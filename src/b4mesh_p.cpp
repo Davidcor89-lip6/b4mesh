@@ -21,7 +21,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
     sizemempool = 500; //Limit size of the mempool in num of txs
     numTxsG = 0;  //Num of txs generated
     lostTrans = 0;
-	lostPacket = 0;
+	  lostPacket = 0;
     blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
 
 
@@ -96,8 +96,8 @@ void B4Mesh::GenerateTransactions(){
     std::cout << " Node: " << " size payload " << size_payload << std::endl;
 
     SendTransaction(t);
-	// maybe need a sleep of 500ms here ? to avoid colliding transaction and block
-	TransactionsTreatment(t);
+	  usleep(200); // maybe need a sleep of 500ms here ? to avoid colliding transaction and block
+	  TransactionsTreatment(t);
 
     // restart transaction generation
     int interval = dist_exp()*1000 + 500; // add 500ms to avoid collidingif interval equal 0
@@ -126,8 +126,9 @@ void B4Mesh::TransactionsTreatment(Transaction t)
         if (!IsTxInBlockGraph(t)){
             std::cout << "Transaction not in Blockgraph. " << std::endl;
             if (pending_transactions.size() <= sizemempool){
-                std::cout << "Adding transaction in mempool... " << std::endl;
+                std::cout << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
                 pending_transactions[t.GetHash()] = t;
+                //DumpMempool();
             } else { // No space in mempool.
                 std::cout << "Transaction's Mempool is full" << std::endl;
                 std::cout << "Dumping transaction..." << std::endl;
@@ -152,6 +153,15 @@ bool B4Mesh::IsTxInMempool (Transaction t)
     }
     else {
         return false;
+    }
+}
+
+void B4Mesh::DumpMempool (void)
+{
+    std::cout << "Dump MemPool " << std::endl;
+    for(auto it = pending_transactions.begin(); it != pending_transactions.end(); ++it)
+    {
+      std::cout << it->first << std::endl; 
     }
 }
 
@@ -276,6 +286,8 @@ bool B4Mesh::IsBlockMerge(Block &b){
 void B4Mesh::UpdatingMempool (Block &b)
 {
     vector<Transaction> t_in_b = b.GetTransactions();
+
+    //DumpMempool();
 
     for (auto &t : t_in_b){
         if (pending_transactions.count(t.GetHash()) > 0){
@@ -574,14 +586,14 @@ void B4Mesh::GenerateBlocks(){
 	}
 	block.SetTransactions(transactions);
 
-	// Remove transactions from the list of pending transactions
+	/*// Remove transactions from the list of pending transactions
 	// Transactions from the leader need to be removed Here
 	// and not at the block reception because the leader's Mempool size
 	// is the critirial to create blocks. If transactions are not removed
 	// blocks are going to be created with repeated txs
 	
 	for (auto &t : transactions)
-		pending_transactions.erase(t.GetHash());
+		pending_transactions.erase(t.GetHash());*/ // in the case of the POC, is not necessary
 
 
 	// Getting Parents of the futur Block

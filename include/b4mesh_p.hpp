@@ -93,6 +93,10 @@ class B4Mesh
      */
     bool IsTxInMempool (Transaction t);
     /**
+     * Dump the mempool
+     */
+    void DumpMempool (void);
+    /**
      *  Check if the transaction is already present in the blockgraph
      */
     bool IsTxInBlockGraph (Transaction t);
