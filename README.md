@@ -36,4 +36,6 @@ WAIT !!!
 
 In the makefile, you need to change the link the greencommunication toolchain.
 
+Create the folder "build" and "build_local", if they don't exist.
+
 $ make all
