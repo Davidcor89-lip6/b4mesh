@@ -15,6 +15,7 @@ set_property(TARGET ${PROJECT_NAME}_coreEngine
     PROPERTY
         CXX_STANDARD 17 # 20
         CXX_EXTENSIONS OFF
+        POSITION_INDEPENDENT_CODE ON
 )
 target_compile_features(${PROJECT_NAME}_coreEngine
     cxx_std_17 # cxx_std_20

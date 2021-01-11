@@ -1,6 +1,12 @@
 add_executable(${PROJECT_NAME}_binary
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/main.cpp
 )
+set_property(TARGET ${PROJECT_NAME}_binary
+    PROPERTY
+        CXX_STANDARD 17 # 20
+        CXX_EXTENSIONS OFF
+        POSITION_INDEPENDENT_CODE ON
+)
 target_compile_features(${PROJECT_NAME}_binary
     cxx_std_17 # cxx_std_20
 )
