@@ -11,6 +11,14 @@ add_library(${PROJECT_NAME}_coreEngine SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/consensus.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/session.cpp
 )
+set_property(TARGET ${PROJECT_NAME}_coreEngine
+    PROPERTY
+        CXX_STANDARD 17 # 20
+        CXX_EXTENSIONS OFF
+)
+target_compile_features(${PROJECT_NAME}_coreEngine
+    cxx_std_17 # cxx_std_20
+)
 target_include_directories(${PROJECT_NAME}_coreEngine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl

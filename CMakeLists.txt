@@ -10,5 +10,5 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/core_engine)   # ${PROJECT_NAME}::c
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/binary)        # ${PROJECT_NAME}::binary
 
 # todo : install() ...
-# todo : test() + gtest dependencies
+# todo : option() => test() + gtest dependencies
 # todo : package() ...

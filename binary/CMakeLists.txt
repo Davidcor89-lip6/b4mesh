@@ -1,6 +1,9 @@
 add_executable(${PROJECT_NAME}_binary
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/main.cpp
 )
+target_compile_features(${PROJECT_NAME}_binary
+    cxx_std_17 # cxx_std_20
+)
 
 # Dependencies
 ## Boost
