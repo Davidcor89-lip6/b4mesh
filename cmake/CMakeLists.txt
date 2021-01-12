@@ -21,3 +21,5 @@ if (b4mesh_USE_EXTERNAL_LIBDBUSCXX)
 
   include(${CMAKE_CURRENT_SOURCE_DIR}/external/FindDBusCXX.cmake)
 endif()
+
+include(./greensoft_toolchain.cmake)
