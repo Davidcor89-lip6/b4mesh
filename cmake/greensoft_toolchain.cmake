@@ -29,7 +29,7 @@ add_custom_target(greenSoftSDK_extract
 
 # Create and/or build target
 add_custom_target(greenSoftSDK_build
-    COMMAND "make alldefconfig"
+    COMMAND "make alldefconfig" # OK config ?
     COMMAND "make"
     DEPENDS greenSoftSDK_extract
     BYPRODUCTS
@@ -40,21 +40,23 @@ add_custom_target(greenSoftSDK_build
     WORKING_DIRECTORY ${GreenSoftSDK_extracted_dirname}
 )
 
-# GreenSoftSDK libDBusC++
-add_library(DBus SHARED IMPORTED GLOBAL)
-add_dependencies(DBus greenSoftSDK_build)
-set_target_properties(DBus PROPERTIES
+# GreenSoftSDK::DBusCXX
+add_library(DBusCXX SHARED IMPORTED GLOBAL)
+add_dependencies(DBusCXX greenSoftSDK_build)
+set_target_properties(DBusCXX PROPERTIES
   IMPORTED_LOCATION         "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1.so"
   IMPORTED_LOCATION_DEBUG   "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1-d.so" # ?
   IMPORTED_CONFIGURATIONS   "RELEASE;DEBUG"
 )
-target_include_directories(DBus PUBLIC
+target_include_directories(DBusCXX PUBLIC
     ${GreenSoftSDK_extracted_dirname}/usr/include/dbus-c++-1
 )
-add_library(DBus ALIAS GreenSoftSDK::LibDBus)
+add_library(DBusCXX ALIAS GreenSoftSDK::DBusCXX)
 
 # Toolchains
 # add_custom_target(greenSoftSDK_toolchain_host)
 # add_custom_target(greenSoftSDK_toolchain_local)
 
 # Generates toolchain files for -DCMAKE_TOOLCHAIN_FILE
+# Force toolchain
+#   SET(CMAKE_TOOLCHAIN_FILE  "${GreenSoftSDK_toolchain_path}" CACHE INTERNAL "CMAKE_TOOLCHAIN_FILE")

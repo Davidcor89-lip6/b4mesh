@@ -40,19 +40,20 @@ find_package(Boost 1.65.0 REQUIRED COMPONENTS
     random
 )
 ## DBusCXX
-find_package(DBusCXX REQUIRED)
+# find_package(DBusCXX REQUIRED) # GreenSoftSDK::DBusCXX
 
 add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::asio
-    Boost::Math
+    Boost::bind
+    Boost::math
     Boost::random
-    DBusCXX
+    GreenSoftSDK::DBusCXX
 )
 target_link_libraries(${PROJECT_NAME}_coreEngine PRIVATE
     Boost::asio
     Boost::Math
     Boost::random
-    DBusCXX
+    GreenSoftSDK::DBusCXX
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)
 
