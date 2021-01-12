@@ -25,6 +25,8 @@ using boost::asio::ip::tcp;
 
 #include "node.hpp"
 
+#define RECCURENT_TIMER 10
+
 class B4Mesh
 {
 
@@ -220,18 +222,26 @@ class B4Mesh
 private:
     //parent
     node* node_;
+    std::string mIP_;
     std::chrono::time_point<std::chrono::steady_clock> time_start;
     double getSeconds() {
         std::chrono::time_point<std::chrono::steady_clock> time_end = std::chrono::steady_clock::now();
         return std::chrono::duration<double>(time_end - time_start).count();
     }
     boost::asio::io_service& io_service_;
-    void timer_generateT_fct (const boost::system::error_code& /*e*/) {GenerateTransactions();}
-    boost::asio::steady_timer timer_generateT;
+    
+    // random variable
     boost::random::mt19937 rng;
     boost::random::uniform_int_distribution<> dist;
     boost::variate_generator<boost::mt19937&, boost::exponential_distribution<> > dist_exp;
-    std::string mIP_;
+ 
+    // generate transaction
+    void timer_generateT_fct (const boost::system::error_code& /*e*/) {GenerateTransactions();}
+    boost::asio::steady_timer timer_generateT;
+
+    // other recurrent call
+    void timer_recurrentTask_fct (const boost::system::error_code& /*e*/);
+    boost::asio::steady_timer timer_recurrentTask;
 
 };
 

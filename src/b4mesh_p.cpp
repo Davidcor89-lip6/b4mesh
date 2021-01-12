@@ -4,12 +4,13 @@
 //Constructor - Global variables initialization
 B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std::string myIP)
     : node_(node),
+	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
       io_service_(io_service),
-      timer_generateT(io_service,std::chrono::steady_clock::now()),
       dist(300,600),  // payload size
       dist_exp(rng, boost::exponential_distribution<>(0.5)), // mean = 2
-      mIP_(myIP)
+	  timer_generateT(io_service,std::chrono::steady_clock::now()),
+	  timer_recurrentTask(io_service,std::chrono::steady_clock::now())
 {
 
     missing_parents_list = std::vector<pair<string, std::string>> ();
@@ -24,6 +25,9 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
 	  lostPacket = 0;
     blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
 
+    //recurrent task
+    timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
+	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
     //lancement transaction
     if ( node_->consensus_.AmILeader() )
@@ -36,6 +40,15 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
 }
 
 B4Mesh::~B4Mesh(){
+}
+
+// ************** Recurrent Task **************************************
+void B4Mesh::timer_recurrentTask_fct (const boost::system::error_code& /*e*/) 
+{
+	Ask4MissingBlocks();
+    timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
+	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
+
 }
 
 
@@ -64,8 +77,27 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
         else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
             string req_block = p.GetPayload();
             std::cout << " REQUEST_BLOCK: looking for block: " << req_block << std::endl;;
-            //SendParentBlock(req_block, ip);
+            SendParentBlock(req_block, ip);
         }
+		/* ------------ CHANGE_TOPO TREATMENT ------------------ */
+		else if (p.GetService() == ApplicationPacket::CHANGE_TOPO){
+			int message_type = ExtractMessageType(p.GetPayload());
+			if ( message_type == CHILDLESSBLOCK_REQ){ //TODO needed ?
+				// send to leader your childless blocks.
+				//SendChildlessBlocks(ip);
+			}
+			else if (message_type == CHILDLESSBLOCK_REP){ //TODO needed ?
+				// Reply only received by leaders -
+				//CheckBranchesSync(p.GetPayload(), ip);
+			}
+			else if (message_type == GROUPBRANCH_REQ){ //TODO needed ?
+				// All nodes can enter here
+				//SendBranch4Sync(p.GetPayload(), ip);
+			}
+			else {
+				std::cout << " Packet CHANGE_TOPO type unsupported" << std::endl;
+			}
+		}
         else{
             std::cout << " Packet type unsupported" << std::endl;
         }
@@ -96,11 +128,11 @@ void B4Mesh::GenerateTransactions(){
     std::cout << " Node: " << " size payload " << size_payload << std::endl;
 
     SendTransaction(t);
-	  usleep(200); // maybe need a sleep of 500ms here ? to avoid colliding transaction and block
+	  usleep(200); // TODO : maybe need a sleep of 500ms here ? to avoid colliding transaction and block 
 	  TransactionsTreatment(t);
 
     // restart transaction generation
-    int interval = dist_exp()*1000 + 500; // add 500ms to avoid collidingif interval equal 0
+    int interval = dist_exp()*1000 + 500; // TODO : added 500ms to avoid colliding if interval equal 0
     std::cout << " Node :" << " Random variable Expo: " << interval << "ms" <<std::endl;
     timer_generateT.expires_from_now(std::chrono::milliseconds(interval));
     timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
@@ -322,32 +354,24 @@ void B4Mesh::UpdatingMempool (Block &b)
   }
 }*/
 
-/*void B4Mesh::SendParentBlock(string hash_p, Ipv4Address destAddr){
+void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
   Block block;
 
   if (blockgraph.HasBlock(hash_p)){
-    debug_suffix.str("");
-    debug_suffix << " SendParentBlock: Block " << hash_p << " founded!" << endl;
-    debug(debug_suffix.str());
+    std::cout << " SendParentBlock: Block " << hash_p << " founded!" << std::endl;
     block = blockgraph.GetBlock(hash_p);
   }
     // Case when block is not present...
     // is very unlikely since we already check that this node has this block.
   else {
-    debug_suffix.str("");
-    debug_suffix << " SendParentBlock: Block " << hash_p << " not founded!" << endl;
-    debug(debug_suffix.str());
+    std::cout << " SendParentBlock: Block " << hash_p << " not founded!" << std::endl;
     return;
   }
 
-  debug_suffix.str("");
-  debug_suffix << " SendParentBlock: Sending block to node: " << destAddr << endl;
-  debug(debug_suffix.str());
+  std::cout << " SendParentBlock: Sending block to node: " << destAddr << std::endl;
   ApplicationPacket packet(ApplicationPacket::BLOCK, block.Serialize());
-  SendPacket(packet, destAddr);
-  // Trace for block propagation delai
-  TraceBlockCreate(GetIdFromIp(destAddr), Simulator::Now().GetSeconds(), stoi(block.GetHash()));
-}*/
+  node_->SendPacket(destAddr, packet);
+}
 
 /*void B4Mesh::SendChildlessBlocks(Ipv4Address destAddr){
   vector<Block> childless_b_list = blockgraph.GetChildlessBlocks();
