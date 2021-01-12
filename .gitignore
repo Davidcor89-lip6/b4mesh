@@ -1,6 +1,10 @@
 # Project-specific
 build/*
 build_local/*
+greensoft_sdk
+
+# CMake
+cmake/external/*
 
 # MSVC
 .vscode
