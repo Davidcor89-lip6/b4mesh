@@ -26,9 +26,9 @@ public:
     node(boost::asio::io_service& io_service, short port, std::string myIP);
     
     void addClientToList(std::string IP, client * c);
-    void removeClientFromList(std::string IP, client * c);
+    void removeClientFromList(std::string IP);
     void addSessionToList(std::string IP, session * s);
-    void removeSessionFromList(std::string IP, session * s);
+    void removeSessionFromList(std::string IP);
     void handle_accept(session* new_session, const boost::system::error_code& error);
 
     void SendPacket(std::string& IP, ApplicationPacket& packet);

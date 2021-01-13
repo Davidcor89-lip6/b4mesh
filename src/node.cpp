@@ -41,7 +41,7 @@ void node::addClientToList( std::string IP, client * c)
     listClient.insert(std::pair<std::string, client*>(IP,c));			
 }
 
-void node::removeClientFromList( std::string IP, client * c)
+void node::removeClientFromList( std::string IP)
 {
     // TODO adding a mutex
     listClient.erase(IP);			
@@ -53,7 +53,7 @@ void node::addSessionToList( std::string IP, session * s)
     listSession.insert(std::pair<std::string, session*>(IP,s));			
 }
 
-void node::removeSessionFromList( std::string IP, session * s)
+void node::removeSessionFromList( std::string IP)
 {
     // TODO adding a mutex
     listSession.erase(IP);			
