@@ -148,7 +148,10 @@ void B4Mesh::SendTransaction(Transaction t){
     node_->BroadcastPacket(packet);
 }
 
-
+int B4Mesh::ExtractMessageType(const string& msg_payload){
+  int ret = *((int*)msg_payload.data());
+  return ret;
+}
 
 //  ******* TRANSACTION RELATED METHODS **************** */
 void B4Mesh::TransactionsTreatment(Transaction t)

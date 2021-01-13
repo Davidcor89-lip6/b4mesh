@@ -52,7 +52,7 @@ boost::asio::async_read(socket_, boost::asio::buffer(data_, max_length),
         {
             std::cout << " closing connection with " << socket_.remote_endpoint() << " ok" << std::endl;
             socket_.close();
-            parent_->removeClientFromList(destIP_, this);
+            parent_->removeClientFromList(destIP_);
         }
     });
 }
