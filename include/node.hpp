@@ -4,6 +4,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
+#include <boost/bind.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
@@ -39,6 +40,7 @@ public:
 
 private:
     void SendOnNetwork(tcp::socket& socket, std::string string);
+    void create_client(std::string addr);
 
 private:
     boost::asio::io_service& io_service_;
@@ -50,9 +52,15 @@ public:
 
 private:
     std::string my_IP;
+    short port_;
     std::vector<std::string> startListAddr; 
     std::map<std::string, session*> listSession;
     std::map<std::string, client*> listClient;
+
+private:
+    // polling Dbus
+    void timer_pollDbus_fct (const boost::system::error_code& /*e*/);
+    boost::asio::steady_timer timer_pollDbus;
 
 };
 

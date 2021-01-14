@@ -25,6 +25,7 @@ int EndHandler(const int signal, node * node_)
 	{
 		printf("Caught signal (%s)\n", saved->GetIp().c_str());
 		saved->GenerateResults();
+		saved->consensus_.terminate_dbus();
 		exit(1);
 	}
 

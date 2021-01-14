@@ -3,15 +3,18 @@
 #include "client.hpp"
 #include "b4mesh_p.hpp"
 
+#define POLLING_DBUS 5
 
 node::node(boost::asio::io_service& io_service, short port, std::string myIP)
     : io_service_(io_service),
       acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
       consensus_(myIP),
-      my_IP(myIP)
+      my_IP(myIP),
+      port_(port),
+      timer_pollDbus(io_service,std::chrono::steady_clock::now())
 {
     // blockgraph pointeur
-    b4mesh_ = new B4Mesh (this, io_service, port, myIP);
+    b4mesh_ = new B4Mesh (this, io_service, port_, myIP);
 
     //Starting Server part
     std::cout << " starting connection acceptor " << std::endl;
@@ -25,13 +28,38 @@ node::node(boost::asio::io_service& io_service, short port, std::string myIP)
     std::cout << " try to connect the list " << std::endl;
     for (auto addr = startListAddr.begin(); addr != startListAddr.end(); ++addr)
     {
-        if (*addr != my_IP)
-        {
-        std::cout << " creation client with : " << *addr << std::endl;
-        /*client* new_client =*/ new client(this, io_service_, *addr, std::to_string(port));
-        }
+        create_client(*addr);
     }
-    
+
+    //recurrent task
+    timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));
+	timer_pollDbus.async_wait(boost::bind(&node::timer_pollDbus_fct, this, boost::asio::placeholders::error));    
+
+}
+
+// ************** Recurrent Task **************************************
+void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/) 
+{
+	std::cout << "Status Dbus" << std::endl; 
+    std::vector<std::string> addListAddr = consensus_.getAddNodeList(); 
+    std::vector<std::string> removeListAddr = consensus_.getRemoveNodeList(); 
+
+    for (auto it = addListAddr.begin(); it != addListAddr.end(); ++it)
+    {
+        std::cout << "timer_pollDbus_fct: adding " << *it << std::endl;
+        consensus_.removeFromAddAddr(*it);
+        create_client(*it);
+    }
+
+    for (auto it = addListAddr.begin(); it != addListAddr.end(); ++it)
+    {
+        std::cout << "timer_pollDbus_fct: removing " << *it << std::endl;
+        consensus_.removeFromRemoveAddr(*it);
+        removeClientFromList(*it);
+    }
+
+    timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));
+	timer_pollDbus.async_wait(boost::bind(&node::timer_pollDbus_fct, this, boost::asio::placeholders::error));
 
 }
 
@@ -57,6 +85,15 @@ void node::removeSessionFromList( std::string IP)
 {
     // TODO adding a mutex
     listSession.erase(IP);			
+}
+
+void node::create_client(std::string addr)
+{
+    if (addr != my_IP)
+    {
+        std::cout << " creation client with : " << addr << std::endl;
+        /*client* new_client =*/ new client(this, io_service_, addr, std::to_string(port_));
+    }
 }
 
 void node::handle_accept(session* new_session, const boost::system::error_code& error)

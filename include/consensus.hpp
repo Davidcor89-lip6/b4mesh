@@ -18,6 +18,9 @@ public:
 
 	void Added(const std::string& address);
 	void Removed(const std::string& address);
+	
+	std::vector<std::string> addListAddr;
+	std::vector<std::string> removeListAddr;
 
 };
 
@@ -34,7 +37,11 @@ public:
 	int GetIdFromIP(std::string s);
 	std::string GetGroupId();
 
-	void initialisation_dbus(void);
+	void terminate_dbus(void);
+	std::vector<std::string>& getAddNodeList(void);
+	std::vector<std::string>& getRemoveNodeList(void);
+	void removeFromAddAddr(std::string addr);
+	void removeFromRemoveAddr(std::string addr);
 	
 private:
 	std::string mIP_;
@@ -44,6 +51,7 @@ private:
 
 	/*dbus*/
 	DBus::BusDispatcher dispatcher;
+	green_state * p_clientState;
 
 };
 
