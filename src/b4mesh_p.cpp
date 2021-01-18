@@ -84,15 +84,15 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
 			int message_type = ExtractMessageType(p.GetPayload());
 			if ( message_type == CHILDLESSBLOCK_REQ){ //TODO needed ?
 				// send to leader your childless blocks.
-				//SendChildlessBlocks(ip);
+				SendChildlessBlocks(ip);
 			}
 			else if (message_type == CHILDLESSBLOCK_REP){ //TODO needed ?
 				// Reply only received by leaders -
-				//CheckBranchesSync(p.GetPayload(), ip);
+				CheckBranchesSync(p.GetPayload(), ip);
 			}
 			else if (message_type == GROUPBRANCH_REQ){ //TODO needed ?
 				// All nodes can enter here
-				//SendBranch4Sync(p.GetPayload(), ip);
+				SendBranch4Sync(p.GetPayload(), ip);
 			}
 			else {
 				std::cout << " Packet CHANGE_TOPO type unsupported" << std::endl;
@@ -234,7 +234,7 @@ void B4Mesh::BlockTreatment(Block b)
             if(IsBlockMerge(b)){
                 std::cout << "This block is a merge block." << std::endl;
                 //std::cout << "Starting synchronization process..." << std::endl;
-                //SyncNode(unknown_parents, ip); // fast sync
+                SyncNode(unknown_parents, ip); // fast sync
             }
         }
         // Adding block to blockgraph
@@ -318,6 +318,28 @@ bool B4Mesh::IsBlockMerge(Block &b){
   }
 }
 
+void B4Mesh::SyncNode(vector<string> unknown_p, std::string ip){
+
+  if (unknown_p.size() > 0){
+    // Ask for block branch
+    group_branch_hdr_t branch_req;
+    branch_req.msg_type = GROUPBRANCH_REQ;
+
+    std::string serie_unknown_b_h = "";
+
+    for (auto &u_hash : unknown_p){
+      std::cout << " SyncNode: Asking for block's " << u_hash << " branch to "
+                   << ip << std::endl;
+      serie_unknown_b_h += u_hash;
+    }
+
+    std::string serie((char*)&branch_req, sizeof(group_branch_hdr_t));
+    serie += serie_unknown_b_h;
+    ApplicationPacket pkt(ApplicationPacket::CHANGE_TOPO, serie);
+    node_->SendPacket(ip, pkt);
+  }
+}
+
 void B4Mesh::UpdatingMempool (Block &b)
 {
     vector<Transaction> t_in_b = b.GetTransactions();
@@ -376,17 +398,15 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
   node_->SendPacket(destAddr, packet);
 }
 
-/*void B4Mesh::SendChildlessBlocks(Ipv4Address destAddr){
-  vector<Block> childless_b_list = blockgraph.GetChildlessBlocks();
-  string serie_hashes = "";
+void B4Mesh::SendChildlessBlocks(std::string destAddr){
+  std::vector<Block> childless_b_list = blockgraph.GetChildlessBlocks();
+  std::string serie_hashes = "";
 
 
   for (auto chless : childless_b_list){
     string tmp_str = chless.GetHash(); //
     if (tmp_str != "01111111111111111111111111111111"){
-      debug_suffix.str("");
-      debug_suffix << " SendChildlessBlocks: Childless block founded : " << tmp_str;
-      debug(debug_suffix.str());
+      std::cout << " SendChildlessBlocks: Childless block founded : " << tmp_str << std::endl;
 
       serie_hashes += tmp_str;
     }
@@ -398,21 +418,21 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
     string serie((char*)&ch_rep, sizeof(childlessblock_rep_hdr_t));
     serie += serie_hashes;
     ApplicationPacket pkt(ApplicationPacket::CHANGE_TOPO, serie);
-    SendPacket(pkt, destAddr, false);
+    node_->SendPacket(destAddr, pkt);
   } else {
-    debug(" SendChildlessBlocks: No childless block founded!");
+    std::cout << " SendChildlessBlocks: No childless block founded!"<< std::endl;
   }
-}*/
+}
 
-/*void B4Mesh::CheckBranchesSync(const string& msg_payload, Ipv4Address destAddr){
+void B4Mesh::CheckBranchesSync(const std::string& msg_payload, std::string destAddr){
   // Only executed by the leader
-  string deserie = msg_payload;
-  string tmp_hash = "";
+  std::string deserie = msg_payload;
+  std::string tmp_hash = "";
 
   deserie = deserie.substr(sizeof(childlessblock_rep_hdr_t), deserie.size());
 
-  vector<string> otherNode_childless = vector<string> ();
-  vector<string> unknown_b_hash = vector<string> ();
+  std::vector<std::string> otherNode_childless = std::vector<std::string> ();
+  std::vector<std::string> unknown_b_hash = std::vector<std::string> ();
 
   //deserialisation
   while ( deserie.size() > 0){
@@ -422,23 +442,21 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
   }
 
   for (auto &hash : otherNode_childless){
-    debug(" CheckBranchesSync: This block is not a childless block of mine.");
-    debug(" CheckBranchesSync: Checking if block is present in local blockgraph...");
+    std::cout << " CheckBranchesSync: This block is not a childless block of mine."<< std::endl;
+    std::cout <<" CheckBranchesSync: Checking if block is present in local blockgraph..."<< std::endl;
 
     if(blockgraph.HasBlock(hash)){
-        debug(" CheckBranchesSync: Block is present in local blockgraph...Ignoring block");
+        std::cout <<" CheckBranchesSync: Block is present in local blockgraph...Ignoring block"<< std::endl;
         continue;
     } else {
-      debug(" CheckBranchesSync: Block is not present in blockgraph...Checking if block is present in blocks_to_sync");
+      std::cout <<" CheckBranchesSync: Block is not present in blockgraph...Checking if block is present in blocks_to_sync"<< std::endl;
       if (IsBlockInMissingList(hash)){
-        debug(" CheckBranchesSync: Block already in waiting list. Ignoring block");
+        std::cout <<" CheckBranchesSync: Block already in waiting list. Ignoring block"<< std::endl;
         continue;
       } else {
-        debug(" CheckBranchesSync: Block not in waiting list. Adding block to waiting list ");
+        std::cout <<" CheckBranchesSync: Block not in waiting list. Adding block to waiting list "<< std::endl;
         missing_parents_list.push_back(make_pair(hash, destAddr));
-        debug_suffix.str("");
-        debug_suffix << " CheckBranchesSync: Asking for this block's " << hash << " chain " << endl;
-        debug(debug_suffix.str());
+        std::cout << " CheckBranchesSync: Asking for this block's " << hash << " chain " << std::endl;
         unknown_b_hash.push_back(hash);
       }
     }
@@ -449,32 +467,30 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
     group_branch_hdr_t branch_req;
     branch_req.msg_type = GROUPBRANCH_REQ;
 
-    string serie_unknown_b_h = "";
+    std::string serie_unknown_b_h = "";
 
     for (auto &u_hash : unknown_b_hash){
-      debug_suffix.str("");
-      debug_suffix << " CheckBranchesSync: Asking for chain of block " << u_hash;
-      debug(debug_suffix.str());
+      std::cout <<  " CheckBranchesSync: Asking for chain of block " << u_hash << std::endl;;
       serie_unknown_b_h += u_hash;
     }
 
-    string serie((char*)&branch_req, sizeof(group_branch_hdr_t));
+    std::string serie((char*)&branch_req, sizeof(group_branch_hdr_t));
     serie += serie_unknown_b_h;
     ApplicationPacket pkt(ApplicationPacket::CHANGE_TOPO, serie);
-    SendPacket(pkt, destAddr, false);
+    node_->SendPacket(destAddr, pkt);
 
   }
   else {
-    debug(" CheckBranchesSync: Blockgraph Up-to-date or synchronization already in process.");
+    std::cout << " CheckBranchesSync: Blockgraph Up-to-date or synchronization already in process."<< std::endl;
   }
-}*/
+}
 
-/*void B4Mesh::SendBranch4Sync(const string& msg_payload, Ipv4Address destAddr){
-  string deserie = msg_payload;
-  string block_hash = "";
-  string gp_id = "";
-  vector<string> block_hash_v = vector<string> ();
-  vector<string> gp_id_v = vector<string> ();
+void B4Mesh::SendBranch4Sync(const std::string& msg_payload, std::string destAddr){
+  std::string deserie = msg_payload;
+  std::string block_hash = "";
+  std::string gp_id = "";
+  std::vector<std::string> block_hash_v = std::vector<std::string> ();
+  std::vector<std::string> gp_id_v = std::vector<std::string> ();
 
   deserie = deserie.substr(sizeof(group_branch_hdr_t), deserie.size());
 
@@ -503,18 +519,14 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
 
   // Sending blocks with the same groupId to node
   for (auto g_id : gp_id_v){
-    vector<Block> blocks_group = blockgraph.GetBlocksFromGroup(g_id);
+    std::vector<Block> blocks_group = blockgraph.GetBlocksFromGroup(g_id);
     for (auto b_grp : blocks_group){
-      debug_suffix.str("");
-      debug_suffix << " SendBranch4Sync: Sending block hash " << b_grp.GetHash() << " to node " << destAddr << endl;
-      debug(debug_suffix.str());
+      std::cout << " SendBranch4Sync: Sending block hash " << b_grp.GetHash() << " to node " << destAddr << std::endl;
       ApplicationPacket packet(ApplicationPacket::BLOCK, b_grp.Serialize());
-      SendPacket(packet, destAddr);
-      // Trace for block propagation delai
-      TraceBlockCreate(GetIdFromIp(destAddr), Simulator::Now().GetSeconds(), stoi(b_grp.GetHash()));
+      node_->SendPacket(destAddr, packet);
     }
   }
-}*/
+}
 
 // ********* Missing Parents block list METHODS **************
 bool B4Mesh::IsBlockInMissingList(string b_hash){
@@ -662,41 +674,27 @@ void B4Mesh::SendBlockToConsensus(Block b)
 }
 
 // ************** CALCUL AND GROUP DETECTION METHODS ************************
-/*void B4Mesh::ReceiveNewTopologyInfo(pair<string, vector<pair<int, Ipv4Address>>> new_group){
-	groupId = new_group.first;
-	group = new_group.second;
-}*/
 
-/*void B4Mesh::StartMerge(){
-  if (running == false){
-    return;
-  }
+void B4Mesh::StartMerge(){
 
-  if (GetB4MeshRaft(node->GetId())->IsLeader() == false)
+  if (node_->consensus_.AmILeader() == false)
     return;
 
-  debug(" Starting Merge at Node: ");
-  debug_suffix.str("");
-  debug_suffix << " StartMerge: Leader node: " << node->GetId()
-               << " starting the leader synchronization process..." << endl;
-  debug(debug_suffix.str());
+  std::cout << " Starting Merge at Node: " << std::endl;
+  std::cout << " StartMerge: Leader node: " << node_->consensus_.GetId() << " starting the leader synchronization process..." << std::endl;
   CheckBlockgraphSync();
-}*/
+}
 
-/*void B4Mesh::CheckBlockgraphSync(){
-  debug(" CheckBlockgraphSync: In leader synch process ");
+void B4Mesh::CheckBlockgraphSync(){
+  std::cout << " CheckBlockgraphSync: In leader synch process "<< std::endl;
   childlessblock_req_hdr_t ch_req;
   ch_req.msg_type = CHILDLESSBLOCK_REQ;
 
   ApplicationPacket packet(ApplicationPacket::CHANGE_TOPO,
-      string((char*)&ch_req, sizeof(ch_req)));
+      std::string((char*)&ch_req, sizeof(ch_req)));
 
-  vector<Ipv4Address> groupDestination = vector<Ipv4Address> ();
-  for (auto& dest : group){
-    groupDestination.push_back(dest.second);
-  }
-  BroadcastPacket(packet, groupDestination);
-}*/
+  node_->BroadcastPacket(packet);
+}
 // *************** TRACES AND PERFORMANCES ***********************************
 
 int B4Mesh::SizeMempoolBytes (){
