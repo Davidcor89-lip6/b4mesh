@@ -27,15 +27,19 @@ endif()
 
 set(GreenSoftSDK_extracted_dirname ${generated_dirname}/GreenSoftSDK)
 add_custom_target(greenSoftSDK_extract
+    COMMAND "echo -e \"Extracting greenSoftSDK...\""
     COMMAND cmake -E tar xzf ${GreenSoftSDK_filename} -- ${GreenSoftSDK_extracted_dirname}
+    COMMAND "echo -e \"Extracting greenSoftSDK... done\""
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} # useless ?
     OUTPUTS GreenSoftSDK
 )
 
 # Create and/or build target
 add_custom_target(greenSoftSDK_build
+    COMMAND "echo -e \"Building greenSoftSDK...\""
     COMMAND "make alldefconfig" # OK config ?
     COMMAND "make"
+    COMMAND "echo -e \"Building greenSoftSDK... done\""
     DEPENDS greenSoftSDK_extract
     BYPRODUCTS
         ./output/host/g++
@@ -53,10 +57,10 @@ set_target_properties(DBusCXX PROPERTIES
   IMPORTED_LOCATION_DEBUG   "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1-d.so" # ?
   IMPORTED_CONFIGURATIONS   "RELEASE;DEBUG"
 )
-target_include_directories(DBusCXX PUBLIC
+target_include_directories(DBusCXX INTERFACE
     ${GreenSoftSDK_extracted_dirname}/usr/include/dbus-c++-1
 )
-add_library(DBusCXX ALIAS GreenSoftSDK::DBusCXX)
+add_library(GreenSoftSDK::DBusCXX ALIAS DBusCXX)
 
 # Toolchains
 # add_custom_target(greenSoftSDK_toolchain_host)

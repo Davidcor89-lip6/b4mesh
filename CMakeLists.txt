@@ -15,6 +15,12 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17) # 20
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# set(Boost_USE_DEBUG_LIBS OFF)
+# set(Boost_USE_RELEASE_LIBS ON)
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # Fetch external CMake modules
 
 # todo : swap toolchain using option()
