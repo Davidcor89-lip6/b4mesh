@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.8)
-project(b4mesh VERSION 0.1 LANGUAGES CXX)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Default build type")
+endif()
+
+project(b4mesh
+    VERSION 0.1
+    LANGUAGES CXX
+    DESCRIPTION "B4Mesh main projet"
+    HOMEPAGE_URL https://github.com/Davidcor89-lip6/b4mesh
+)
+enable_testing()
 
 set(CMAKE_CXX_STANDARD 17) # 20
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -13,6 +24,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/utils)         # ${PROJECT_NAME}::u
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/core_engine)   # ${PROJECT_NAME}::core_engine
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/binary)        # ${PROJECT_NAME}::binary
 
-# todo : install() ...
+# todo : install() ... include(GNUInstallDirs)
 # todo : option(b4mesh_BUILD_TESTS) => test() + gtest dependencies
 # todo : package() ...
