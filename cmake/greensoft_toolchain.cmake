@@ -4,16 +4,21 @@
 # todo : force CMAKE_TOOLCHAIN_FILE to default when building GreenSoftSDK
 
 # Extract target sources
+
+set(greenSoftSDK_archive_directory ${PROJECT_SOURCE_DIR}/archives)
+message(STATUS "Scanning [${greenSoftSDK_archive_directory}] for [greensoft-sdk-*.tar.xz] ...")
 file(GLOB GreenSoftSDK_filename
     LIST_DIRECTORIES false
     # CONFIGURE_DEPENDS
-    greensoft-sdk-*.tar.xz
+    ${greenSoftSDK_archive_directory}/greensoft-sdk-*.tar.xz
 )
+
 list(LENGTH GreenSoftSDK_filename GreenSoftSDK_filename_matches)
-if (GreenSoftSDK_filename_matches NOT EQUAL 1)
+if (NOT(${GreenSoftSDK_filename_matches} EQUAL 1))
     message(FATAL_ERROR "> Wrong GreenSoftSDK quantity : ${GreenSoftSDK_filename}")
 endif()
 list(GET GreenSoftSDK_filename 0 GreenSoftSDK_filename)
+message(STATUS "\tFound [${GreenSoftSDK_filename}]")
 
 set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
 if (NOT EXISTS "${generated_dirname}")
