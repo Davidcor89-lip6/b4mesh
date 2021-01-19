@@ -15,6 +15,8 @@ if (b4mesh_USE_EXTERNAL_LIBDBUSCXX)
   FetchContent_GetProperties(FindDBusCXX)
 
   include(${CMAKE_CURRENT_SOURCE_DIR}/external/FindDBusCXX.cmake)
+else()
+    include(./dependencies_management/LibDBusCXX.cmake)
 endif()
 
 include(./dependencies_management/greensoft_toolchain.cmake)

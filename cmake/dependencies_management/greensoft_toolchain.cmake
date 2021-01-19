@@ -20,38 +20,59 @@ endif()
 list(GET GreenSoftSDK_filename 0 GreenSoftSDK_filename)
 message(STATUS "\tFound [${GreenSoftSDK_filename}]")
 
-set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
-if (NOT EXISTS "${generated_dirname}")
-    file(MAKE_DIRECTORY ${generated_dirname})
-endif()
-
-set(GreenSoftSDK_extracted_dirname ${generated_dirname}/GreenSoftSDK)
-add_custom_target(greenSoftSDK_extract
-    COMMAND "echo -e \"Extracting greenSoftSDK...\""
-    COMMAND cmake -E tar xzf ${GreenSoftSDK_filename} -- ${GreenSoftSDK_extracted_dirname}
-    COMMAND "echo -e \"Extracting greenSoftSDK... done\""
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} # useless ?
-    OUTPUTS GreenSoftSDK
+include(ExternalProject)
+find_program(MAKE_EXE NAMES gmake nmake make)
+ExternalProject_Add(greenSoftSDK_build
+  URL               ${GreenSoftSDK_filename}
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ${MAKE_EXE} alldefconfig && make
 )
 
-# Create and/or build target
-add_custom_target(greenSoftSDK_build
-    COMMAND "echo -e \"Building greenSoftSDK...\""
-    COMMAND "make alldefconfig" # OK config ?
-    COMMAND "make"
-    COMMAND "echo -e \"Building greenSoftSDK... done\""
-    DEPENDS greenSoftSDK_extract
-    BYPRODUCTS
-        ./output/host/g++
-        ./output/host/arm-linux-g++
-        # ./usr/lib/dbus-c++-1/
-        # ./usr/include/dbus-c++-1/
-    WORKING_DIRECTORY ${GreenSoftSDK_extracted_dirname}
-)
+# set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
+# if (NOT EXISTS "${generated_dirname}")
+#     file(MAKE_DIRECTORY ${generated_dirname})
+# endif()
+
+# set(GreenSoftSDK_extracted_dirname ${generated_dirname}/GreenSoftSDK)
+# # Extract tarball target
+# add_custom_command(OUTPUT ${GreenSoftSDK_extracted_dirname}
+#     COMMAND echo -e "Extracting greenSoftSDK from [${GreenSoftSDK_filename}] ..."
+#     COMMAND cmake -E tar xzf ${GreenSoftSDK_filename} -- ${GreenSoftSDK_extracted_dirname}
+#     COMMAND echo -e "Extracting greenSoftSDK... done"
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} # useless ?
+#     DEPENDS ${GreenSoftSDK_filename}
+#     BYPRODUCTS
+#         ${GreenSoftSDK_extracted_dirname}
+#         ${GreenSoftSDK_extracted_dirname}/Makefile
+# )
+# add_custom_target(greenSoftSDK_extract
+#     DEPENDS
+#         ${GreenSoftSDK_extracted_dirname}
+#         ${GreenSoftSDK_extracted_dirname}/Makefile
+# )
+
+# # Create and/or build target
+# add_custom_command(OUTPUT ${GreenSoftSDK_extracted_dirname}/usr
+#     DEPENDS greenSoftSDK_extract
+#     COMMAND echo -e "Building greenSoftSDK..."
+#     COMMAND make alldefconfig # OK config ?
+#     COMMAND make
+#     COMMAND echo -e "Building greenSoftSDK... done"
+#     BYPRODUCTS
+#         ${GreenSoftSDK_extracted_dirname}/output/host/g++           # a confirmer
+#         ${GreenSoftSDK_extracted_dirname}/output/host/arm-linux-g++ # a confirmer
+#         ${GreenSoftSDK_extracted_dirname}/usr                       # a confirmer
+#     WORKING_DIRECTORY ${GreenSoftSDK_extracted_dirname}
+# )
+# add_custom_target(greenSoftSDK_build
+#     DEPENDS
+#         ${GreenSoftSDK_extracted_dirname}/usr
+# )
 
 # GreenSoftSDK::DBusCXX
-add_library(DBusCXX SHARED IMPORTED GLOBAL)
+add_library(DBusCXX SHARED IMPORTED GLOBAL) # SHARED
 add_dependencies(DBusCXX greenSoftSDK_build)
+target_link_libraries(DBusCXX INTERFACE greenSoftSDK_build)
 set_target_properties(DBusCXX PROPERTIES
   IMPORTED_LOCATION         "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1.so"
   IMPORTED_LOCATION_DEBUG   "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1-d.so" # ?
