@@ -48,6 +48,7 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     {
         std::cout << "timer_pollDbus_fct: adding " << *it << std::endl;
         consensus_.removeFromAddAddr(*it);
+        consensus_.addToListAddr(*it);
         create_client(*it);
     }
 
@@ -55,6 +56,7 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     {
         std::cout << "timer_pollDbus_fct: removing " << *it << std::endl;
         consensus_.removeFromRemoveAddr(*it);
+        consensus_.removeFromListAddr(*it);
         removeClientFromList(*it);
     }
 

@@ -680,8 +680,8 @@ void B4Mesh::StartMerge(){
   if (node_->consensus_.AmILeader() == false)
     return;
 
-  std::cout << " Starting Merge at Node: " << std::endl;
-  std::cout << " StartMerge: Leader node: " << node_->consensus_.GetId() << " starting the leader synchronization process..." << std::endl;
+  std::cout << " StartMerge: Leader node: " << node_->consensus_.GetId() << std::endl;
+  std::cout << " starting the leader synchronization process..." << std::endl; 
   CheckBlockgraphSync();
 }
 

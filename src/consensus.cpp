@@ -101,14 +101,26 @@ void consensus::removeFromAddAddr(std::string addr)
 {
     std::vector<std::string>::iterator position = std::find(p_clientState->addListAddr.begin(), p_clientState->addListAddr.end(), addr);
     if (position != p_clientState->addListAddr.end()) // == p_clientState->addListAddr.end() means the element was not found
-    p_clientState->addListAddr.erase(position);
+        p_clientState->addListAddr.erase(position);
 }
 
 void consensus::removeFromRemoveAddr(std::string addr)
 {
     std::vector<std::string>::iterator position = std::find(p_clientState->removeListAddr.begin(), p_clientState->removeListAddr.end(), addr);
-    if (position != p_clientState->removeListAddr.end()) // == p_clientState->removeListAddr.end() means the element was not found
-    p_clientState->removeListAddr.erase(position);
+    if (position != p_clientState->removeListAddr.end()) //  not found
+        p_clientState->removeListAddr.erase(position);
+}
+
+void consensus::addToListAddr(std::string addr)
+{
+    listAddr.push_back(addr);
+}
+
+void consensus::removeFromListAddr(std::string addr)
+{
+    std::vector<std::string>::iterator position = std::find(listAddr.begin(), listAddr.end(), addr);
+    if (position != listAddr.end()) // not found
+        listAddr.erase(position);
 }
 
 std::string consensus::getLeader(void)

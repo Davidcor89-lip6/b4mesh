@@ -42,6 +42,9 @@ public:
 	std::vector<std::string>& getRemoveNodeList(void);
 	void removeFromAddAddr(std::string addr);
 	void removeFromRemoveAddr(std::string addr);
+
+	void addToListAddr(std::string addr);
+	void removeFromListAddr(std::string addr);
 	
 private:
 	std::string mIP_;
