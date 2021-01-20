@@ -4,6 +4,7 @@ INC_DIR=./include
 SRC_DIR=./src
 BUILD_DIR=./build
 APPNAME=b4mesh
+GREEN_BUILDROOT=../greencom/greensoft-sdk-2020-10-06-67b51/
 
 DEPS=$(wildcard ${INC_DIR}/*.hpp) 
 SRC=$(wildcard ${SRC_DIR}/*.cpp)
@@ -23,7 +24,7 @@ endif
 LOCAL ?=0
 ifeq ($(LOCAL),1)
 CC=g++ 
-GREEN_PATH=../greencom/greensoft-sdk-2020-10-06-67b51/output/host
+GREEN_PATH=${GREEN_BUILDROOT}output/host
 GREEN_INCLUDE=${GREEN_PATH}/usr/include/dbus-c++-1/
 GREEN_LIB=${GREEN_PATH}/usr/lib/
 CCPFLAGS=${OPTIM} -std=c++11 -Wall
@@ -31,7 +32,7 @@ LDFLAGS= -lpthread -L${GREEN_LIB} -ldbus-c++-1
 BUILD_DIR=./build_local
 else
 CC=arm-linux-g++
-GREEN_PATH=../greencom/greensoft-sdk-2020-10-06-67b51/output/target
+GREEN_PATH=${GREEN_BUILDROOT}output/target
 GREEN_INCLUDE=${GREEN_PATH}/usr/include/dbus-c++-1/
 GREEN_LIB=${GREEN_PATH}/usr/lib/
 CCPFLAGS=${OPTIM} -fcompare-debug-second -std=c++11 -Wall
@@ -76,5 +77,5 @@ clean_glue_files:
 
 build_glue_files: ${GLUE_FILES}
 
-.PHONY: clean all send1 sendall clean_glue_files build_glue_files
+.PHONY: clean all send1 sendall clean_glue_files build_glue_files recoverResult1 recoverResultAll
 

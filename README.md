@@ -10,7 +10,7 @@ use the green communication tutorial
 
 extract archives/greensoft-sdk-2020-10-06-67b51.tar.xz somewhere else
 
-copy libdbus-cpp-6d390205.tar.gz in the folder "dl" into the buildroot folder
+copy libdbus-cpp-6d390205.tar.gz in the folder "dl" (that you create) into the buildroot folder
 
 $make menuconfig
 
