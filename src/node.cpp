@@ -40,6 +40,7 @@ node::node(boost::asio::io_service& io_service, short port, std::string myIP)
 // ************** Recurrent Task **************************************
 void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/) 
 {
+    int merge = 0;
 	std::cout << "Status Dbus" << std::endl; 
     std::vector<std::string> addListAddr = consensus_.getAddNodeList(); 
     std::vector<std::string> removeListAddr = consensus_.getRemoveNodeList(); 
@@ -50,14 +51,31 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
         consensus_.removeFromAddAddr(*it);
         consensus_.addToListAddr(*it);
         create_client(*it);
+        merge++;
     }
 
-    for (auto it = addListAddr.begin(); it != addListAddr.end(); ++it)
+    for (auto it = removeListAddr.begin(); it != removeListAddr.end(); ++it)
     {
         std::cout << "timer_pollDbus_fct: removing " << *it << std::endl;
         consensus_.removeFromRemoveAddr(*it);
         consensus_.removeFromListAddr(*it);
         removeClientFromList(*it);
+    }
+
+    if (merge > 0)
+    {
+        std::string ldr = "-1";
+        while (ldr == "-1")
+        {
+            ldr = consensus_.getLeader();  
+            if ( ldr != "-1"){
+                cout << "Node: " << consensus_.GetId() << "Current leader is: " << ldr << endl;
+                b4mesh_->StartMerge();
+                return;
+            } 
+            usleep(500);
+        }
+        merge = 0;
     }
 
     timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));

@@ -120,7 +120,14 @@ void consensus::removeFromListAddr(std::string addr)
 {
     std::vector<std::string>::iterator position = std::find(listAddr.begin(), listAddr.end(), addr);
     if (position != listAddr.end()) // not found
+    {
         listAddr.erase(position);
+    }
+
+    if (leader_ == addr)
+    {
+        leader_ = "-1";
+    }
 }
 
 std::string consensus::getLeader(void)
