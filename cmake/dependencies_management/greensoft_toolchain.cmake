@@ -27,9 +27,11 @@ include(ExternalProject)
 find_program(MAKE_EXE NAMES gmake nmake make)
 ExternalProject_Add(greenSoftSDK
   URL               https://github.com/Davidcor89-lip6/b4mesh/raw/main/archives/greensoft-sdk-2020-10-06-67b51.tar.xz
-  CONFIGURE_COMMAND cp ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz <BUILD_DIR>/dl
+  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "[greenSoftSDK] Starting $<CONFIG> configuration ..."
+  COMMAND           ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz <BUILD_DIR>/dl/
   COMMAND           ${MAKE_EXE} alldefconfig
-  BUILD_COMMAND     ${MAKE_EXE}
+  BUILD_COMMAND     ${CMAKE_COMMAND} -E echo "[greenSoftSDK] Starting $<CONFIG> build ..."
+  COMMAND           ${MAKE_EXE}
   BUILD_BYPRODUCTS # useless ?
     <INSTALL_DIR>/usr/lib/dbus-c++-1.so
     <INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
