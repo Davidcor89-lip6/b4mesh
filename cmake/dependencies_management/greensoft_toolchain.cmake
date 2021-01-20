@@ -1,3 +1,5 @@
+message(STATUS "[GreenSoftSDK] Generating ...")
+
 # Extract, build, and create targets related to GreenSoftSDK
 #   thus generates ${PROJECT_SOURCE_DIR}/generated/GreenSoftSDK directory
 
@@ -5,28 +7,36 @@
 
 # Extract target sources
 
-set(greenSoftSDK_archive_directory ${PROJECT_SOURCE_DIR}/archives)
-message(STATUS "Scanning [${greenSoftSDK_archive_directory}] for [greensoft-sdk-*.tar.xz] ...")
-file(GLOB GreenSoftSDK_filename
-    LIST_DIRECTORIES false
-    # CONFIGURE_DEPENDS
-    ${greenSoftSDK_archive_directory}/greensoft-sdk-*.tar.xz
-)
-
-list(LENGTH GreenSoftSDK_filename GreenSoftSDK_filename_matches)
-if (NOT(${GreenSoftSDK_filename_matches} EQUAL 1))
-    message(FATAL_ERROR "> Wrong GreenSoftSDK quantity : ${GreenSoftSDK_filename}")
-endif()
-list(GET GreenSoftSDK_filename 0 GreenSoftSDK_filename)
-message(STATUS "\tFound [${GreenSoftSDK_filename}]")
+# set(greenSoftSDK_archive_directory ${PROJECT_SOURCE_DIR}/archives)
+# message(STATUS "Scanning [${greenSoftSDK_archive_directory}] for [greensoft-sdk-*.tar.xz] ...")
+# file(GLOB GreenSoftSDK_filename
+#     LIST_DIRECTORIES false
+#     # CONFIGURE_DEPENDS
+#     ${greenSoftSDK_archive_directory}/greensoft-sdk-*.tar.xz
+# )
+# 
+# list(LENGTH GreenSoftSDK_filename GreenSoftSDK_filename_matches)
+# if (NOT(${GreenSoftSDK_filename_matches} EQUAL 1))
+#     message(FATAL_ERROR "> Wrong GreenSoftSDK quantity : ${GreenSoftSDK_filename}")
+# endif()
+# list(GET GreenSoftSDK_filename 0 GreenSoftSDK_filename)
+# message(STATUS "\tFound [${GreenSoftSDK_filename}]")
+# # Use ${GreenSoftSDK_filename} as ExternalProject_Add URL value ...
 
 include(ExternalProject)
 find_program(MAKE_EXE NAMES gmake nmake make)
-ExternalProject_Add(greenSoftSDK_build
-  URL               ${GreenSoftSDK_filename}
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND     ${MAKE_EXE} alldefconfig && make
+ExternalProject_Add(greenSoftSDK
+  URL               https://github.com/Davidcor89-lip6/b4mesh/raw/main/archives/greensoft-sdk-2020-10-06-67b51.tar.xz
+  CONFIGURE_COMMAND cp ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz <BUILD_DIR>/dl
+  COMMAND           ${MAKE_EXE} alldefconfig
+  BUILD_COMMAND     ${MAKE_EXE}
+  BUILD_BYPRODUCTS # useless ?
+    <INSTALL_DIR>/usr/lib/dbus-c++-1.so
+    <INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
+    <INSTALL_DIR>/usr/include/dbus-c++-1
 )
+ExternalProject_Get_Property(greenSoftSDK install_dir)
+set(greenSoftSDK_install_dir ${install_dir})
 
 # set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
 # if (NOT EXISTS "${generated_dirname}")
@@ -70,18 +80,16 @@ ExternalProject_Add(greenSoftSDK_build
 # )
 
 # GreenSoftSDK::DBusCXX
-add_library(DBusCXX SHARED IMPORTED GLOBAL) # SHARED
-add_dependencies(DBusCXX greenSoftSDK_build)
-target_link_libraries(DBusCXX INTERFACE greenSoftSDK_build)
+add_library(DBusCXX SHARED IMPORTED GLOBAL)
 set_target_properties(DBusCXX PROPERTIES
-  IMPORTED_LOCATION         "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1.so"
-  IMPORTED_LOCATION_DEBUG   "${GreenSoftSDK_extracted_dirname}/usr/lib/dbus-c++-1-d.so" # ?
-  IMPORTED_CONFIGURATIONS   "RELEASE;DEBUG"
+    IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
+    IMPORTED_LOCATION_RELEASE       ${greenSoftSDK_install_dir}/usr/lib/dbus-c++-1.so
+    IMPORTED_LOCATION_DEBUG         ${greenSoftSDK_install_dir}/usr/lib/dbus-c++-1-d.so
+    INTERFACE_INCLUDE_DIRECTORIES   ${greenSoftSDK_install_dir}/usr/include/dbus-c++-1
 )
-target_include_directories(DBusCXX INTERFACE
-    ${GreenSoftSDK_extracted_dirname}/usr/include/dbus-c++-1
-)
+add_dependencies(DBusCXX greenSoftSDK)
 add_library(GreenSoftSDK::DBusCXX ALIAS DBusCXX)
+
 
 # Toolchains
 # add_custom_target(greenSoftSDK_toolchain_host)
@@ -90,3 +98,5 @@ add_library(GreenSoftSDK::DBusCXX ALIAS DBusCXX)
 # Generates toolchain files for -DCMAKE_TOOLCHAIN_FILE
 # Force toolchain
 #   SET(CMAKE_TOOLCHAIN_FILE  "${GreenSoftSDK_toolchain_path}" CACHE INTERNAL "CMAKE_TOOLCHAIN_FILE")
+
+message(STATUS "[GreenSoftSDK] Generating ... done")
