@@ -724,5 +724,16 @@ void B4Mesh::GenerateResults()
 	std::cout << "B4Mesh: Packets lost (transaction or block) due to network jamming: " << lostPacket << std::endl;
     std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
     std::cout << "B4Mesh: Total Bytes : " << blockgraph.GetByteSize() << "\n" << std::endl;
+
+	// ---The blockgraph into file. ----
+	ofstream output_file;
+	char filename[50];
+	sprintf(filename, "blockgraph-%d.txt", node_->consensus_.GetId());
+	output_file.open(filename, ios::out);
+	output_file << "#BlockGroup" << " " << "ParentBlock" << " " << "BlockHash" << endl;
+	for (auto &it : blockgraph_file){
+		output_file << it.first << " " << it.second.first << " " << it.second.second << endl;
+	}
+	output_file.close();
     
 }

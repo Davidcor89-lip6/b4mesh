@@ -62,6 +62,15 @@ sendall:
 	sshpass -p 'b4meshroot' scp $(BUILD_DIR)/${APPNAME} default@10.181.172.130:/var/persistent-data/b4mesh
 	sshpass -p 'b4meshroot' scp $(BUILD_DIR)/${APPNAME} default@10.154.134.26:/var/persistent-data/b4mesh
 
+recoverResult1:
+	sshpass -p 'b4meshroot' scp default@10.181.178.217:/var/persistent-data/b4mesh/blockgraph* Results
+
+recoverResultAll:
+	sshpass -p 'b4meshroot' scp default@10.181.178.217:/var/persistent-data/b4mesh/blockgraph* Results
+	sshpass -p 'b4meshroot' scp default@10.181.172.130:/var/persistent-data/b4mesh/blockgraph* Results
+	sshpass -p 'b4meshroot' scp default@10.154.134.26:/var/persistent-data/b4mesh/blockgraph* Results
+
+
 clean_glue_files:
 	rm -f ${GLUE_FILES}
 
