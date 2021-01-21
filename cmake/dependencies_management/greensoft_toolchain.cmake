@@ -51,11 +51,12 @@ if(NOT greensoftsdk_POPULATED)
 
     find_program(MAKE_EXE NAMES gmake nmake make)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting $<CONFIG> configuration ..."
+        COMMAND_ECHO STDOUT
+        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting configuration ..."
         COMMAND ${CMAKE_COMMAND} -E make_directory ${greensoftsdk_SOURCE_DIR}/dl/
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz ${greensoftsdk_SOURCE_DIR}/dl/
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz ${greensoftsdk_SOURCE_DIR}/dl
         COMMAND ${MAKE_EXE} alldefconfig
-        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting $<CONFIG> build ..."
+        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting build ..."
         COMMAND ${MAKE_EXE}
 
         WORKING_DIRECTORY ${greensoftsdk_SOURCE_DIR}
