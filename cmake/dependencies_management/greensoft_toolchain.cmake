@@ -23,22 +23,51 @@ message(STATUS "[GreenSoftSDK] Generating ...")
 # message(STATUS "\tFound [${GreenSoftSDK_filename}]")
 # # Use ${GreenSoftSDK_filename} as ExternalProject_Add URL value ...
 
-include(ExternalProject)
-find_program(MAKE_EXE NAMES gmake nmake make)
-ExternalProject_Add(greenSoftSDK
-  URL               https://github.com/Davidcor89-lip6/b4mesh/raw/main/archives/greensoft-sdk-2020-10-06-67b51.tar.xz
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "[greenSoftSDK] Starting $<CONFIG> configuration ..."
-  COMMAND           ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz <BUILD_DIR>/dl/
-  COMMAND           ${MAKE_EXE} alldefconfig
-  BUILD_COMMAND     ${CMAKE_COMMAND} -E echo "[greenSoftSDK] Starting $<CONFIG> build ..."
-  COMMAND           ${MAKE_EXE}
-  BUILD_BYPRODUCTS # useless ?
-    <INSTALL_DIR>/usr/lib/dbus-c++-1.so
-    <INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
-    <INSTALL_DIR>/usr/include/dbus-c++-1
-)
-ExternalProject_Get_Property(greenSoftSDK install_dir)
-set(greenSoftSDK_install_dir ${install_dir})
+# include(ExternalProject)
+# find_program(MAKE_EXE NAMES gmake nmake make)
+# ExternalProject_Add(greenSoftSDK
+#   URL               https://github.com/Davidcor89-lip6/b4mesh/raw/main/archives/greensoft-sdk-2020-10-06-67b51.tar.xz
+#   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "[greenSoftSDK] Starting $<CONFIG> configuration ..."
+#   COMMAND           ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz <BUILD_DIR>/dl/
+#   COMMAND           ${MAKE_EXE} alldefconfig
+#   BUILD_COMMAND     ${CMAKE_COMMAND} -E echo "[greenSoftSDK] Starting $<CONFIG> build ..."
+#   COMMAND           ${MAKE_EXE}
+#   BUILD_BYPRODUCTS # useless ?
+#     <INSTALL_DIR>/usr/lib/dbus-c++-1.so
+#     <INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
+#     <INSTALL_DIR>/usr/include/dbus-c++-1
+# )
+# ExternalProject_Get_Property(greenSoftSDK install_dir)
+# set(greenSoftSDK_install_dir ${install_dir})
+
+include(FetchContent)
+FetchContent_Declare(greensoftsdk # Consistency : as FetchContent generated targets are lowercase
+    PREFIX  external_dependencies/greensoftsdk
+    URL     ${PROJECT_SOURCE_DIR}/archives/greensoft-sdk-2020-10-06-67b51.tar.xz #https://github.com/Davidcor89-lip6/b4mesh/raw/main/archives/greensoft-sdk-2020-10-06-67b51.tar.xz
+) 
+FetchContent_GetProperties(greensoftsdk)
+if(NOT greensoftsdk_POPULATED)
+    FetchContent_Populate(greensoftsdk)
+
+    find_program(MAKE_EXE NAMES gmake nmake make)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting $<CONFIG> configuration ..."
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${greensoftsdk_SOURCE_DIR}/dl/
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz ${greensoftsdk_SOURCE_DIR}/dl/
+        COMMAND ${MAKE_EXE} alldefconfig
+        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting $<CONFIG> build ..."
+        COMMAND ${MAKE_EXE}
+
+        WORKING_DIRECTORY ${greensoftsdk_SOURCE_DIR}
+        OUTPUT_FILE       ${greensoftsdk_BINARY_DIR}/build_output.log
+        ERROR_FILE        ${greensoftsdk_BINARY_DIR}/build_output.log
+        RESULT_VARIABLE   result
+    )
+    message(STATUS "[greensoftsdk] greenSoftSDK build complete")
+    if (result)
+        message(FATAL_ERROR "[greensoftsdk] Build failed, see log at:\t${greensoftsdk_BINARY_DIR}/build_output.log")
+    endif()
+endif()
 
 # set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
 # if (NOT EXISTS "${generated_dirname}")
@@ -82,16 +111,16 @@ set(greenSoftSDK_install_dir ${install_dir})
 # )
 
 # GreenSoftSDK::DBusCXX
+
 add_library(DBusCXX SHARED IMPORTED GLOBAL)
 set_target_properties(DBusCXX PROPERTIES
     IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
     IMPORTED_LOCATION_RELEASE       ${greenSoftSDK_install_dir}/usr/lib/dbus-c++-1.so
     IMPORTED_LOCATION_DEBUG         ${greenSoftSDK_install_dir}/usr/lib/dbus-c++-1-d.so
-    INTERFACE_INCLUDE_DIRECTORIES   ${greenSoftSDK_install_dir}/usr/include/dbus-c++-1
+    # INTERFACE_INCLUDE_DIRECTORIES   ${greenSoftSDK_install_dir}/usr/include/dbus-c++-1
 )
 add_dependencies(DBusCXX greenSoftSDK)
 add_library(GreenSoftSDK::DBusCXX ALIAS DBusCXX)
-
 
 # Toolchains
 # add_custom_target(greenSoftSDK_toolchain_host)

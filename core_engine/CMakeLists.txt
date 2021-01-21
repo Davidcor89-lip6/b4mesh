@@ -39,19 +39,23 @@ find_package(Boost 1.65.0 REQUIRED
         system
 )
 
-## DBusCXX
-# find_package(DBusCXX REQUIRED) # GreenSoftSDK::DBusCXX
+if (NOT (TARGET GreenSoftSDK::DBusCXX) OR
+    NOT (TARGET DBusCXX))
+    message(FATAL_ERROR ">>>>>>>>>> KO : core-engine")
+endif()
 
 add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::random
     Boost::system
     GreenSoftSDK::DBusCXX
+    # ${PROJECT_NAME}::utils
 )
 target_link_libraries(${PROJECT_NAME}_coreEngine PRIVATE
     #Boost::math
     Boost::random
     Boost::system
     GreenSoftSDK::DBusCXX
+    # ${PROJECT_NAME}::utils
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)
 
