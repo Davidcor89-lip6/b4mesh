@@ -11,6 +11,7 @@ using boost::asio::ip::tcp;
 
 #include "node.hpp"
 #include "utils.hpp"
+#include "configs.hpp"
 
 // ----------------------------
 int EndHandler(const int signal, node * node_)
@@ -81,7 +82,7 @@ int main(int argc, char* argv[])
 	{
 		port = std::atoi(arg_port);
 	} else {
-		port = 5000;
+		port = DEFAULT_PORT;
 	}
 
 	std::cout << " -> " << myIP << ":" << port << std::endl;

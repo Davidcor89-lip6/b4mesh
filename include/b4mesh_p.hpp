@@ -25,7 +25,7 @@ using boost::asio::ip::tcp;
 
 #include "node.hpp"
 
-#define RECCURENT_TIMER 10
+#include "configs.hpp"
 
 class B4Mesh
 {

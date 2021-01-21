@@ -7,8 +7,8 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
 	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
       io_service_(io_service),
-      dist(300,600),  // payload size
-      dist_exp(rng, boost::exponential_distribution<>(0.5)), // mean = 2
+      dist(PAYLOAD_MIN,PAYLOAD_MAX),  // payload size
+      dist_exp(rng, boost::exponential_distribution<>(LAMBDA_DIST)), // mean = 2
 	  timer_generateT(io_service,std::chrono::steady_clock::now()),
 	  timer_recurrentTask(io_service,std::chrono::steady_clock::now())
 {
@@ -18,8 +18,8 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
     groupId = string(32,0);
 
     /* Variables for the blockchain performances */
-    blocktxsSize = 5; // 130 Number of txs in mempool to creat a block.
-    sizemempool = 500; //Limit size of the mempool in num of txs
+    blocktxsSize = SIZE_BLOCK; // Number of txs in mempool to creat a block.
+    sizemempool = SIZE_MEMPOOL; //Limit size of the mempool in num of txs
     numTxsG = 0;  //Num of txs generated
     lostTrans = 0;
 	lostPacket = 0;
@@ -32,8 +32,8 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
     //lancement transaction
     //if ( node_->consensus_.AmILeader() )
     {
-        std::cout << "i m leader " << std::endl;
-        timer_generateT.expires_from_now(std::chrono::seconds(5));
+        //std::cout << "i m leader " << std::endl;
+        timer_generateT.expires_from_now(std::chrono::seconds(WAIT_FOR_FIRST_TRANSACTION));
         timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
     }
 
@@ -128,11 +128,11 @@ void B4Mesh::GenerateTransactions(){
     std::cout << " Node: " << " size payload " << size_payload << std::endl;
 
     SendTransaction(t);
-	  usleep(200); // TODO : maybe need a sleep of 500ms here ? to avoid colliding transaction and block 
+	  usleep(WAIT_BEFORE); // TODO : maybe need a sleep of 500ms here ? to avoid colliding transaction and block 
 	  TransactionsTreatment(t);
 
     // restart transaction generation
-    int interval = dist_exp()*1000 + 500; // TODO : added 500ms to avoid colliding if interval equal 0
+    int interval = dist_exp()*1000 + WAIT_AFTER; // TODO : added 500ms to avoid colliding if interval equal 0
     std::cout << " Node :" << " Random variable Expo: " << interval << "ms" <<std::endl;
     timer_generateT.expires_from_now(std::chrono::milliseconds(interval));
     timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));

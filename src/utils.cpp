@@ -39,7 +39,7 @@ std::string findOwnIP(void)
     for (auto i = vectAddr.begin(); i != vectAddr.end(); ++i)
     {
         //std::cout << (*i).to_string()<< ' ';
-        if ((*i).to_string().compare(0, 3, "10.") == 0)
+        if ((*i).to_string().compare(0, 3, "10.") == 0) // All IP in 10.X.X.X
         {
             return  (*i).to_string();
         }

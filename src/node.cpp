@@ -2,8 +2,7 @@
 #include "node.hpp"
 #include "client.hpp"
 #include "b4mesh_p.hpp"
-
-#define POLLING_DBUS 5
+#include "configs.hpp"
 
 node::node(boost::asio::io_service& io_service, short port, std::string myIP)
     : io_service_(io_service),
