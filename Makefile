@@ -70,6 +70,10 @@ recoverResultAll:
 	sshpass -p 'b4meshroot' scp default@10.181.178.217:/var/persistent-data/b4mesh/blockgraph* Results
 	sshpass -p 'b4meshroot' scp default@10.181.172.130:/var/persistent-data/b4mesh/blockgraph* Results
 	sshpass -p 'b4meshroot' scp default@10.154.134.26:/var/persistent-data/b4mesh/blockgraph* Results
+	sshpass -p 'b4meshroot' scp default@10.181.178.217:/var/persistent-data/b4mesh/mempool* Results
+	sshpass -p 'b4meshroot' scp default@10.181.172.130:/var/persistent-data/b4mesh/mempool* Results
+	sshpass -p 'b4meshroot' scp default@10.154.134.26:/var/persistent-data/b4mesh/mempool* Results
+
 
 
 clean_glue_files:

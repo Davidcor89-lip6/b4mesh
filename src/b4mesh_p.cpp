@@ -22,7 +22,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
     sizemempool = 500; //Limit size of the mempool in num of txs
     numTxsG = 0;  //Num of txs generated
     lostTrans = 0;
-	  lostPacket = 0;
+	lostPacket = 0;
     blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
 
     //recurrent task
@@ -30,7 +30,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std:
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
     //lancement transaction
-    if ( node_->consensus_.AmILeader() )
+    //if ( node_->consensus_.AmILeader() )
     {
         std::cout << "i m leader " << std::endl;
         timer_generateT.expires_from_now(std::chrono::seconds(5));
@@ -632,7 +632,7 @@ void B4Mesh::GenerateBlocks(){
 	// blocks are going to be created with repeated txs
 	
 	for (auto &t : transactions)
-		pending_transactions.erase(t.GetHash());*/ // in the case of the POC, is not necessary
+		pending_transactions.erase(t.GetHash());*/ // in the case of the POC, is not necessary ???
 
 
 	// Getting Parents of the futur Block
@@ -730,10 +730,22 @@ void B4Mesh::GenerateResults()
 	char filename[50];
 	sprintf(filename, "blockgraph-%d.txt", node_->consensus_.GetId());
 	output_file.open(filename, ios::out);
-	output_file << "#BlockGroup" << " " << "ParentBlock" << " " << "BlockHash" << endl;
+	output_file << "#BlockGroup" << " " << "ParentBlock" << " " << "BlockHash" << std::endl;
 	for (auto &it : blockgraph_file){
-		output_file << it.first << " " << it.second.first << " " << it.second.second << endl;
+		output_file << it.first << " " << it.second.first << " " << it.second.second << std::endl;
 	}
 	output_file.close();
+
+	// ---Dump the rest of the mempool into file. ----
+	ofstream output_file2;
+	char filename2[50];
+	sprintf(filename2, "mempool-%d.txt", node_->consensus_.GetId());
+	output_file2.open(filename2, ios::out);
+	output_file2 << "#mempool" << std::endl;
+	for(auto &it : pending_transactions)
+    {
+      output_file2 << it.second << std::endl; 
+    }
+	output_file2.close();
     
 }
