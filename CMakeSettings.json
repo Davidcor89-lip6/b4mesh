@@ -1,15 +1,36 @@
 ﻿{
   "configurations": [
     {
-      "name": "x64-Debug (par défaut)",
+      "name": "x64-Debug",
       "generator": "Ninja",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DBOOST_ROOT=C:\\Users\\gdua\\Desktop\\Dev\\dependencies\\boost_1_71_0",
+      "cmakeCommandArgs": "-DBOOST_ROOT=C:\\Dev\\dependencies\\boost_1_71_0",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "BOOST_ROOT",
+          "value": "C:\\Dev\\dependencies\\boost_1_71_0",
+          "type": "UNINITIALIZED"
+        }
+      ]
+    },
+    {
+      "name": "WSL-GCC-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeExecutable": "cmake",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "wslPath": "${defaultWSLPath}",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": []
     }
   ]
