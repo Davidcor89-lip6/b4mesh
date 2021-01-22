@@ -1,4 +1,4 @@
-message(STATUS "[GreenSoftSDK] Generating ...")
+message(STATUS "[greensoftsdk] Generating ...")
 
 # Extract, build, and create targets related to GreenSoftSDK
 #   thus generates ${PROJECT_SOURCE_DIR}/generated/GreenSoftSDK directory
@@ -50,11 +50,19 @@ if(NOT greensoftsdk_POPULATED)
     FetchContent_Populate(greensoftsdk)
 
     find_program(MAKE_EXE NAMES gmake nmake make)
+    message(STATUS "[greensoftsdk] Found MAKE_EXE=[${MAKE_EXE}]")
+
+    # todo : split targets
+    # make libdbus-cpp
+    # make toolchain
+    # todo : execute_process => custom_target
+
     execute_process(
         COMMAND_ECHO STDOUT
-        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting configuration ..."
+        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting prerequisites (custom libdbus-c++ integration) ..."
         COMMAND ${CMAKE_COMMAND} -E make_directory ${greensoftsdk_SOURCE_DIR}/dl/
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/archives/libdbus-cpp-6d390205.tar.gz ${greensoftsdk_SOURCE_DIR}/dl
+        COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting configuration ..."
         COMMAND ${MAKE_EXE} alldefconfig
         COMMAND ${CMAKE_COMMAND} -E echo "[greensoftsdk] Starting build ..."
         COMMAND ${MAKE_EXE}
@@ -64,7 +72,7 @@ if(NOT greensoftsdk_POPULATED)
         ERROR_FILE        ${greensoftsdk_BINARY_DIR}/build_output.log
         RESULT_VARIABLE   result
     )
-    message(STATUS "[greensoftsdk] greenSoftSDK build complete")
+    message(STATUS "[greensoftsdk] Build complete")
     if (result)
         message(FATAL_ERROR "[greensoftsdk] Build failed, see log at:\t${greensoftsdk_BINARY_DIR}/build_output.log")
     endif()
