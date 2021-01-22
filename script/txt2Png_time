@@ -1,0 +1,28 @@
+#!/bin/bash
+# dependance graphviz -  gawk
+# exec txt2Png_time srcfile pngfile
+# $./txt2Png_time blockgraph-0.txt res.png
+
+
+echo "digraph {" > graph
+echo "splines=line;" >> graph
+
+
+gawk 'BEGIN {i=1;} { if($1 != "#BlockGroup") {g[$1][$3]=i; i++;} } 
+			END { 
+				j=1;
+				for(group in g){ 
+						print "subgraph cluster_" group " {";
+						print "label=\""group"\";"; 
+						for(node in g[group]) {
+							x = g[group][node] *1.5;
+							y = j;
+							print node"[pos=\"" x "," y  "!\"];";
+						}
+						print "}"
+						j++;
+				} 
+			} '  $1  >> graph
+
+gawk 'BEGIN { } { if($1 != "#BlockGroup" && $1 != "0") {print $2 " -> " $3 ";"} } END{ print "}" }' $1 >> graph
+dot -Kneato -Tpng ./graph > $2
