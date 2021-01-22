@@ -8,7 +8,7 @@ project(b4mesh
     VERSION 0.1
     LANGUAGES CXX
     DESCRIPTION "B4Mesh main projet"
-    HOMEPAGE_URL https://github.com/Davidcor89-lip6/b4mesh
+    #HOMEPAGE_URL https://github.com/Davidcor89-lip6/b4mesh # WTF mix-up with CMAKE_C_COMPILER on linux ???
 )
 enable_testing()
 
