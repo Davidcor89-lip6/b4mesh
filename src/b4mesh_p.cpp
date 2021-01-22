@@ -1,14 +1,14 @@
 #include "b4mesh_p.hpp"
 
-
 //Constructor - Global variables initialization
 B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std::string myIP)
     : node_(node),
 	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
       io_service_(io_service),
+	  rng((unsigned int)time(NULL)+getpid()),  
       dist(PAYLOAD_MIN,PAYLOAD_MAX),  // payload size
-      dist_exp(rng, boost::exponential_distribution<>(LAMBDA_DIST)), // mean = 2
+      dist_exp(rng, boost::exponential_distribution<>(LAMBDA_DIST)), 
 	  timer_generateT(io_service,std::chrono::steady_clock::now()),
 	  timer_recurrentTask(io_service,std::chrono::steady_clock::now())
 {
@@ -122,14 +122,14 @@ void B4Mesh::GenerateTransactions(){
     int size_payload = dist(rng);
 
     Transaction t;
-    t.SetPayload(string(size_payload, 'A'));
+    t.SetPayload(string(size_payload, 'A'+node_->consensus_.GetId()));
     t.SetTimestamp(getSeconds());
 
-    std::cout << " Node: " << " size payload " << size_payload << std::endl;
+    std::cout << " Node: " << node_->consensus_.GetId() << " size payload " << size_payload << std::endl;
 
     SendTransaction(t);
-	  usleep(WAIT_BEFORE); // TODO : maybe need a sleep of 500ms here ? to avoid colliding transaction and block 
-	  TransactionsTreatment(t);
+	usleep(WAIT_BEFORE); // TODO : maybe need a sleep of 500ms here ? to avoid colliding transaction and block 
+	TransactionsTreatment(t);
 
     // restart transaction generation
     int interval = dist_exp()*1000 + WAIT_AFTER; // TODO : added 500ms to avoid colliding if interval equal 0
