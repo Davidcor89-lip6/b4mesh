@@ -32,41 +32,37 @@ function(greensoftsdk_FindArchiveFile)
 endfunction()
 
 macro(greensoftsdk_builder)
-    set(options TAG_INFO)
-    set(oneValueArgs)
-    set(multiValueArgs EXECUTEPROCESS_ARGS)
+    set(options)
+    set(oneValueArgs    TAG_INFO)
+    set(multiValueArgs  EXECUTEPROCESS_ARGS)
     cmake_parse_arguments(GREENSOFTSDK_BUILDER "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
     message(STATUS "[greensoftsdk](${GREENSOFTSDK_BUILDER_TAG_INFO}) ...")
 
-    set(EXECUTEPROCESS_ARGS_as_string "")
-    foreach(arg IN LISTS GREENSOFTSDK_BUILDER_EXECUTEPROCESS_ARGS)
-        string(CONCAT EXECUTEPROCESS_ARGS_as_string ${EXECUTEPROCESS_ARGS_as_string} " " ${arg})
-    endforeach()
+    set(output_filepath ${greensoftsdk_BINARY_DIR}/build_output.${GREENSOFTSDK_BUILDER_TAG_INFO}.log)
 
     execute_process(
         COMMAND_ECHO STDOUT
-        ${EXECUTEPROCESS_ARGS_as_string}
+        ${GREENSOFTSDK_BUILDER_EXECUTEPROCESS_ARGS}
 
         WORKING_DIRECTORY ${greensoftsdk_SOURCE_DIR}
-        OUTPUT_FILE       ${greensoftsdk_BINARY_DIR}/build_output_${GREENSOFTSDK_BUILDER_TAG_INFO}.log
-        ERROR_FILE        ${greensoftsdk_BINARY_DIR}/build_output_${GREENSOFTSDK_BUILDER_TAG_INFO}.log
+        OUTPUT_FILE       ${output_filepath}
+        ERROR_FILE        ${output_filepath}
         RESULT_VARIABLE   result
     )
-    message(STATUS "[greensoftsdk](${GREENSOFTSDK_BUILDER_TAG_INFO}) Build complete")
+    message(STATUS "[greensoftsdk](${GREENSOFTSDK_BUILDER_TAG_INFO}) complete")
     if (result)
-        message(FATAL_ERROR "[greensoftsdk](${GREENSOFTSDK_BUILDER_TAG_INFO}) Build failed"
-                            "\nsee log at:\t${greensoftsdk_BINARY_DIR}/build_output.log")
+        message(FATAL_ERROR "[greensoftsdk](${GREENSOFTSDK_BUILDER_TAG_INFO}) Build failed\nsee log at:\t${output_filepath}")
     endif()
 endmacro()
 
 macro(greensoftsdk_generateToolchain)
 
-    greensoftsdk_builder(TAG_INFO configuration
-        EXECUTEPROCESS_ARGS
-            COMMAND ${MAKE_EXE} alldefconfig
-    )
-    greensoftsdk_builder(TAG_INFO toolchain
+    # greensoftsdk_builder(TAG_INFO "configuration"
+    #     EXECUTEPROCESS_ARGS
+    #         COMMAND ${MAKE_EXE} alldefconfig
+    # )
+    greensoftsdk_builder(TAG_INFO "toolchain"
         EXECUTEPROCESS_ARGS
             COMMAND ${MAKE_EXE} toolchain
     )
@@ -79,6 +75,11 @@ macro(greensoftsdk_generateLibDBusCXX)
         PATTERN "libdbus-cpp-*.tar.gz"
     )
     set(greensoftsdk_libdbuscpp_tarball_path ${greensoftsdk_FindArchiveFile_result})
+
+    file(SHA256
+        ${greensoftsdk_libdbuscpp_tarball_path}
+        "6842e99baf73372ae8d047c3b2d79ca2f5d57f900cb436890a9a8ac19930b411"
+    ) # as arg
 
     greensoftsdk_builder(TAG_INFO LibDBusCXX
         EXECUTEPROCESS_ARGS
@@ -109,9 +110,9 @@ if(NOT greensoftsdk_POPULATED)
 
     greensoftsdk_generateToolchain()
     # set(CMAKE_TOOLCHAIN_FILE greensoftsdk_toolchain.cmake)
-    greensoftsdk_generateLibDBusCXX
+    greensoftsdk_generateLibDBusCXX()
     # todo : execute_process => custom_target
-
+    # todo : imported targets
 endif()
 
 # set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
