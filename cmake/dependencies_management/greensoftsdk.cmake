@@ -95,25 +95,72 @@ greensoftsdk_FindArchiveFile(
 )
 set(greensoftsdk_tarball_path ${greensoftsdk_FindArchiveFile_result})
 
-include(FetchContent)
-FetchContent_Declare(greensoftsdk # Consistency : as FetchContent generated targets are lowercase
-    PREFIX  external_dependencies/greensoftsdk
-    URL     ${greensoftsdk_tarball_path}
-    # todo : replace with remote URL
-) 
-FetchContent_GetProperties(greensoftsdk)
-if(NOT greensoftsdk_POPULATED)
-    FetchContent_Populate(greensoftsdk)
+# -------------------------------------------
+message(STATUS "[greensoftsdk] ...")
+find_program(MAKE_EXE NAMES gmake nmake make)
+include(ExternalProject)
+ExternalProject_Add(greensoftsdk
+    URL               ${greensoftsdk_tarball_path}
+    URL_HASH          SHA256=0cd474065448cf4c237f168c8566bc76b18f42da3fece6ef02519b7ec955bf0a
 
-    find_program(MAKE_EXE NAMES gmake nmake make)
-    message(STATUS "[greensoftsdk] Found MAKE_EXE=[${MAKE_EXE}]")
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ${MAKE_EXE} toolchain
+    INSTALL_COMMAND   ${CMAKE_COMMAND} -E copy <SOURCE_DIR> <INSTALL_DIR>
 
-    greensoftsdk_generateToolchain()
-    # set(CMAKE_TOOLCHAIN_FILE greensoftsdk_toolchain.cmake)
-    greensoftsdk_generateLibDBusCXX()
-    # todo : execute_process => custom_target
-    # todo : imported targets
-endif()
+    BUILD_BYPRODUCTS
+        <INSTALL_DIR>/usr/lib/dbus-c++-1.so
+        <INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
+        # <SOURCE_DIR>/usr/lib/dbus-c++-1.so
+        # <SOURCE_DIR>/usr/lib/dbus-c++-1-d.so
+)
+ExternalProject_Get_Property(greensoftsdk SOURCE_DIR)
+set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
+ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
+set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
+
+message(STATUS "greensoftsdk_SOURCE_DIR=[${greensoftsdk_SOURCE_DIR}]")
+message(STATUS "greensoftsdk_INSTALL_DIR=[${greensoftsdk_INSTALL_DIR}]")
+
+ExternalProject_Add_Step(greensoftsdk libdbus-cpp
+    DEPENDEES           configure build
+    DEPENDERS           install
+    COMMENT             "[greensoftsdk] libdbus-cpp step ..."
+    # DEPENDEES           greensoftsdk-configure
+    #                     greensoftsdk-build
+    COMMAND             if [ (${CMAKE_COMMAND} -E sha256sum ${greensoftsdk_libdbuscpp_tarball_path}) -ne "6842e99baf73372ae8d047c3b2d79ca2f5d57f900cb436890a9a8ac19930b411" ] \; then ${CMAKE_COMMAND} -E false\; fi
+    COMMAND             ${CMAKE_COMMAND} -E make_directory ${greensoftsdk_SOURCE_DIR}/dl/
+    COMMAND             ${CMAKE_COMMAND} -E copy ${greensoftsdk_libdbuscpp_tarball_path} ${greensoftsdk_SOURCE_DIR}/dl
+    COMMAND             ${MAKE_EXE} libdbus-cpp
+    WORKING_DIRECTORY   ${greensoftsdk_SOURCE_DIR}
+)
+# -------------------------------------------
+
+# include(FetchContent)
+# FetchContent_Declare(greensoftsdk # Consistency : as FetchContent generated targets are lowercase
+#     PREFIX  external_dependencies/greensoftsdk
+#     URL     ${greensoftsdk_tarball_path}
+#     # todo : replace with remote URL
+#     # FETCHCONTENT_UPDATES_DISCONNECTED
+# ) 
+# FetchContent_GetProperties(greensoftsdk)
+# if(NOT greensoftsdk_POPULATED)
+#     FetchContent_Populate(greensoftsdk)
+# 
+#     find_program(MAKE_EXE NAMES gmake nmake make)
+#     message(STATUS "[greensoftsdk] Found MAKE_EXE=[${MAKE_EXE}]")
+# 
+#     greensoftsdk_generateToolchain()
+#     greensoftsdk_generateLibDBusCXX()
+# 
+#     # emulate greensoftsdk install
+#     message(STATUS "[greensoftsdk] Installing to : ${CMAKE_INSTALL_PREFIX}/greensoftsdk ...")
+#     install(DIRECTORY ${greensoftsdk_SOURCE_DIR} DESTINATION ${CMAKE_INSTALL_PREFIX}/greensoftsdk)
+# 
+#     # set(CMAKE_TOOLCHAIN_FILE greensoftsdk_toolchain.cmake)
+# 
+#     # todo : execute_process => custom_target
+#     # todo : imported targets
+# endif()
 
 # set(generated_dirname "${PROJECT_SOURCE_DIR}/generated")
 # if (NOT EXISTS "${generated_dirname}")
@@ -161,11 +208,11 @@ endif()
 add_library(DBusCXX SHARED IMPORTED GLOBAL)
 set_target_properties(DBusCXX PROPERTIES
     IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
-    IMPORTED_LOCATION_RELEASE       ${greenSoftSDK_install_dir}/usr/lib/dbus-c++-1.so
-    IMPORTED_LOCATION_DEBUG         ${greenSoftSDK_install_dir}/usr/lib/dbus-c++-1-d.so
-    # INTERFACE_INCLUDE_DIRECTORIES   ${greenSoftSDK_install_dir}/usr/include/dbus-c++-1
+    IMPORTED_LOCATION_RELEASE       ${greensoftsdk_INSTALL_DIR}/usr/lib/dbus-c++-1.so
+    IMPORTED_LOCATION_DEBUG         ${greensoftsdk_INSTALL_DIR}/usr/lib/dbus-c++-1-d.so
+    # INTERFACE_INCLUDE_DIRECTORIES   ${greensoftsdk_INSTALL_DIR}/usr/include/dbus-c++-1
 )
-add_dependencies(DBusCXX greenSoftSDK)
+add_dependencies(DBusCXX greensoftsdk-libdbus-cpp)
 add_library(GreenSoftSDK::DBusCXX ALIAS DBusCXX)
 
 # Toolchains

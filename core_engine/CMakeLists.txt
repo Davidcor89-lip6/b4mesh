@@ -23,7 +23,7 @@ target_include_directories(${PROJECT_NAME}_coreEngine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/interface
+        ${CMAKE_CURRENT_SOURCE_DIR}/includes/interface
 )
 
 # Dependencies
@@ -48,14 +48,14 @@ add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::random
     Boost::system
     GreenSoftSDK::DBusCXX
-    # ${PROJECT_NAME}::utils
+    ${PROJECT_NAME}::utils
 )
 target_link_libraries(${PROJECT_NAME}_coreEngine PRIVATE
     #Boost::math
     Boost::random
     Boost::system
     GreenSoftSDK::DBusCXX
-    # ${PROJECT_NAME}::utils
+    ${PROJECT_NAME}::utils
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)
 
