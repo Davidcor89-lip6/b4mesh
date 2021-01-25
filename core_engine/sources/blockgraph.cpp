@@ -1,4 +1,4 @@
-#include "blockgraph.hpp"
+#include <b4mesh/core_engine/blockgraph.hpp>
 
 Blockgraph::Blockgraph ()
 {

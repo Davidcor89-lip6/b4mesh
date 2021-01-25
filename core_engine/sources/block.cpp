@@ -1,5 +1,4 @@
-#include "block.hpp"
-
+#include <b4mesh/core_engine/block.hpp>
 
 Block::Block(){
   hash = string(HASH_SIZE, 0);

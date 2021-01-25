@@ -1,4 +1,4 @@
-#include "application_packet.hpp"
+#include <b4mesh/core_engine/application_packet.hpp>
 
 ApplicationPacket::ApplicationPacket(){
   service = NONE;

@@ -1,4 +1,4 @@
-#include "b4mesh_p.hpp"
+#include <b4mesh/core_engine/b4mesh_p.hpp>
 
 
 //Constructor - Global variables initialization

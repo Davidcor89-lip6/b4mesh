@@ -1,4 +1,4 @@
-#include "transaction.hpp"
+#include <b4mesh/core_engine/transaction.hpp>
 
 Transaction::Transaction(){
   hash = string(HASH_SIZE, 0);

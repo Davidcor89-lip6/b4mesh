@@ -1,7 +1,7 @@
 
-#include "node.hpp"
-#include "client.hpp"
-#include "b4mesh_p.hpp"
+#include <b4mesh/core_engine/node.hpp>
+#include <b4mesh/core_engine/client.hpp>
+#include <b4mesh/core_engine/b4mesh_p.hpp>
 
 
 node::node(boost::asio::io_service& io_service, short port, std::string myIP)

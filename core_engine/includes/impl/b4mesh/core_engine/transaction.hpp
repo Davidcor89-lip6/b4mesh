@@ -6,7 +6,7 @@
 #include <vector>
 #include <string.h>
 
-#include "utils.hpp"
+#include <b4mesh/utils/utils.hpp>
 
 using namespace std;
 

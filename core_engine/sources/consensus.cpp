@@ -1,4 +1,4 @@
-#include "consensus.hpp"
+#include <b4mesh/core_engine/consensus.hpp>
 
 /**  green state method **/
 
