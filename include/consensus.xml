@@ -191,9 +191,32 @@
       <arg name="new_keys" type="a{s(sayd)}"/>
     </signal>
 
+
+    <!-- IP address of the leader as string, or an empty string for no leader
+	 The IP address of the leader will always be its main address.
+    -->
+    <property name="Leader" type="s" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal"
+		  value="true"/>
+    </property>
+    <!-- Number of data conflicts.
+
+         If non-zero, then a network merge is happening and
+         (conflict_count + 1) networks are merging together.
+
+	 Depending on the merge, a leader relection may be required.  If it
+	 isn't, then some nodes may be unaware that a conflict had happened.
+    -->
+    <property name="Conflicts" type="u" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal"
+		  value="true"/>
+    </property>
+
     <!-- Dump debug information about the internal state of the program. -->
     <method name="DebugDump">
-      <!-- IP address of the current leader, or empty if none -->
+      <!-- IP address of the current leader, or empty if none.
+	   This the raw leader, which may be 0.0.0.0 without a backhaul.
+       -->
       <arg name="leader" type="s" direction="out"/>
       <!--
         decrees stored inside consensusd.  There are four cases in which
@@ -261,5 +284,3 @@
     </method>
   </interface>
 </node>
-
-
