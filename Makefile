@@ -4,7 +4,7 @@ INC_DIR=./include
 SRC_DIR=./src
 BUILD_DIR=./build
 APPNAME=b4mesh
-GREEN_BUILDROOT=../greencom/greensoft-sdk-2020-10-06-67b51/
+GREEN_BUILDROOT=../greencom/greensoft-sdk-2021-01-25-14ae3/
 
 DEPS=$(wildcard ${INC_DIR}/*.hpp) 
 SRC=$(wildcard ${SRC_DIR}/*.cpp)

@@ -14,9 +14,9 @@ class B4Mesh;
 class session
 {
 public:
-    session(B4Mesh* b4mesh, boost::asio::io_service& io_service)
+    session(B4Mesh* b4mesh, boost::asio::io_context& io_context)
     : b4mesh_(b4mesh),
-      socket_(io_service){}
+      socket_(io_context){}
 
     tcp::socket& socket(){ return socket_;}
 

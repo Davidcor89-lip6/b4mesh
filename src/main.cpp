@@ -88,11 +88,11 @@ int main(int argc, char* argv[])
 	std::cout << " -> " << myIP << ":" << port << std::endl;
 	
 	//create network service
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 	//create b4mesh node
-    node s(io_service, port, myIP);
+    node s(io_context, port, myIP);
 	//launch network service
-    std::thread t([&io_service](){io_service.run();});
+    std::thread t([&io_context](){io_context.run();});
 
 	// add treatment of ctrl + c catch
 	signal (SIGINT,(void(*)(int))EndHandler);

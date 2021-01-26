@@ -53,7 +53,7 @@ class B4Mesh
     /**
      * Constructors and destructor
      */
-    B4Mesh(node* node, boost::asio::io_service& io_service, short port, std::string myIP);
+    B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP);
     ~B4Mesh();
 
     public:
@@ -228,7 +228,7 @@ private:
         std::chrono::time_point<std::chrono::steady_clock> time_end = std::chrono::steady_clock::now();
         return std::chrono::duration<double>(time_end - time_start).count();
     }
-    boost::asio::io_service& io_service_;
+    boost::asio::io_context& io_context_;
     
     // random variable
     boost::random::mt19937 rng;

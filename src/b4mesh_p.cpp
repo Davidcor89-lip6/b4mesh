@@ -1,16 +1,16 @@
 #include "b4mesh_p.hpp"
 
 //Constructor - Global variables initialization
-B4Mesh::B4Mesh(node* node, boost::asio::io_service& io_service, short port, std::string myIP)
+B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP)
     : node_(node),
 	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
-      io_service_(io_service),
+      io_context_(io_context),
 	  rng((unsigned int)time(NULL)+getpid()),  
       dist(PAYLOAD_MIN,PAYLOAD_MAX),  // payload size
       dist_exp(rng, boost::exponential_distribution<>(LAMBDA_DIST)), 
-	  timer_generateT(io_service,std::chrono::steady_clock::now()),
-	  timer_recurrentTask(io_service,std::chrono::steady_clock::now())
+	  timer_generateT(io_context,std::chrono::steady_clock::now()),
+	  timer_recurrentTask(io_context,std::chrono::steady_clock::now())
 {
 
     missing_parents_list = std::vector<pair<string, std::string>> ();

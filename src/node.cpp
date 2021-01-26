@@ -4,20 +4,20 @@
 #include "b4mesh_p.hpp"
 #include "configs.hpp"
 
-node::node(boost::asio::io_service& io_service, short port, std::string myIP)
-    : io_service_(io_service),
-      acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
+node::node(boost::asio::io_context& io_context, short port, std::string myIP)
+    : io_context_(io_context),
+      acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
       consensus_(myIP),
       my_IP(myIP),
       port_(port),
-      timer_pollDbus(io_service,std::chrono::steady_clock::now())
+      timer_pollDbus(io_context,std::chrono::steady_clock::now())
 {
     // blockgraph pointeur
-    b4mesh_ = new B4Mesh (this, io_service, port_, myIP);
+    b4mesh_ = new B4Mesh (this, io_context, port_, myIP);
 
     //Starting Server part
     std::cout << " starting connection acceptor " << std::endl;
-    session* new_session = new session(b4mesh_, io_service_);
+    session* new_session = new session(b4mesh_, io_context_);
     acceptor_.async_accept(new_session->socket(),
     boost::bind(&node::handle_accept, this, new_session,
     boost::asio::placeholders::error));
@@ -111,7 +111,7 @@ void node::create_client(std::string addr)
     if (addr != my_IP)
     {
         std::cout << " creation client with : " << addr << std::endl;
-        /*client* new_client =*/ new client(this, io_service_, addr, std::to_string(port_));
+        /*client* new_client =*/ new client(this, io_context_, addr, std::to_string(port_));
     }
 }
 
@@ -123,7 +123,7 @@ void node::handle_accept(session* new_session, const boost::system::error_code& 
         std::string IP = new_session->socket().remote_endpoint().address().to_string();
         addSessionToList(IP, std::move(new_session));
         std::cout << " new connection with : " << IP << std::endl; 
-        new_session = new session(b4mesh_, io_service_);
+        new_session = new session(b4mesh_, io_context_);
         acceptor_.async_accept(new_session->socket(),
             boost::bind(&node::handle_accept, this, new_session,
             boost::asio::placeholders::error));

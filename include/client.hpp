@@ -14,7 +14,7 @@ using boost::asio::ip::tcp;
 class client
 {
 public:
-	client(node* parent, boost::asio::io_service& io_service, std::string destIP, std::string port);
+	client(node* parent, boost::asio::io_context& io_context, std::string destIP, std::string port);
 	
 	tcp::socket& socket(){return socket_;}
 
@@ -27,7 +27,7 @@ private:
 	//parent
 	node * parent_;
 
-	boost::asio::io_service& io_service_;
+	boost::asio::io_context& io_context_;
     tcp::socket socket_;
 	tcp::resolver resolver_;
 	std::string destIP_;

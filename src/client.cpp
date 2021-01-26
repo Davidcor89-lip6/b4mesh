@@ -1,12 +1,12 @@
 #include "client.hpp"
 
-client::client(node* parent, boost::asio::io_service& io_service, std::string destIP, std::string port)
+client::client(node* parent, boost::asio::io_context& io_context, std::string destIP, std::string port)
     : parent_(parent),
-      io_service_(io_service),
-      socket_(io_service),
-      resolver_(io_service),
+      io_context_(io_context),
+      socket_(io_context),
+      resolver_(io_context),
       destIP_(destIP),
-      m_timer(io_service, std::chrono::steady_clock::now() + std::chrono::seconds(2))
+      m_timer(io_context, std::chrono::steady_clock::now() + std::chrono::seconds(2))
 {
 
     endpoints = resolver_.resolve(destIP_, port);

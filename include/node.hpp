@@ -24,7 +24,7 @@ class B4Mesh;
 class node
 {
 public:
-    node(boost::asio::io_service& io_service, short port, std::string myIP);
+    node(boost::asio::io_context& io_context, short port, std::string myIP);
     
     void addClientToList(std::string IP, client * c);
     void removeClientFromList(std::string IP);
@@ -43,7 +43,7 @@ private:
     void create_client(std::string addr);
 
 private:
-    boost::asio::io_service& io_service_;
+    boost::asio::io_context& io_context_;
     tcp::acceptor acceptor_;
 
 public: 
