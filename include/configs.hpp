@@ -1,4 +1,5 @@
-
+#ifndef B4MESH_CONFIGS
+#define B4MESH_CONFIGS
 
 // default port
 #define DEFAULT_PORT 5000
@@ -24,3 +25,5 @@
 //Avoiding collision
 #define WAIT_BEFORE 200 //us
 #define WAIT_AFTER 500 //us 
+
+#endif /*B4MESH_CONFIGS*/

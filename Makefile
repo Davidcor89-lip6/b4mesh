@@ -28,7 +28,7 @@ GREEN_PATH=${GREEN_BUILDROOT}output/host
 GREEN_INCLUDE=${GREEN_PATH}/usr/include/dbus-c++-1/
 GREEN_LIB=${GREEN_PATH}/usr/lib/
 CCPFLAGS=${OPTIM} -std=c++11 -Wall
-LDFLAGS= -lpthread -L${GREEN_LIB} -ldbus-c++-1
+LDFLAGS= -lpthread -L${GREEN_LIB} -ldbus-c++-1 -ldbus-c++-asio-1
 BUILD_DIR=./build_local
 else
 CC=arm-linux-g++
@@ -36,7 +36,7 @@ GREEN_PATH=${GREEN_BUILDROOT}output/target
 GREEN_INCLUDE=${GREEN_PATH}/usr/include/dbus-c++-1/
 GREEN_LIB=${GREEN_PATH}/usr/lib/
 CCPFLAGS=${OPTIM} -fcompare-debug-second -std=c++11 -Wall
-LDFLAGS= -lpthread -L${GREEN_LIB} -ldbus-c++-1
+LDFLAGS= -lpthread -L${GREEN_LIB} -ldbus-c++-1 -ldbus-c++-asio-1
 endif
 
 CCPFLAGS+= -I$(BUILD_DIR) -I${INC_DIR} -I${GREEN_INCLUDE}

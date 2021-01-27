@@ -4,10 +4,10 @@
 #include "b4mesh_p.hpp"
 #include "configs.hpp"
 
-node::node(boost::asio::io_context& io_context, short port, std::string myIP)
+node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP)
     : io_context_(io_context),
       acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
-      consensus_(myIP),
+      consensus_(myIP, conn),
       my_IP(myIP),
       port_(port),
       timer_pollDbus(io_context,std::chrono::steady_clock::now())
@@ -41,33 +41,50 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
 {
     int merge = 0;
 	std::cout << "Status Dbus" << std::endl; 
-    std::vector<std::string> addListAddr = consensus_.getAddNodeList(); 
-    std::vector<std::string> removeListAddr = consensus_.getRemoveNodeList(); 
-
-    for (auto it = addListAddr.begin(); it != addListAddr.end(); ++it)
+    std::vector<std::string> listAddr = consensus_.getNodeList();
+    std::cout << "new list " << std::endl;
+    for (auto it : listAddr)
     {
-        std::cout << "timer_pollDbus_fct: adding " << *it << std::endl;
-        consensus_.removeFromAddAddr(*it);
-        consensus_.addToListAddr(*it);
-        create_client(*it);
-        merge++;
+        std::cout << it << std::endl;
+    }
+    std::cout << "start list " << std::endl;
+    for (auto it : startListAddr)
+    {
+        std::cout << it << std::endl;
     }
 
-    for (auto it = removeListAddr.begin(); it != removeListAddr.end(); ++it)
+    std::cout << "leader " << std::endl;
+    std::string leader = consensus_.getLeader();
+    std::cout << leader << std::endl;
+
+    for (auto it : listAddr)
     {
-        std::cout << "timer_pollDbus_fct: removing " << *it << std::endl;
-        consensus_.removeFromRemoveAddr(*it);
-        consensus_.removeFromListAddr(*it);
-        removeClientFromList(*it);
+        auto Addr = std::find (startListAddr.begin(), startListAddr.end(), it);
+        if (Addr == startListAddr.end())
+        {
+            std::cout << "timer_pollDbus_fct: adding " << it << std::endl;
+            create_client(it);
+            merge++;
+        }
+    }
+
+    for (auto it : startListAddr)
+    {
+        auto Addr = std::find (listAddr.begin(), listAddr.end(), it);
+        if (Addr == listAddr.end())
+        {
+            std::cout << "timer_pollDbus_fct: removing " << it << std::endl;
+            removeClientFromList(it);
+        }
     }
 
     if (merge > 0)
     {
-        std::string ldr = "-1";
-        while (ldr == "-1")
+        std::string ldr = "";
+        while (ldr == "")
         {
             ldr = consensus_.getLeader();  
-            if ( ldr != "-1"){
+            if ( ldr != ""){
                 cout << "Node: " << consensus_.GetId() << "Current leader is: " << ldr << endl;
                 b4mesh_->StartMerge();
                 return;
@@ -76,6 +93,8 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
         }
         merge = 0;
     }
+
+    startListAddr = listAddr;
 
     timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));
 	timer_pollDbus.async_wait(boost::bind(&node::timer_pollDbus_fct, this, boost::asio::placeholders::error));

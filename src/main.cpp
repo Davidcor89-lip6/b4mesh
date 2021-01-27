@@ -7,31 +7,15 @@
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 
+#include <dbus-c++/dbus.h>
+#include <dbus-c++/asio-integration.h>
+
 using boost::asio::ip::tcp;
 
 #include "node.hpp"
 #include "utils.hpp"
 #include "configs.hpp"
 
-// ----------------------------
-int EndHandler(const int signal, node * node_)
-{
-	static node * saved = NULL;
-
-	if (saved == NULL)
-	{
-		saved = node_;
-	}
-	if (saved != NULL && signal == SIGINT)
-	{
-		printf("Caught signal (%s)\n", saved->GetIp().c_str());
-		saved->GenerateResults();
-		saved->consensus_.terminate_dbus();
-		exit(1);
-	}
-
-	 return 0;
-}
 
 int main(int argc, char* argv[])
 {
@@ -89,17 +73,26 @@ int main(int argc, char* argv[])
 	
 	//create network service
     boost::asio::io_context io_context;
+	
+	DBus::Asio::Dispatcher dispatcher{io_context};
+  	DBus::default_dispatcher = &dispatcher;
+  	boost::asio::signal_set sighandler{io_context, SIGINT, SIGTERM};
+
+	DBus::Connection conn = DBus::Connection::SystemBus();
+	std::cout << "Connection Dbus ok" << std::endl;
+
 	//create b4mesh node
-    node s(io_context, port, myIP);
+    node s(io_context, conn, port, myIP);
+
+	sighandler.async_wait([&io_context, &s](const boost::system::error_code&, const int&) {
+		std::cout << " Signal that end the program" << std::endl;
+    	io_context.stop();
+		s.GenerateResults();
+  	});
+
 	//launch network service
-    std::thread t([&io_context](){io_context.run();});
+    io_context.run();
 
-	// add treatment of ctrl + c catch
-	signal (SIGINT,(void(*)(int))EndHandler);
-	EndHandler(666, &s);
-
-	//wait for all thread to stop
-    t.join();
   }
   catch (std::exception& e)
   {

@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <dbus-c++/dbus.h>
+#include <dbus-c++/asio-integration.h>
 #include "state_glue.h"
-
+#include "consensus_glue.h"
 
 class green_state :
 	public net::qolsr::Qolyester::ReachableNodes_proxy,
@@ -18,16 +19,29 @@ public:
 
 	void Added(const std::string& address);
 	void Removed(const std::string& address);
-	
-	std::vector<std::string> addListAddr;
-	std::vector<std::string> removeListAddr;
+
+};
+
+class green_cons :
+	public net::qolsr::Consensus_proxy,
+	public DBus::IntrospectableProxy,
+	public DBus::ObjectProxy
+{
+public:
+
+	green_cons(DBus::Connection &connection, const char *path, const char *name);
+
+
+	void ValueChanged(const std::string& name, const std::string& new_version, const std::vector< uint8_t >& new_value, const double& expiration);
+    void TransactionResult(const uint32_t& id, const bool& success, const std::map< std::string, std::string >& changed_keys);
+    void WatchResult(const std::vector< ::DBus::Struct< std::string, std::string > >& changed_keys_versions, const std::map< std::string, ::DBus::Struct< std::string, std::vector< uint8_t >, double > >& new_keys);
 
 };
 
 class consensus
 {
 public:
-	consensus(std::string mIP);
+	consensus(std::string mIP, DBus::Connection& conn);
 	
 	std::vector<std::string>& getNodeList(void);	
 	std::string getLeader(void);
@@ -37,7 +51,6 @@ public:
 	int GetIdFromIP(std::string s);
 	std::string GetGroupId();
 
-	void terminate_dbus(void);
 	std::vector<std::string>& getAddNodeList(void);
 	std::vector<std::string>& getRemoveNodeList(void);
 	void removeFromAddAddr(std::string addr);
@@ -53,8 +66,9 @@ private:
     std::vector<std::string> listAddr;
 
 	/*dbus*/
-	DBus::BusDispatcher dispatcher;
-	green_state * p_clientState;
+	DBus::Connection conn_;
+	green_state state_client;
+	green_cons cons_client;
 
 };
 

@@ -3,11 +3,12 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-
-#include <boost/bind.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+
+#include <dbus-c++/dbus.h>
+#include <dbus-c++/asio-integration.h>
 
 using boost::asio::ip::tcp;
 
@@ -24,7 +25,7 @@ class B4Mesh;
 class node
 {
 public:
-    node(boost::asio::io_context& io_context, short port, std::string myIP);
+    node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP);
     
     void addClientToList(std::string IP, client * c);
     void removeClientFromList(std::string IP);
