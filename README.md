@@ -37,6 +37,9 @@ $make toolchain
 
 WAIT !!!
 
+Add the path of the sdk tool inside your basrc
+export PATH="'path/to/greencomsdk/root'/output/host/bin:$PATH"
+
 ## b4mesh compilation
 
 In the makefile, you need to change the link the greencommunication toolchain.
