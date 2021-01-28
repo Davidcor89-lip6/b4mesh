@@ -36,6 +36,22 @@ ApplicationPacket::ApplicationPacket(string &serie){
   payload = string(packet_payload, size-HeaderSize());
 }
 
+ApplicationPacket::ApplicationPacket(string &serie, size_t p_size ){
+  packet_hdr_serie *hdr = (packet_hdr_serie*) serie.data();
+  service = hdr->service;
+  size = hdr->size;
+
+  if (size == p_size)
+  {
+    const char* packet_payload = serie.data() + HeaderSize();
+    payload = string(packet_payload, size-HeaderSize());
+  } else {
+    service = NONE;
+    payload = "";
+    size = CalculateSize();
+  }
+}
+
 ApplicationPacket::~ApplicationPacket(){
 }
 

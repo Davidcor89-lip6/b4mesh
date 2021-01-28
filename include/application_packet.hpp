@@ -23,6 +23,7 @@ class ApplicationPacket{
     ApplicationPacket(char service, int size, const uint8_t* payload);
     ApplicationPacket(ApplicationPacket &p);
     ApplicationPacket(string &serie);
+    ApplicationPacket(string &serie, size_t p_size);
     ~ApplicationPacket();
 
   public:
