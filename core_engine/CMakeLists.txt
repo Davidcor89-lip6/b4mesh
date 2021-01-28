@@ -39,9 +39,8 @@ find_package(Boost 1.65.0 REQUIRED
         system
 )
 
-if (NOT (TARGET GreenSoftSDK::DBusCXX) OR
-    NOT (TARGET DBusCXX))
-    message(FATAL_ERROR ">>>>>>>>>> KO : core-engine")
+if (NOT (TARGET GreenSoftSDK::DBusCXX))
+    message(FATAL_ERROR "[${PROJECT_NAME}::core-engine] Cannot reach target GreenSoftSDK::DBusCXX")
 endif()
 
 add_dependencies(${PROJECT_NAME}_coreEngine

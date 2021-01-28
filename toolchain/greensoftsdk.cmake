@@ -1,7 +1,5 @@
 # Extract, build, and create targets related to GreenSoftSDK
 
-message(STATUS ">>>>>>> ${CMAKE_MODULE_PATH}")
-
 include(b4mesh/FindFile)
 
 FindFile(
@@ -78,7 +76,14 @@ ExternalProject_Get_Property(greensoftsdk SOURCE_DIR)
 set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
 ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
 set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
-
+set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR} PARENT_SCOPE)
+#set(greensoftsdk_toolchain_descriptor ${greensoftsdk_INSTALL_DIR}/greensoftsdk/greensoftsdk.toolchain.cmake PARENT_SCOPE)
+SET(greensoftsdk_toolchain_descriptor "${CMAKE_CURRENT_SOURCE_DIR}/greensoftsdk.toolchain.cmake"
+	CACHE INTERNAL "(source) greensoftsdk cmake toolchain descriptor path"
+)
+SET(greensoftsdk_toolchain_descriptor_installed "${greensoftsdk_INSTALL_DIR}/greensoftsdk/greensoftsdk.toolchain.cmake"
+	CACHE INTERNAL "(installed) greensoftsdk cmake toolchain descriptor path"
+)
 
 # Toolchains
 # add_custom_target(greenSoftSDK_toolchain_host)

@@ -35,6 +35,11 @@ ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
     WORKING_DIRECTORY   ${greensoftsdk_SOURCE_DIR}
 )
 
+if (NOT DEFINED greensoftsdk_INSTALL_DIR)
+    ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
+    set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
+endif()
+
 add_library(DBusCXX UNKNOWN IMPORTED GLOBAL)
 set_target_properties(DBusCXX PROPERTIES
     IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
@@ -45,6 +50,9 @@ set_target_properties(DBusCXX PROPERTIES
     #INTERFACE_INCLUDE_DIRECTORIES   ${greensoftsdk_INSTALL_DIR}/usr/include/dbus-c++-1
     #INCLUDE_DIRECTORIES ${greensoftsdk_INSTALL_DIR}/usr/include/dbus-c++-1
 )
-add_dependencies(DBusCXX greensoftsdk greensoftsdk-libdbus-cpp)
+add_dependencies(DBusCXX
+    greensoftsdk
+    greensoftsdk-libdbus-cpp
+)
 target_link_libraries(DBusCXX INTERFACE greensoftsdk)
 add_library(GreenSoftSDK::DBusCXX ALIAS DBusCXX)
