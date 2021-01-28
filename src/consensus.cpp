@@ -80,7 +80,12 @@ std::string consensus::getLeader(void)
 
 bool consensus::AmILeader(void)
 {
-    return (leader_ == mIP_)? 1: 0;
+    bool ret = false;
+    leader_ = cons_client.Leader();
+    if ( leader_ != "")
+        if (leader_ == mIP_)
+            ret = true;
+    return ret;
 }
 
 int consensus::GetId()
