@@ -40,33 +40,45 @@ ExternalProject_Add(greensoftsdk
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Built."
     # CMake instance stops here for some reasons ...([greensoftsdk] Built. Build failed.)
     INSTALL_COMMAND     ${CMAKE_COMMAND} -E echo "[greensoftsdk] Installing ..."
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Copying [<SOURCE_DIR>/output] to [<INSTALL_DIR>]"
-    COMMAND             ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/output/images/${greensoftsdk_package_name}.tar.gz <INSTALL_DIR>/${greensoftsdk_package_name}.tar.gz
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Extracting [<INSTALL_DIR>/${greensoftsdk_package_name}.tar.gz]"
-    COMMAND             ${CMAKE_COMMAND} -E tar x <INSTALL_DIR>/${greensoftsdk_package_name}.tar.gz
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Cleaning [<INSTALL_DIR>/${greensoftsdk_package_name}.tar.gz]"
-    COMMAND             ${CMAKE_COMMAND} -E rm <INSTALL_DIR>/${greensoftsdk_package_name}.tar.gz
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Extracting [<INSTALL_DIR>/${greensoftsdk_package_name}.tar.gz]"
-    COMMAND             ${CMAKE_COMMAND} -E copy_directory <INSTALL_DIR>/${greensoftsdk_package_name} <INSTALL_DIR>/greensoftsdk # Cannot rename, as BUILD_BYPRODUCTS already concurrently create directoriesadam 
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Cleaning [<INSTALL_DIR>/${greensoftsdk_package_name}]"
-    COMMAND             ${CMAKE_COMMAND} -E rm rf <INSTALL_DIR>/${greensoftsdk_package_name}
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Running [relocate-sdk.sh] script ..."
-    COMMAND             ${SHELL_EXE} <INSTALL_DIR>/greensoftsdk/relocate-sdk.sh
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Installed in <INSTALL_DIR>"
-
     TEST_COMMAND        ""
+
     BUILD_BYPRODUCTS
         <INSTALL_DIR>/greensoftsdk
+        <INSTALL_DIR>/greensoftsdk/greensoftsdk.toolchain.cmake
         <INSTALL_DIR>/greensoftsdk/lib/libdbus-c++-1.so
         # <INSTALL_DIR>/lib/libdbus-c++-1.so
         # #<INSTALL_DIR>/usr/lib/dbus-c++-1.so
         # #<INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
         # <INSTALL_DIR>/include/dbus-c++-1/
 )
+
+ExternalProject_Add_Step(greensoftsdk custom_install
+    DEPENDEES           install
+    COMMENT             "[greensoftsdk] custom_install step ..."
+    WORKING_DIRECTORY   <INSTALL_DIR>
+    
+    COMMAND             ${CMAKE_COMMAND} -E rm -rf <INSTALL_DIR>/${greensoftsdk_package_name}
+    COMMAND             ${CMAKE_COMMAND} -E rm -rf <INSTALL_DIR>/greensoftsdk
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Extracting [<SOURCE_DIR>/output/images/${greensoftsdk_package_name}.tar.gz]"
+    COMMAND             ${CMAKE_COMMAND} -E tar x <SOURCE_DIR>/output/images/${greensoftsdk_package_name}.tar.gz
+    COMMAND             ${CMAKE_COMMAND} -E rename <INSTALL_DIR>/${greensoftsdk_package_name} <INSTALL_DIR>/greensoftsdk
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Running [relocate-sdk.sh] script ..."
+    COMMAND             ${SHELL_EXE} <INSTALL_DIR>/greensoftsdk/relocate-sdk.sh
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Installed in <INSTALL_DIR>"
+)
+ExternalProject_Add_Step(greensoftsdk install_cmake_toolchain_descriptor
+    DEPENDEES           custom_install
+    COMMENT             "[greensoftsdk] install_cmake_toolchain_descriptor step ..."
+    WORKING_DIRECTORY   <INSTALL_DIR>
+
+    COMMAND             ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/greensoftsdk.toolchain.cmake <INSTALL_DIR>
+)
+
 ExternalProject_Get_Property(greensoftsdk SOURCE_DIR)
 set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
 ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
 set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
+
 
 # Toolchains
 # add_custom_target(greenSoftSDK_toolchain_host)
