@@ -2,7 +2,6 @@
 #define B4MESH_CONSENSUS
 
 #include <iostream>
-#include <>
 #include <dbus-c++/dbus.h>
 #include "state_glue.h"
 

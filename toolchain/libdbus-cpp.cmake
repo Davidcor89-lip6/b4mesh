@@ -4,7 +4,8 @@ endif()
 
 # GreenSoftSDK::DBusCXX
 
-# todo : use SDK's toolchain to build libdbus-cpp
+# todo : use SDK's toolchain to build libdbus-cpp (recommanded by Green-communication)
+#        ... but WTF SDK rule `make sdk` depends on libdbus, and libdbus should be built using SDK ?
 
 message(STATUS "[greensoftsdk] libdbus-cpp : check tarball sha256 ...")
 file(SHA256 ${greensoftsdk_libdbuscpp_tarball_path} greensoftsdk_libdbus-cpp_sha256sum)
@@ -44,11 +45,9 @@ add_library(DBusCXX UNKNOWN IMPORTED GLOBAL)
 set_target_properties(DBusCXX PROPERTIES
     IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
     IMPORTED_LOCATION               ${greensoftsdk_INSTALL_DIR}/greensoftsdk/lib/libdbus-c++-1.so
-    INCLUDE_DIRECTORIES             ${greensoftsdk_INSTALL_DIR}/greensoftsdk/include/dbus-c++-1/
+    INTERFACE_INCLUDE_DIRECTORIES   ${greensoftsdk_INSTALL_DIR}/greensoftsdk/include/dbus-c++-1/
     # IMPORTED_LOCATION_RELEASE       ${greensoftsdk_INSTALL_DIR}/usr/lib/dbus-c++-1.so
     # IMPORTED_LOCATION_DEBUG         ${greensoftsdk_INSTALL_DIR}/usr/lib/dbus-c++-1-d.so
-    #INTERFACE_INCLUDE_DIRECTORIES   ${greensoftsdk_INSTALL_DIR}/usr/include/dbus-c++-1
-    #INCLUDE_DIRECTORIES ${greensoftsdk_INSTALL_DIR}/usr/include/dbus-c++-1
 )
 add_dependencies(DBusCXX
     greensoftsdk
