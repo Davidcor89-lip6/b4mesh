@@ -85,10 +85,11 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
         {
             ldr = consensus_.getLeader();  
             if ( ldr != ""){
-                cout << "Node: " << consensus_.GetId() << "Current leader is: " << ldr << endl;
+                std::cout << "Node: " << consensus_.GetId() << " Current leader is: " << ldr << std::endl;
                 b4mesh_->StartMerge();
                 return;
-            } 
+            }
+            std::cout << RED << "Wait for new leader" << RESET << std::endl; 
             usleep(500);
         }
         merge = 0;

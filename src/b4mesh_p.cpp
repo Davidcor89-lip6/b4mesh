@@ -30,7 +30,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
     //lancement transaction
-    //if ( node_->consensus_.AmILeader() )
+    if ( node_->consensus_.AmILeader() )
     {
         //std::cout << "i m leader " << std::endl;
         timer_generateT.expires_from_now(std::chrono::seconds(WAIT_FOR_FIRST_TRANSACTION));
@@ -58,40 +58,43 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
     std::cout << "ReceivePacket: size " << packet.size() << std::endl; 
     try
     {
-        ApplicationPacket p(packet);
+        ApplicationPacket p(packet, packet.size());
         //std::cout << "message " << p << std::endl;
 
         // ------------ TRANSACTION TREATMENT ------------------ 
         if (p.GetService() == ApplicationPacket::TRANSACTION){
             Transaction t(p.GetPayload());
-            std::cout << " Received a new transaction packet : " << t << " from " <<  ip << " with hash " << t.GetHash() << std::endl;
+            std::cout << BOLDCYAN << " Received a new transaction packet : " << t << " from " <<  ip << " with hash " << t.GetHash() << RESET << std::endl;
             TransactionsTreatment(t);
         }
         // ------------ BLOCK TREATMENT ------------------
         else if (p.GetService() == ApplicationPacket::BLOCK){
             Block b(p.GetPayload());
-            std::cout << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << std::endl;
+            std::cout << GREEN << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << RESET << std::endl;
             BlockTreatment(b);
         }
         // ------------ REQUEST_BLOCK TREATMENT ------------------ 
         else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
             string req_block = p.GetPayload();
-            std::cout << " REQUEST_BLOCK: looking for block: " << req_block << std::endl;;
+            std::cout << BLUE << " REQUEST_BLOCK: looking for block: " << req_block << RESET << std::endl;
             SendParentBlock(req_block, ip);
         }
 		/* ------------ CHANGE_TOPO TREATMENT ------------------ */
 		else if (p.GetService() == ApplicationPacket::CHANGE_TOPO){
 			int message_type = ExtractMessageType(p.GetPayload());
-			if ( message_type == CHILDLESSBLOCK_REQ){ //TODO needed ?
+			if ( message_type == CHILDLESSBLOCK_REQ){
 				// send to leader your childless blocks.
+				std::cout << RED << " CHILDLESSBLOCK_REQ: " << ip << RESET << std::endl;
 				SendChildlessBlocks(ip);
 			}
-			else if (message_type == CHILDLESSBLOCK_REP){ //TODO needed ?
+			else if (message_type == CHILDLESSBLOCK_REP){
 				// Reply only received by leaders -
+				std::cout << BOLDYELLOW << " CHILDLESSBLOCK_REP: " << ip << RESET << std::endl;
 				CheckBranchesSync(p.GetPayload(), ip);
 			}
-			else if (message_type == GROUPBRANCH_REQ){ //TODO needed ?
+			else if (message_type == GROUPBRANCH_REQ){
 				// All nodes can enter here
+				std::cout << MAGENTA << " GROUPBRANCH_REQ: " << ip << RESET << std::endl;
 				SendBranch4Sync(p.GetPayload(), ip);
 			}
 			else {
@@ -99,7 +102,8 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
 			}
 		}
         else{
-            std::cout << " Packet type unsupported" << std::endl;
+            std::cout << RED << " Packet type unsupported or faulty!" << RESET << std::endl;
+			lostPacket++;
         }
   
     }
@@ -133,7 +137,7 @@ void B4Mesh::GenerateTransactions(){
 
     // restart transaction generation
     int interval = dist_exp()*1000 + WAIT_AFTER; // TODO : added 500ms to avoid colliding if interval equal 0
-    std::cout << " Node :" << " Random variable Expo: " << interval << "ms" <<std::endl;
+    std::cout << " -> Next Transaction in : " << interval << "ms" <<std::endl;
     timer_generateT.expires_from_now(std::chrono::milliseconds(interval));
     timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
 
@@ -141,7 +145,7 @@ void B4Mesh::GenerateTransactions(){
 
 void B4Mesh::SendTransaction(Transaction t){
 
-    std::cout << "sending t "<< t << std::endl;
+	std::cout << BOLDCYAN << " sending new transaction packet : " << t << " with hash " << t.GetHash() << RESET << std::endl;
     string serie = t.Serialize();
     ApplicationPacket packet(ApplicationPacket::TRANSACTION, serie);
 
