@@ -42,7 +42,7 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     int merge = 0;
 	std::cout << "Status Dbus" << std::endl; 
     std::vector<std::string> listAddr = consensus_.getNodeList();
-    std::cout << "new list " << std::endl;
+    /*std::cout << "new list " << std::endl;
     for (auto it : listAddr)
     {
         std::cout << it << std::endl;
@@ -51,11 +51,9 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     for (auto it : startListAddr)
     {
         std::cout << it << std::endl;
-    }
+    }*/
 
-    std::cout << "leader " << std::endl;
-    std::string leader = consensus_.getLeader();
-    std::cout << leader << std::endl;
+    std::cout << "leader " << consensus_.getLeader() << std::endl;
 
     for (auto it : listAddr)
     {
