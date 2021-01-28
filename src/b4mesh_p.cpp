@@ -657,7 +657,7 @@ void B4Mesh::GenerateBlocks(){
 	block.SetTimestamp(getSeconds());
 
 	if(p_block.size() > 1){
-		std::cout << "Sending a MERGE BLOCK" << std::endl;
+		std::cout << GREEN << "Sending a MERGE BLOCK" << RESET << std::endl;
 	}
 
 	BlockTreatment(block);
@@ -669,7 +669,7 @@ void B4Mesh::GenerateBlocks(){
 void B4Mesh::SendBlockToConsensus(Block b)
 {
 	// Using c4m to publish the block
-	std::cout << " SendBlockToConsensus:   " << b.GetHash() << std::endl;
+	std::cout << GREEN << " SendBlockToConsensus:   " << b.GetHash() << RESET << std::endl;
 	std::cout << "sending b "<< b << std::endl;
 	string serie = b.Serialize();
 	ApplicationPacket packet(ApplicationPacket::BLOCK, serie);

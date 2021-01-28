@@ -6,6 +6,7 @@
 
 // Dbus
 #define POLLING_DBUS 5
+#define WAITING_FOR_NEW_LEADER 500
 
 //payload size
 #define PAYLOAD_MIN 300

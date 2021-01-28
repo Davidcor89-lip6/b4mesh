@@ -88,7 +88,7 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
                 return;
             }
             std::cout << RED << "Wait for new leader" << RESET << std::endl; 
-            usleep(500);
+            usleep(WAITING_FOR_NEW_LEADER);
         }
         merge = 0;
     }
@@ -103,12 +103,14 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
 void node::addClientToList( std::string IP, client * c)
 {
     // TODO adding a mutex
+    std::cout << "addClientToList " << IP << std::endl;
     listClient.insert(std::pair<std::string, client*>(IP,c));			
 }
 
 void node::removeClientFromList( std::string IP)
 {
     // TODO adding a mutex
+    std::cout << "removeClientFromList " << IP << std::endl;
     listClient.erase(IP);			
 }
 
@@ -162,12 +164,12 @@ void node::SendOnNetwork(tcp::socket& socket, std::string string)
 
 void node::BroadcastPacket( ApplicationPacket& packet)
 {
-
+    std::cout << "BroadcastPacket to : " << listClient.size() << std::endl;
     for (auto const& it : listClient)
     {
         std::string IP = it.first;
         client* c = it.second;
-        //std::cout << "message to " << IP <<  " " << packet << std::endl;
+        std::cout << "message to " << IP << std::endl;
         SendOnNetwork(c->socket(), packet.Serialize());
     }
 }
