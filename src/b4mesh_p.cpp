@@ -30,7 +30,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
     //lancement transaction
-    if ( node_->consensus_.AmILeader() )
+    //if ( node_->consensus_.AmILeader() )
     {
         //std::cout << "i m leader " << std::endl;
         timer_generateT.expires_from_now(std::chrono::seconds(WAIT_FOR_FIRST_TRANSACTION));

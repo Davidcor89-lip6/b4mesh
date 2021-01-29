@@ -62,7 +62,10 @@ private:
     // polling Dbus
     void timer_pollDbus_fct (const boost::system::error_code& /*e*/);
     boost::asio::steady_timer timer_pollDbus;
+    // merge
     int merge;
+    void merge_launcher_fct (const boost::system::error_code& /*e*/);
+    boost::asio::steady_timer timer_merging;
 
 };
 

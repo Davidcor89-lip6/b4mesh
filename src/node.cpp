@@ -11,7 +11,8 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
       my_IP(myIP),
       port_(port),
       timer_pollDbus(io_context,std::chrono::steady_clock::now()),
-      merge(0)
+      merge(0), 
+      timer_merging(io_context,std::chrono::steady_clock::now())
 {
     // blockgraph pointeur
     b4mesh_ = new B4Mesh (this, io_context, port_, myIP);
@@ -78,18 +79,8 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
 
     if (merge > 0)
     {
-        std::string ldr = "";
-        while (ldr == "" && merge > 0)
-        {
-            ldr = consensus_.getLeader();  
-            if ( ldr != "" && merge == 0){
-                std::cout << "Node: " << consensus_.GetId() << " Current leader is: " << ldr << std::endl;
-                b4mesh_->StartMerge();
-                return;
-            }
-            std::cout << RED << "Wait for new leader" << RESET << std::endl; 
-            usleep(WAITING_FOR_NEW_LEADER);
-        }
+        timer_merging.expires_from_now(std::chrono::seconds(MERGE_TIMING));
+        timer_merging.async_wait(boost::bind(&node::merge_launcher_fct, this, boost::asio::placeholders::error));
     }
 
     startListAddr = listAddr;
@@ -97,6 +88,20 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));
 	timer_pollDbus.async_wait(boost::bind(&node::timer_pollDbus_fct, this, boost::asio::placeholders::error));
 
+}
+
+void node::merge_launcher_fct (const boost::system::error_code& /*e*/) 
+{
+    std::string ldr = consensus_.getLeader();  
+    if ( ldr != "" && merge == 0){
+        std::cout << "Node: " << consensus_.GetId() << " Current leader is: " << ldr << std::endl;
+        b4mesh_->StartMerge();
+        return;
+    } else {
+        std::cout << RED << "Wait for new leader or merge connexions (" << ldr << " , " << merge << ")" << RESET << std::endl;
+        timer_merging.expires_from_now(std::chrono::seconds(MERGE_TIMING));
+        timer_merging.async_wait(boost::bind(&node::merge_launcher_fct, this, boost::asio::placeholders::error));
+    }
 }
 
 void node::addClientToList( std::string IP, client * c)
