@@ -10,7 +10,8 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
       consensus_(myIP, conn),
       my_IP(myIP),
       port_(port),
-      timer_pollDbus(io_context,std::chrono::steady_clock::now())
+      timer_pollDbus(io_context,std::chrono::steady_clock::now()),
+      merge(0)
 {
     // blockgraph pointeur
     b4mesh_ = new B4Mesh (this, io_context, port_, myIP);
@@ -39,7 +40,6 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
 // ************** Recurrent Task **************************************
 void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/) 
 {
-    int merge = 0;
 	std::cout << "Status Dbus" << std::endl; 
     std::vector<std::string> listAddr = consensus_.getNodeList();
     /*std::cout << "new list " << std::endl;
@@ -79,10 +79,10 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     if (merge > 0)
     {
         std::string ldr = "";
-        while (ldr == "")
+        while (ldr == "" && merge > 0)
         {
             ldr = consensus_.getLeader();  
-            if ( ldr != ""){
+            if ( ldr != "" && merge == 0){
                 std::cout << "Node: " << consensus_.GetId() << " Current leader is: " << ldr << std::endl;
                 b4mesh_->StartMerge();
                 return;
@@ -90,7 +90,6 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
             std::cout << RED << "Wait for new leader" << RESET << std::endl; 
             usleep(WAITING_FOR_NEW_LEADER);
         }
-        merge = 0;
     }
 
     startListAddr = listAddr;
@@ -104,7 +103,9 @@ void node::addClientToList( std::string IP, client * c)
 {
     // TODO adding a mutex
     std::cout << "addClientToList " << IP << std::endl;
-    listClient.insert(std::pair<std::string, client*>(IP,c));			
+    listClient.insert(std::pair<std::string, client*>(IP,c));
+    if ( merge > 0 )
+        merge --;
 }
 
 void node::removeClientFromList( std::string IP)

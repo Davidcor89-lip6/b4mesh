@@ -62,6 +62,7 @@ private:
     // polling Dbus
     void timer_pollDbus_fct (const boost::system::error_code& /*e*/);
     boost::asio::steady_timer timer_pollDbus;
+    int merge;
 
 };
 
