@@ -7,11 +7,6 @@ FindFile(
     PATTERN "greensoft-sdk-*.tar.xz"
 )
 set(greensoftsdk_tarball_path ${FindFile_result})
-FindFile(
-        DIRNAME ${CMAKE_CURRENT_SOURCE_DIR}/archives
-        PATTERN "libdbus-cpp-*.tar.gz"
-    )
-set(greensoftsdk_libdbuscpp_tarball_path ${FindFile_result})
 
 message(STATUS "[greensoftsdk] ...")
 set(greensoftsdk_expected_sha256sum
@@ -53,17 +48,37 @@ set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
 ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
 set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
 
+FindFile(
+    DIRNAME ${CMAKE_CURRENT_SOURCE_DIR}/archives
+    PATTERN "libdbus-cpp-*.tar.gz"
+)
+set(greensoftsdk_libdbuscpp_tarball_path ${FindFile_result})
+
+file(SHA256 ${greensoftsdk_libdbuscpp_tarball_path} greensoftsdk_libdbus-cpp_sha256sum)
+set(greensoftsdk_libdbus-cpp_expected_sha256sum
+    "6842e99baf73372ae8d047c3b2d79ca2f5d57f900cb436890a9a8ac19930b411"
+    CACHE STRING
+    "GreenSoftSDK LibDBusC++ : Expected tarball sha256sum result"
+)
+if (NOT ${greensoftsdk_libdbus-cpp_sha256sum} MATCHES ${greensoftsdk_libdbus-cpp_expected_sha256sum})
+    message(FATAL_ERROR
+        "[greensoftsdk] libdbus-cpp : sha256sum mismatch for ${greensoftsdk_libdbuscpp_tarball_path}"
+        "\n\tExpecting  : [${greensoftsdk_libdbus-cpp_expected_sha256sum}]"
+        "\n\tCalculated : [${greensoftsdk_libdbus-cpp_sha256sum}]"
+    )
+endif()
+
 ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
     DEPENDEES           configure
     DEPENDERS           build
     COMMENT             "[greensoftsdk] libdbus-cpp step ..."
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : create [${greensoftsdk_SOURCE_DIR}/dl/] directory ..."
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : create [<SOURCE_DIR>/dl/] directory ..."
     COMMAND             ${CMAKE_COMMAND} -E make_directory ${greensoftsdk_SOURCE_DIR}/dl/
-    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : copy tarball into .../dl/ ..."
-    COMMAND             ${CMAKE_COMMAND} -E copy ${greensoftsdk_libdbuscpp_tarball_path} ${greensoftsdk_SOURCE_DIR}/dl
-    # COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Building ..."
-    # COMMAND             ${MAKE_EXE}  --silent libdbus-cpp # useless ?
-    # COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Built ..."
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : copy tarball [${greensoftsdk_libdbuscpp_tarball_path}] into [<SOURCE_DIR>/dl/]"
+    COMMAND             ${CMAKE_COMMAND} -E copy ${greensoftsdk_libdbuscpp_tarball_path} <SOURCE_DIR>/dl
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Building ..."
+    COMMAND             ${MAKE_EXE}  --silent libdbus-cpp
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Built ..."
     WORKING_DIRECTORY   ${greensoftsdk_SOURCE_DIR}
 )
 ExternalProject_Add_Step(greensoftsdk custom_install
