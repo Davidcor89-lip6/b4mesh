@@ -39,21 +39,17 @@ find_package(Boost 1.65.0 REQUIRED
         system
 )
 
-if (NOT (TARGET GreenSoftSDK::DBusCXX))
-    message(FATAL_ERROR "[${PROJECT_NAME}::core-engine] Cannot reach target GreenSoftSDK::DBusCXX")
-endif()
-
 add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::random
     Boost::system
-    GreenSoftSDK::DBusCXX
+    DBusCXX
     ${PROJECT_NAME}::utils
 )
 target_link_libraries(${PROJECT_NAME}_coreEngine PRIVATE
     #Boost::math
     Boost::random
     Boost::system
-    GreenSoftSDK::DBusCXX
+    DBusCXX
     ${PROJECT_NAME}::utils
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)

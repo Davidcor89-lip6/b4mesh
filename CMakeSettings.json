@@ -64,6 +64,38 @@
           "type": "FILEPATH"
         }
       ]
+    },
+    {
+      "name": "Linux-GCC-Debug-WithGreenSDK",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "cmakeExecutable": "cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "cmakeCommandArgs": "-DUSE_GREEN_SDK:BOOL=ON",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "variables": [
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "/usr/bin/g++-9",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "/usr/bin/gcc-9",
+          "type": "FILEPATH"
+        }
+      ],
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     }
   ]
 }

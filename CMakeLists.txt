@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # modules, dependencies
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
+
+option(USE_GREEN_SDK "Use Green SDK (will override toolchain)" off)
+message(STATUS "[b4mesh] option [USE_GREEN_SDK] set to [${USE_GREEN_SDK}]")
+if (${USE_GREEN_SDK})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Default build type")
@@ -16,6 +21,8 @@ project(b4mesh
 enable_testing()
 
 message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+
+include(dependencies/libdbus-cpp)
 
 set(CMAKE_CXX_STANDARD 17) # 20
 set(CMAKE_CXX_STANDARD_REQUIRED True)
