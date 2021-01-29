@@ -34,7 +34,7 @@ void session::handle_read(const boost::system::error_code& error,
     else
     {
         std::cout << "Error with the session " << error << std::endl;
-        socket_.close();
+        //socket_.close();
         //removeSessionFromList(destIP_, this);
         delete this;
     }
