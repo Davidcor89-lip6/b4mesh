@@ -67,14 +67,14 @@
     },
     {
       "name": "Linux-GCC-Debug-WithGreenSDK",
-      "generator": "Ninja",
+      "generator": "Unix Makefiles",
       "configurationType": "Debug",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
+      "inheritEnvironments": [ "linux_arm" ],
       "variables": [
         {
           "name": "CMAKE_CXX_COMPILER",
@@ -96,7 +96,7 @@
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "cmakeToolchain": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake"
+      "cmakeToolchain": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/Linux-GCC-Debug/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake"
     },
     {
       "name": "Linux-GCC-Debug_target_greensoftsdk",

@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # modules, dependencies
-
-# option(USE_GREEN_SDK "Use Green SDK (will override toolchain)" off)
-# message(STATUS "[b4mesh] option [USE_GREEN_SDK] set to [${USE_GREEN_SDK}]")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
 
-if(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Default build type")
 endif()
 
@@ -18,7 +15,19 @@ project(b4mesh
 )
 enable_testing()
 
-message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+message(STATUS "[${PROJECT_NAME}] : toolchain is [${CMAKE_TOOLCHAIN_FILE}]")
+message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE is [${CMAKE_BUILD_TYPE}]")
+
+if (${CMAKE_TOOLCHAIN_FILE} MATCHES ".*\/greensoftsdk\/.*\/toolchainfile\.cmake$")
+    set(USING_GREEN_SDK ON)
+    if (NOT (EXISTS ${CMAKE_TOOLCHAIN_FILE}))
+        message(FATAL_ERROR "[${PROJECT_NAME}] : toolchain required but not found. Run greensoftsdk target.")
+    endif()
+else()
+    set(USING_GREEN_SDK OFF)
+endif()
+message(STATUS "[${PROJECT_NAME}] : Lazy Green SDK detection ... USING_GREEN_SDK is [${USING_GREEN_SDK}]")
+
 
 include(dependencies/libdbus-cpp)
 
