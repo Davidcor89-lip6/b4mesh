@@ -96,6 +96,38 @@
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0"
+    },
+    {
+      "name": "Linux-GCC-Debug_target_greensoftsdk",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "cmakeExecutable": "cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "cmakeCommandArgs": "--target greensoftsdk",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "variables": [
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "/usr/bin/g++-9",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "/usr/bin/gcc-9",
+          "type": "FILEPATH"
+        }
+      ],
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     }
   ]
 }

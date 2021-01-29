@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # modules, dependencies
 
-option(USE_GREEN_SDK "Use Green SDK (will override toolchain)" off)
-message(STATUS "[b4mesh] option [USE_GREEN_SDK] set to [${USE_GREEN_SDK}]")
-if (${USE_GREEN_SDK})
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
-endif()
+# option(USE_GREEN_SDK "Use Green SDK (will override toolchain)" off)
+# message(STATUS "[b4mesh] option [USE_GREEN_SDK] set to [${USE_GREEN_SDK}]")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Default build type")

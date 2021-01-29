@@ -48,7 +48,24 @@ ExternalProject_Add(greensoftsdk
         <INSTALL_DIR>/greensoftsdk/greensoftsdk.toolchain.cmake
         <INSTALL_DIR>/greensoftsdk/lib/libdbus-c++-1.so
 )
+ExternalProject_Get_Property(greensoftsdk SOURCE_DIR)
+set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
+ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
+set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
 
+ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
+    DEPENDEES           configure
+    DEPENDERS           build
+    COMMENT             "[greensoftsdk] libdbus-cpp step ..."
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : create [${greensoftsdk_SOURCE_DIR}/dl/] directory ..."
+    COMMAND             ${CMAKE_COMMAND} -E make_directory ${greensoftsdk_SOURCE_DIR}/dl/
+    COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : copy tarball into .../dl/ ..."
+    COMMAND             ${CMAKE_COMMAND} -E copy ${greensoftsdk_libdbuscpp_tarball_path} ${greensoftsdk_SOURCE_DIR}/dl
+    # COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Building ..."
+    # COMMAND             ${MAKE_EXE}  --silent libdbus-cpp # useless ?
+    # COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Built ..."
+    WORKING_DIRECTORY   ${greensoftsdk_SOURCE_DIR}
+)
 ExternalProject_Add_Step(greensoftsdk custom_install
     DEPENDEES           install
     COMMENT             "[greensoftsdk] custom_install step ..."
@@ -63,18 +80,7 @@ ExternalProject_Add_Step(greensoftsdk custom_install
     COMMAND             ${SHELL_EXE} <INSTALL_DIR>/greensoftsdk/relocate-sdk.sh
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Installed in <INSTALL_DIR>"
 )
-ExternalProject_Add_Step(greensoftsdk install_cmake_toolchain_descriptor
-    DEPENDEES           custom_install
-    COMMENT             "[greensoftsdk] install_cmake_toolchain_descriptor step ..."
-    WORKING_DIRECTORY   <INSTALL_DIR>
 
-    COMMAND             ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/greensoftsdk.toolchain.cmake <INSTALL_DIR>
-)
-
-ExternalProject_Get_Property(greensoftsdk SOURCE_DIR)
-set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
-ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
-set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
 set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR} PARENT_SCOPE)
 SET(greensoftsdk_toolchain_descriptor "${CMAKE_CURRENT_SOURCE_DIR}/greensoftsdk.toolchain.cmake"
 	CACHE INTERNAL "(source) greensoftsdk cmake toolchain descriptor path"
