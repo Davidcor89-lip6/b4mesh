@@ -25,18 +25,21 @@ include(ExternalProject)
 
 set(greensoftsdk_package_name arm-buildroot-linux-uclibcgnueabi_sdk-buildroot)
 ExternalProject_Add(greensoftsdk
-# NB : extra step from libdbus-cpp.make : add_libdbus-cpp (between configure and build)
+    # NB : extra steps
+    #         from libdbus-cpp.make   : add_libdbus-cpp (between configure and build)
+    #         from greensoftsdk.cmake : custom_install (after install)
+    #         from greensoftsdk.cmake : install_cmake_toolchain_descriptor (after custom_install)
+
     URL                 ${greensoftsdk_tarball_path}
     URL_HASH            SHA256=${greensoftsdk_expected_sha256sum}
 
     INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/toolchain
     CONFIGURE_COMMAND   ""
     BUILD_IN_SOURCE     true    # As Makefile designed to build in-sources ...
-    LOG_BUILD           false   # Too many warnings and outputs ...
+    LOG_BUILD           false   # Still tons of warnings and outputs ...
     BUILD_COMMAND       ${CMAKE_COMMAND} -E echo "[greensoftsdk] Building SDK in <SOURCE_DIR>..."
     COMMAND             ${MAKE_EXE} --silent sdk #toolchain
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Built."
-    # CMake instance stops here for some reasons ...([greensoftsdk] Built. Build failed.)
     INSTALL_COMMAND     ${CMAKE_COMMAND} -E echo "[greensoftsdk] Installing ..."
     TEST_COMMAND        ""
 
@@ -44,10 +47,6 @@ ExternalProject_Add(greensoftsdk
         <INSTALL_DIR>/greensoftsdk
         <INSTALL_DIR>/greensoftsdk/greensoftsdk.toolchain.cmake
         <INSTALL_DIR>/greensoftsdk/lib/libdbus-c++-1.so
-        # <INSTALL_DIR>/lib/libdbus-c++-1.so
-        # #<INSTALL_DIR>/usr/lib/dbus-c++-1.so
-        # #<INSTALL_DIR>/usr/lib/dbus-c++-1-d.so
-        # <INSTALL_DIR>/include/dbus-c++-1/
 )
 
 ExternalProject_Add_Step(greensoftsdk custom_install
@@ -77,18 +76,9 @@ set(greensoftsdk_SOURCE_DIR ${SOURCE_DIR})
 ExternalProject_Get_Property(greensoftsdk INSTALL_DIR)
 set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR})
 set(greensoftsdk_INSTALL_DIR ${INSTALL_DIR} PARENT_SCOPE)
-#set(greensoftsdk_toolchain_descriptor ${greensoftsdk_INSTALL_DIR}/greensoftsdk/greensoftsdk.toolchain.cmake PARENT_SCOPE)
 SET(greensoftsdk_toolchain_descriptor "${CMAKE_CURRENT_SOURCE_DIR}/greensoftsdk.toolchain.cmake"
 	CACHE INTERNAL "(source) greensoftsdk cmake toolchain descriptor path"
 )
 SET(greensoftsdk_toolchain_descriptor_installed "${greensoftsdk_INSTALL_DIR}/greensoftsdk/greensoftsdk.toolchain.cmake"
 	CACHE INTERNAL "(installed) greensoftsdk cmake toolchain descriptor path"
 )
-
-# Toolchains
-# add_custom_target(greenSoftSDK_toolchain_host)
-# add_custom_target(greenSoftSDK_toolchain_local)
-
-# Generates toolchain files for -DCMAKE_TOOLCHAIN_FILE
-# Force toolchain
-#   SET(CMAKE_TOOLCHAIN_FILE  "${GreenSoftSDK_toolchain_path}" CACHE INTERNAL "CMAKE_TOOLCHAIN_FILE")

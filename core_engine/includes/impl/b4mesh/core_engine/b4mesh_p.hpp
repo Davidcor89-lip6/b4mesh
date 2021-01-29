@@ -1,10 +1,10 @@
 #ifndef B4MESH_B4MESH_P
 #define B4MESH_B4MESH_P
 
-#include "application_packet.hpp"
-#include "transaction.hpp"
-#include "block.hpp"
-#include "blockgraph.hpp"
+#include <b4mesh/core_engine/application_packet.hpp>
+#include <b4mesh/core_engine/transaction.hpp>
+#include <b4mesh/core_engine/block.hpp>
+#include <b4mesh/core_engine/blockgraph.hpp>
 
 #include <vector>
 #include <utility>
@@ -23,7 +23,7 @@
 
 using boost::asio::ip::tcp;
 
-#include "node.hpp"
+#include <b4mesh/core_engine/node.hpp>
 
 class B4Mesh
 {
