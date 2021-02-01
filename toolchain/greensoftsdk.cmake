@@ -21,8 +21,8 @@ include(ExternalProject)
 set(greensoftsdk_package_name arm-buildroot-linux-uclibcgnueabi_sdk-buildroot)
 ExternalProject_Add(greensoftsdk
     # NB : all steps, including extras are :
+    #         patch_dot_config_file
     #         configure
-    #         add_boost_to_config
     #         add_libdbus-cpp
     #         build
     #         install
@@ -33,7 +33,9 @@ ExternalProject_Add(greensoftsdk
     URL_HASH            SHA256=${greensoftsdk_expected_sha256sum}
 
     INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/toolchain
-    CONFIGURE_COMMAND   "" # todo : patch config file for boost config ...
+    CONFIGURE_COMMAND   ${CMAKE_COMMAND} -E echo "[greensoftsdk] Configuration ..."
+    COMMAND             ${MAKE_EXE} olddefconfig
+
     BUILD_IN_SOURCE     true    # As Makefile designed to build in-sources ...
     LOG_BUILD           false   # Still tons of warnings and outputs ...
     BUILD_COMMAND       ${CMAKE_COMMAND} -E echo "[greensoftsdk] Building SDK in <SOURCE_DIR>..."
@@ -72,21 +74,29 @@ if (NOT ${greensoftsdk_libdbus-cpp_sha256sum} MATCHES ${greensoftsdk_libdbus-cpp
     )
 endif()
 
-set(GreenSDKConfigPayload_BOOST "BR2_PACKAGE_BOOST=y")
-set(GreenSDKConfigPayload_BOOST_SYS "BR2_PACKAGE_BOOST_SYSTEM=y")
-ExternalProject_Add_Step(greensoftsdk add_boost_to_config
-    DEPENDEES           configure
-    DEPENDERS           build
+ExternalProject_Add_Step(greensoftsdk patch_dot_config_file
+    DEPENDEES           download
+    DEPENDERS           configure
+    
     COMMENT             "[greensoftsdk] add_boost_to_config step ..."
+    # BR2_PACKAGE_BOOST=y
     COMMAND             ${CMAKE_COMMAND}  
                             -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=${GreenSDKConfigPayload_BOOST}
+                            -DFileAppend_DATA=BR2_PACKAGE_BOOST=y
                             -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
+    # BR2_PACKAGE_BOOST_SYSTEM=y
     COMMAND             ${CMAKE_COMMAND}  
                             -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=${GreenSDKConfigPayload_BOOST_SYS}
+                            -DFileAppend_DATA=BR2_PACKAGE_BOOST_SYSTEM=y
+                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
+    # BR2_PACKAGE_LIBDBUS_CPP=y
+    COMMAND             ${CMAKE_COMMAND}  
+                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
+                            -DFileAppend_DATA=BR2_PACKAGE_LIBDBUS_CPP=y
                             -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
     WORKING_DIRECTORY   <SOURCE_DIR>
+    BYPRODUCTS          <SOURCE_DIR>/.config
+    ALWAYS              true
 )
 ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
     DEPENDEES           configure
