@@ -1,3 +1,5 @@
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ressources) # Expose b4mesh_core_engine__generate_ressources, that generates some header-files
+
 add_library(${PROJECT_NAME}_coreEngine SHARED
 # todo : INTERFACE?, hierarchy
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/application_packet.cpp
@@ -10,6 +12,7 @@ add_library(${PROJECT_NAME}_coreEngine SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/consensus.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/session.cpp
 )
+add_dependencies(${PROJECT_NAME}_coreEngine ${PROJECT_NAME}_core_engine__generate_ressources)
 set_target_properties(${PROJECT_NAME}_coreEngine
     PROPERTIES
         CXX_STANDARD 17 # 20
@@ -22,6 +25,7 @@ target_compile_features(${PROJECT_NAME}_coreEngine PRIVATE
 target_include_directories(${PROJECT_NAME}_coreEngine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
+        ${${PROJECT_NAME}_core_engine__generate_ressources_INCLUDES_DIR}
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/interface
 )
