@@ -20,10 +20,14 @@ include(ExternalProject)
 
 set(greensoftsdk_package_name arm-buildroot-linux-uclibcgnueabi_sdk-buildroot)
 ExternalProject_Add(greensoftsdk
-    # NB : extra steps
-    #         from libdbus-cpp.make   : add_libdbus-cpp (between configure and build)
-    #         from greensoftsdk.cmake : custom_install (after install)
-    #         from greensoftsdk.cmake : install_cmake_toolchain_descriptor (after custom_install)
+    # NB : all steps, including extras are :
+    #         configure
+    #         add_boost_to_config
+    #         add_libdbus-cpp
+    #         build
+    #         install
+    #         custom_install
+    #         install_cmake_toolchain_descriptor
 
     URL                 ${greensoftsdk_tarball_path}
     URL_HASH            SHA256=${greensoftsdk_expected_sha256sum}
@@ -68,6 +72,22 @@ if (NOT ${greensoftsdk_libdbus-cpp_sha256sum} MATCHES ${greensoftsdk_libdbus-cpp
     )
 endif()
 
+set(GreenSDKConfigPayload_BOOST "BR2_PACKAGE_BOOST=y")
+set(GreenSDKConfigPayload_BOOST_SYS "BR2_PACKAGE_BOOST_SYSTEM=y")
+ExternalProject_Add_Step(greensoftsdk add_boost_to_config
+    DEPENDEES           configure
+    DEPENDERS           build
+    COMMENT             "[greensoftsdk] add_boost_to_config step ..."
+    COMMAND             ${CMAKE_COMMAND}  
+                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
+                            -DFileAppend_DATA=${GreenSDKConfigPayload_BOOST}
+                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
+    COMMAND             ${CMAKE_COMMAND}  
+                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
+                            -DFileAppend_DATA=${GreenSDKConfigPayload_BOOST_SYS}
+                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
+    WORKING_DIRECTORY   <SOURCE_DIR>
+)
 ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
     DEPENDEES           configure
     DEPENDERS           build
@@ -79,7 +99,7 @@ ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Building ..."
     COMMAND             ${MAKE_EXE}  --silent libdbus-cpp
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] libdbus-cpp step : Built ..."
-    WORKING_DIRECTORY   ${greensoftsdk_SOURCE_DIR}
+    WORKING_DIRECTORY   <SOURCE_DIR>
 )
 ExternalProject_Add_Step(greensoftsdk custom_install
     DEPENDEES           install
@@ -92,7 +112,7 @@ ExternalProject_Add_Step(greensoftsdk custom_install
     COMMAND             ${CMAKE_COMMAND} -E tar x <SOURCE_DIR>/output/images/${greensoftsdk_package_name}.tar.gz
     COMMAND             ${CMAKE_COMMAND} -E rename <INSTALL_DIR>/${greensoftsdk_package_name} <INSTALL_DIR>/greensoftsdk
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Running [relocate-sdk.sh] script ..."
-    COMMAND             ${SHELL_EXE} <INSTALL_DIR>/greensoftsdk/relocate-sdk.sh
+    COMMAND             ${SHELL_EXE} <INSTALL_DIR>/greensoftsdk/relocate-sdk.sh # todo : as cmake script
     COMMAND             ${CMAKE_COMMAND} -E echo "[greensoftsdk] Installed in <INSTALL_DIR>"
 )
 
