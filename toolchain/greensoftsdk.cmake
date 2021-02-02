@@ -75,7 +75,7 @@ if (NOT ${greensoftsdk_libdbus-cpp_sha256sum} MATCHES ${greensoftsdk_libdbus-cpp
 endif()
 
 ExternalProject_Add_Step(greensoftsdk patch_dot_config_file
-    DEPENDEES           download
+    DEPENDEES           update
     DEPENDERS           configure
     
     COMMENT             "[greensoftsdk] add_boost_to_config step ..."
@@ -93,6 +93,11 @@ ExternalProject_Add_Step(greensoftsdk patch_dot_config_file
     COMMAND             ${CMAKE_COMMAND}  
                             -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
                             -DFileAppend_DATA=BR2_PACKAGE_LIBDBUS_CPP=y
+                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
+    # BR2_TOOLCHAIN_BUILDROOT_WCHAR
+    COMMAND             ${CMAKE_COMMAND}  
+                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
+                            -DFileAppend_DATA=BR2_TOOLCHAIN_BUILDROOT_WCHAR=y
                             -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
     WORKING_DIRECTORY   <SOURCE_DIR>
     BYPRODUCTS          <SOURCE_DIR>/.config

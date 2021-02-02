@@ -13,6 +13,7 @@ include(ExternalProject)
 
 if (${USING_GREEN_SDK})
 # Import from Green SDK toolchain
+# or use /toolchain/greensoftsdk/lib/cmake/DBus1/DBus1Config.cmake
 
     if (NOT ${GREEN_SDK_IMPORTED})
         message(FATAL_ERROR "[libdbus-cpp] Green SDK toolchain detected but GREEN_SDK_IMPORTED=[${GREEN_SDK_IMPORTED}]")

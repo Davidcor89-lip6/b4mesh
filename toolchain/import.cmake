@@ -22,6 +22,11 @@ if (${USING_GREEN_SDK})
 
     message(STATUS "[toolchain/import.cmake] Importing GreenSDK ...")
 
+    if (NOT DEFINED CMAKE_CXX_COMPILER)
+        message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but no CMAKE_CXX_COMPILER specified")
+    endif()
+    message(STATUS "[toolchain/import.cmake] CMAKE_CXX_COMPILER=[${CMAKE_CXX_COMPILER}]")
+
     if (NOT DEFINED RELOCATED_HOST_DIR)
         message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but toolchain does not set [RELOCATED_HOST_DIR]")
     endif()
