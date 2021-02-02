@@ -14,7 +14,7 @@ else()
 	)
 endif()
 
-set(generated_files_output_dir {CMAKE_INSTALL_PREFIX}/generated/)
+set(generated_files_output_dir ${CMAKE_INSTALL_PREFIX}/generated/)
 if (NOT (EXISTS ${generated_files_output_dir}))
 	make_directory(${generated_files_output_dir})
 endif()

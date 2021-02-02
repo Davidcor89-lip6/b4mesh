@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # modules, dependencies
+
+# todo : libdbus-cpp needs to know USING_GREEN_SDK 
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -19,15 +22,15 @@ message(STATUS "[${PROJECT_NAME}] : toolchain is [${CMAKE_TOOLCHAIN_FILE}]")
 message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE is [${CMAKE_BUILD_TYPE}]")
 
 if (${CMAKE_TOOLCHAIN_FILE} MATCHES ".*\/greensoftsdk\/.*\/toolchainfile\.cmake$")
-    set(USING_GREEN_SDK ON)
     if (NOT (EXISTS ${CMAKE_TOOLCHAIN_FILE}))
         message(FATAL_ERROR "[${PROJECT_NAME}] : toolchain required but not found. Run greensoftsdk target.")
     endif()
+    set(USING_GREEN_SDK ON CACHE BOOL "GreenSDK toolchain autodetection" FORCE)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/toolchain/import.cmake)
 else()
-    set(USING_GREEN_SDK OFF)
+    set(USING_GREEN_SDK OFF CACHE BOOL "GreenSDK toolchain autodetection" FORCE)
 endif()
 message(STATUS "[${PROJECT_NAME}] : Lazy Green SDK detection ... USING_GREEN_SDK is [${USING_GREEN_SDK}]")
-
 
 include(dependencies/libdbus-cpp)
 

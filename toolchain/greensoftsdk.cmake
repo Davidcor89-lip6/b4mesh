@@ -15,7 +15,7 @@ set(greensoftsdk_expected_sha256sum
     "GreenSoftSDK LibDBusC++ : Expected tarball sha256sum result"
 )
 find_program(MAKE_EXE NAMES gmake nmake make)
-find_program(SHELL_EXE NAMES bash sh)
+find_program(SHELL_EXE NAMES bash sh) # todo : replace shell usage by direct CMake script invocation
 include(ExternalProject)
 
 set(greensoftsdk_package_name arm-buildroot-linux-uclibcgnueabi_sdk-buildroot)
