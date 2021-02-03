@@ -27,7 +27,7 @@ target_link_libraries(${PROJECT_NAME}_coreEngine
         ${PROJECT_NAME}::core_engine::generated
 )
 target_include_directories(${PROJECT_NAME}_coreEngine
-    PRIVATE
+    INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/interface
