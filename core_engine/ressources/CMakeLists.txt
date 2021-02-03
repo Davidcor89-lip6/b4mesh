@@ -3,7 +3,7 @@ if (USING_GREEN_SDK)
 		message(FATAL_ERROR "[b4mesh] core_engine/ressources : GreenSDK toolchain detected, but toolchain does not set [CMAKE_PROGRAM_PATH]")
 	endif()
 
-	set(dbusxx_xml2cpp_path ${CMAKE_PROGRAM_PATH}/dbusxx_xml2cpp)
+	set(dbusxx_xml2cpp_path ${CMAKE_PROGRAM_PATH}/dbusxx-xml2cpp)
 	if (NOT (EXISTS ${dbusxx_xml2cpp_path}))
 		message(FATAL_ERROR "[b4mesh] core_engine/ressources : GreenSDK toolchain detected, but [${dbusxx_xml2cpp_path}] does not exists")
 	endif()
