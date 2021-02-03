@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <dbus-c++/dbus.h>
-#include "state_glue.h"
+#include <b4mesh/core_engine/generated/state.hpp>
 
 
 class green_state :

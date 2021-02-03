@@ -12,7 +12,7 @@ add_library(${PROJECT_NAME}_coreEngine SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/consensus.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/session.cpp
 )
-add_dependencies(${PROJECT_NAME}_coreEngine ${PROJECT_NAME}_core_engine__generate_ressources)
+add_dependencies(${PROJECT_NAME}_coreEngine ${PROJECT_NAME}_core_engine__generated)
 set_target_properties(${PROJECT_NAME}_coreEngine
     PROPERTIES
         CXX_STANDARD 17 # 20
@@ -22,10 +22,13 @@ set_target_properties(${PROJECT_NAME}_coreEngine
 target_compile_features(${PROJECT_NAME}_coreEngine PRIVATE
     cxx_std_17 # cxx_std_20
 )
+target_link_libraries(${PROJECT_NAME}_coreEngine
+    PRIVATE
+        ${PROJECT_NAME}_core_engine__generated
+)
 target_include_directories(${PROJECT_NAME}_coreEngine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
-        ${${PROJECT_NAME}_core_engine__generate_ressources_INCLUDES_DIR}
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/interface
 )

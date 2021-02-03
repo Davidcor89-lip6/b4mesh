@@ -9,7 +9,7 @@
 
 using boost::asio::ip::tcp;
 
-#include "node.hpp"
+#include <b4mesh/core_engine/node.hpp>
 
 class client
 {

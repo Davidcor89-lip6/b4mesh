@@ -35,12 +35,6 @@ if (${USING_GREEN_SDK})
 		message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but toolchain does not set [CMAKE_PROGRAM_PATH]")
 	endif()
 
-    # todo : check import path/target
-    # - libdbus
-    # - boost
-    # - etc.
-
-
     set(GreenSDK_sysroot_DIR "${RELOCATED_HOST_DIR}/arm-buildroot-linux-uclibcgnueabi/sysroot/usr" CACHE PATH "GreenSDK toolchain autodetection : SYS_ROOT" FORCE)
     option(GreenSDK_ROOT_PATH_policy "[toolchain/import.cmake] : path to root policy (on=[SDK install DIR], off=[arm-buildroot sysroot/usr])" ON)
     if (GreenSDK_ROOT_PATH_policy)

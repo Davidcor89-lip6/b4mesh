@@ -1,31 +1,40 @@
 if (USING_GREEN_SDK)
-	if (NOT DEFINED CMAKE_PROGRAM_PATH)
-		message(FATAL_ERROR "[b4mesh] core_engine/ressources : GreenSDK toolchain detected, but toolchain does not set [CMAKE_PROGRAM_PATH]")
+	if ((NOT DEFINED GREEN_SDK_IMPORTED) OR (NOT ${GREEN_SDK_IMPORTED}))
+		include(${CMAKE_CURRENT_SOURCE_DIR}/toolchain/import.cmake)
 	endif()
-
-	set(dbusxx_xml2cpp_path ${CMAKE_PROGRAM_PATH}/dbusxx-xml2cpp)
-	if (NOT (EXISTS ${dbusxx_xml2cpp_path}))
-		message(FATAL_ERROR "[b4mesh] core_engine/ressources : GreenSDK toolchain detected, but [${dbusxx_xml2cpp_path}] does not exists")
-	endif()
-else()
-	find_program(dbusxx_xml2cpp_path
-		NAMES dbusxx-xml2cpp
-		REQUIRED
-	)
 endif()
 
-set(generated_files_output_dir ${CMAKE_INSTALL_PREFIX}/generated/)
-if (NOT (EXISTS ${generated_files_output_dir}))
-	make_directory(${generated_files_output_dir})
+find_program(dbusxx_xml2cpp_path
+	NAMES dbusxx-xml2cpp
+	REQUIRED
+)
+message(STATUS "[b4mesh] core_engine/ressources : detecting [dbusxx-xml2cpp] at [${dbusxx_xml2cpp_path}]")
+
+set(generated_files_OUTPUTDIR ${CMAKE_CURRENT_BINARY_DIR}/generation_output)
+set(generated_files_INCLUDEDIR ${generated_files_OUTPUTDIR}/includes)
+set(generated_files_INCLUDEDIR_coreEngine ${generated_files_INCLUDEDIR}/b4mesh/core_engine/generated)
+
+if (NOT (EXISTS ${generated_files_INCLUDEDIR_coreEngine}))
+	make_directory(${generated_files_INCLUDEDIR_coreEngine})
 endif()
 
-message(STATUS "[b4mesh] core_engine/ressources : output is generated in [${generated_files_output_dir}]")
+message(STATUS "[b4mesh] core_engine/ressources : output is generated in [${generated_files_OUTPUTDIR}]")
 add_custom_target(${PROJECT_NAME}_core_engine__generate_ressources
-	COMMAND	${dbusxx_xml2cpp_path} ${CMAKE_CURRENT_SOURCE_DIR}/consensus.xml --proxy=${generated_files_output_dir}/consensus.h
-	COMMAND	${dbusxx_xml2cpp_path} ${CMAKE_CURRENT_SOURCE_DIR}/state.xml --proxy=${generated_files_output_dir}/state.h
+	COMMAND	${dbusxx_xml2cpp_path} ${CMAKE_CURRENT_SOURCE_DIR}/consensus.xml --proxy=${generated_files_INCLUDEDIR_coreEngine}/consensus.hpp
+	COMMAND	${dbusxx_xml2cpp_path} ${CMAKE_CURRENT_SOURCE_DIR}/state.xml --proxy=${generated_files_INCLUDEDIR_coreEngine}/state.hpp
 	BYPRODUCTS
-		${generated_files_output_dir}/consensus.h
-		${generated_files_output_dir}/state.h
+		${generated_files_INCLUDEDIR_coreEngine}/consensus.hpp
+		${generated_files_INCLUDEDIR_coreEngine}/state.hpp
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-set(${PROJECT_NAME}_core_engine__generate_ressources_INCLUDES_DIR ${generated_files_output_dir} PARENT_SCOPE)
+add_library(${PROJECT_NAME}_core_engine__generated INTERFACE)
+add_dependencies(
+	${PROJECT_NAME}_core_engine__generated
+	${PROJECT_NAME}_core_engine__generate_ressources
+)
+target_include_directories(${PROJECT_NAME}_core_engine__generated
+	INTERFACE
+		${generated_files_INCLUDEDIR}/
+)
+
+# $<TARGET_PROPERTY:${PROJECT_NAME}_core_engine__generated_ressources,INCLUDE_DIRECTORIES>

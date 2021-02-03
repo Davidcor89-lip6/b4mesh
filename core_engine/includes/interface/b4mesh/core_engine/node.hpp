@@ -10,11 +10,10 @@
 
 using boost::asio::ip::tcp;
 
-#include "consensus.hpp"
-#include "session.hpp"
-
-#include "application_packet.hpp"
-#include "block.hpp"
+#include <b4mesh/core_engine/consensus.hpp>
+#include <b4mesh/core_engine/session.hpp>
+#include <b4mesh/core_engine/application_packet.hpp>
+#include <b4mesh/core_engine/block.hpp>
 
 // Class declaration to avoid circular dependancy
 class client;
