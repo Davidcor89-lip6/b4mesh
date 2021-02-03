@@ -13,7 +13,7 @@ function(AssertFileExists)
 
     foreach(file_path IN LISTS AssertFileExists_PATHS)
         if (NOT (EXISTS ${file_path}))
-            message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but toolchain does not set [RELOCATED_HOST_DIR]")
+            message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but the following path does not exist [${file_path}]")
         endif()
     endforeach()
 endfunction()
@@ -21,6 +21,7 @@ endfunction()
 if (${USING_GREEN_SDK})
 
     message(STATUS "[toolchain/import.cmake] Importing GreenSDK ...")
+    message(STATUS "[toolchain/import.cmake] custom GreenSDK variable RELOCATED_HOST_DIR=[${RELOCATED_HOST_DIR}]...")
 
     if (NOT DEFINED CMAKE_CXX_COMPILER)
         message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but no CMAKE_CXX_COMPILER specified")
@@ -34,18 +35,32 @@ if (${USING_GREEN_SDK})
 		message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain detected, but toolchain does not set [CMAKE_PROGRAM_PATH]")
 	endif()
 
+    # todo : check import path/target
+    # - libdbus
+    # - boost
+    # - etc.
+
+
+    set(GreenSDK_sysroot_DIR "${RELOCATED_HOST_DIR}/arm-buildroot-linux-uclibcgnueabi/sysroot/usr" CACHE PATH "GreenSDK toolchain autodetection : SYS_ROOT" FORCE)
+    option(GreenSDK_ROOT_PATH_policy "[toolchain/import.cmake] : path to root policy (on=[SDK install DIR], off=[arm-buildroot sysroot/usr])" ON)
+    if (GreenSDK_ROOT_PATH_policy)
+        set(GreenSDK_ROOTPATH "${GreenSDK_sysroot_DIR}" CACHE PATH "GreenSDK toolchain autodetection : ROOT_PATH" FORCE)
+    else()
+        set(GreenSDK_ROOTPATH "${RELOCATED_HOST_DIR}" CACHE PATH "GreenSDK toolchain autodetection : ROOT_PATH" FORCE)
+    endif()
+
     # Check toolchain integrity
     AssertFileExists(PATHS
-        "${RELOCATED_HOST_DIR}/bin"
-        "${RELOCATED_HOST_DIR}/include"
-        "${RELOCATED_HOST_DIR}/lib"
-        "${RELOCATED_HOST_DIR}/lib64"
+        "${GreenSDK_ROOTPATH}/bin"
+        "${GreenSDK_ROOTPATH}/include"
+        "${GreenSDK_ROOTPATH}/lib"
+        #"${GreenSDK_ROOTPATH}/lib64"
     )
     # GREEN_SDK toolchain directories
-    set(GREEN_SDK_BINDIR "${RELOCATED_HOST_DIR}/BIN" CACHE PATH "GreenSDK toolchain autodetection : BINDIR" FORCE)
-    set(GREEN_SDK_INCLUDEDIR "${RELOCATED_HOST_DIR}/lib" CACHE PATH "GreenSDK toolchain autodetection : INCLUDEDIRDIR" FORCE)
-    set(GREEN_SDK_LIBDIR "${RELOCATED_HOST_DIR}/lib" CACHE PATH "GreenSDK toolchain autodetection : LIBDIR" FORCE)
-    set(GREEN_SDK_LIB64DIR "${RELOCATED_HOST_DIR}/lib64" CACHE PATH "GreenSDK toolchain autodetection : LIB64DIR" FORCE)
+    set(GREEN_SDK_BINDIR        "${GreenSDK_ROOTPATH}/BIN" CACHE PATH "GreenSDK toolchain autodetection : BINDIR" FORCE)
+    set(GREEN_SDK_INCLUDEDIR    "${GreenSDK_ROOTPATH}/lib" CACHE PATH "GreenSDK toolchain autodetection : INCLUDEDIRDIR" FORCE)
+    set(GREEN_SDK_LIBDIR        "${GreenSDK_ROOTPATH}/lib" CACHE PATH "GreenSDK toolchain autodetection : LIBDIR" FORCE)
+    #set(GREEN_SDK_LIB64DIR      "${GreenSDK_ROOTPATH}/lib64" CACHE PATH "GreenSDK toolchain autodetection : LIB64DIR" FORCE)
 
     # GREEN_SDK_dbusxx_xml2cpp
 	set(GREEN_SDK_dbusxx_xml2cpp ${CMAKE_PROGRAM_PATH}/dbusxx-xml2cpp)

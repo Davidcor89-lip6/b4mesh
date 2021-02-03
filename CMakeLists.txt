@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # modules, dependencies
-
-# todo : libdbus-cpp needs to know USING_GREEN_SDK 
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -42,9 +39,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-
-# todo : swap toolchain using option()
-# option(b4mesh_)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/utils)         # ${PROJECT_NAME}::utils
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/core_engine)   # ${PROJECT_NAME}::core_engine
