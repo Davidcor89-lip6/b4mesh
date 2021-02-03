@@ -57,8 +57,8 @@ if (${USING_GREEN_SDK})
         #"${GreenSDK_ROOTPATH}/lib64"
     )
     # GREEN_SDK toolchain directories
-    set(GREEN_SDK_BINDIR        "${GreenSDK_ROOTPATH}/BIN" CACHE PATH "GreenSDK toolchain autodetection : BINDIR" FORCE)
-    set(GREEN_SDK_INCLUDEDIR    "${GreenSDK_ROOTPATH}/lib" CACHE PATH "GreenSDK toolchain autodetection : INCLUDEDIRDIR" FORCE)
+    set(GREEN_SDK_BINDIR        "${GreenSDK_ROOTPATH}/bin" CACHE PATH "GreenSDK toolchain autodetection : BINDIR" FORCE)
+    set(GREEN_SDK_INCLUDEDIR    "${GreenSDK_ROOTPATH}/include" CACHE PATH "GreenSDK toolchain autodetection : INCLUDEDIR" FORCE)
     set(GREEN_SDK_LIBDIR        "${GreenSDK_ROOTPATH}/lib" CACHE PATH "GreenSDK toolchain autodetection : LIBDIR" FORCE)
     #set(GREEN_SDK_LIB64DIR      "${GreenSDK_ROOTPATH}/lib64" CACHE PATH "GreenSDK toolchain autodetection : LIB64DIR" FORCE)
 
