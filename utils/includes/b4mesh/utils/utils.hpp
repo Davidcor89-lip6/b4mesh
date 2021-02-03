@@ -102,13 +102,13 @@ inline int uniform_rand(int min=0, int max=100000){
 //----------------------------
 // find own IP
 
-boost::asio::ip::address_v6 sinaddr_to_asio(sockaddr_in6 *addr) {
+static boost::asio::ip::address_v6 sinaddr_to_asio(sockaddr_in6 *addr) {
     boost::asio::ip::address_v6::bytes_type buf;
     memcpy(buf.data(), addr->sin6_addr.s6_addr, sizeof(addr->sin6_addr));
     return boost::asio::ip::make_address_v6(buf, addr->sin6_scope_id);
 }
 
-std::vector<boost::asio::ip::address> get_local_interfaces(void) {
+static std::vector<boost::asio::ip::address> get_local_interfaces(void) {
     std::vector<boost::asio::ip::address> res;
     ifaddrs *ifs;
     if (getifaddrs(&ifs)) {
@@ -132,7 +132,7 @@ std::vector<boost::asio::ip::address> get_local_interfaces(void) {
     return res;
 }
 
-std::string findOwnIP(void)
+static std::string findOwnIP(void)
 {
 	std::vector<boost::asio::ip::address> vectAddr = get_local_interfaces();
     for (auto i = vectAddr.begin(); i != vectAddr.end(); ++i)
