@@ -4,9 +4,10 @@
  */
 #ifndef BLOCKGRAPH_H
 #define BLOCKGRAPH_H
+
 #include <vector>
 #include <map>
-#include "block.hpp"
+#include <b4mesh/core_engine/block.hpp>
 
 using namespace std;
 

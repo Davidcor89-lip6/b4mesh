@@ -5,13 +5,7 @@
 #include <b4mesh/core_engine/transaction.hpp>
 #include <b4mesh/core_engine/block.hpp>
 #include <b4mesh/core_engine/blockgraph.hpp>
-
-#include <vector>
-#include <utility>
-#include <random>
-#include <limits>
-#include <queue>
-#include <math.h>
+#include <b4mesh/core_engine/node.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -23,7 +17,12 @@
 
 using boost::asio::ip::tcp;
 
-#include <b4mesh/core_engine/node.hpp>
+#include <vector>
+#include <utility>
+#include <random>
+#include <limits>
+#include <queue>
+#include <math.h>
 
 class B4Mesh
 {

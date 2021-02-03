@@ -12,7 +12,7 @@ add_library(${PROJECT_NAME}_coreEngine SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/consensus.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/session.cpp
 )
-add_dependencies(${PROJECT_NAME}_coreEngine ${PROJECT_NAME}_core_engine__generated)
+add_dependencies(${PROJECT_NAME}_coreEngine ${PROJECT_NAME}::core_engine::generated)
 set_target_properties(${PROJECT_NAME}_coreEngine
     PROPERTIES
         CXX_STANDARD 17 # 20
@@ -24,7 +24,7 @@ target_compile_features(${PROJECT_NAME}_coreEngine PRIVATE
 )
 target_link_libraries(${PROJECT_NAME}_coreEngine
     PRIVATE
-        ${PROJECT_NAME}_core_engine__generated
+        ${PROJECT_NAME}::core_engine::generated
 )
 target_include_directories(${PROJECT_NAME}_coreEngine
     PRIVATE
@@ -52,12 +52,13 @@ add_dependencies(${PROJECT_NAME}_coreEngine
     DBusCXX
     ${PROJECT_NAME}::utils
 )
-target_link_libraries(${PROJECT_NAME}_coreEngine PRIVATE
-    #Boost::math
-    Boost::random
-    Boost::system
-    DBusCXX
-    ${PROJECT_NAME}::utils
+target_link_libraries(${PROJECT_NAME}_coreEngine
+    PRIVATE
+        #Boost::math
+        Boost::random
+        Boost::system
+        DBusCXX
+        ${PROJECT_NAME}::utils
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)
 

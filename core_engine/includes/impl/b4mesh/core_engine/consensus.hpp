@@ -5,7 +5,6 @@
 #include <dbus-c++/dbus.h>
 #include <b4mesh/core_engine/generated/state.hpp>
 
-
 class green_state :
 	public net::qolsr::Qolyester::ReachableNodes_proxy,
 	public DBus::IntrospectableProxy,

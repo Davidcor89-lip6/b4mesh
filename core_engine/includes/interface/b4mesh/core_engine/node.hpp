@@ -15,7 +15,7 @@ using boost::asio::ip::tcp;
 #include <b4mesh/core_engine/application_packet.hpp>
 #include <b4mesh/core_engine/block.hpp>
 
-// Class declaration to avoid circular dependancy
+// Class declaration to avoid circular dependency
 class client;
 class B4Mesh;
 
@@ -54,8 +54,6 @@ private:
     std::map<std::string, client*> listClient;
 
 };
-
-
 
 #endif //B4MESH_NODE
 

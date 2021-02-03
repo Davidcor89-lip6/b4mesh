@@ -26,12 +26,14 @@ find_package(Threads REQUIRED)
 
 add_dependencies(${PROJECT_NAME}_binary
     ${PROJECT_NAME}::core_engine
+    ${PROJECT_NAME}::utils
     Boost::system
     Threads::Threads
 )
 target_link_libraries(${PROJECT_NAME}_binary
     PRIVATE
         ${PROJECT_NAME}::core_engine
+        ${PROJECT_NAME}::utils
         Boost::system
         Threads::Threads
 )

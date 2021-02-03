@@ -1,5 +1,6 @@
 #ifndef APPLICATION_PACKET_H
 #define APPLICATION_PACKET_H
+
 #include <iostream>
 #include <string>
 

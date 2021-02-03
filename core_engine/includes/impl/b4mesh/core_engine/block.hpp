@@ -1,9 +1,11 @@
 #ifndef BLOCK_H
 #define BLOCK_H
+
+#include <b4mesh/core_engine/transaction.hpp>
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include "transaction.hpp"
 
 using namespace std;
 

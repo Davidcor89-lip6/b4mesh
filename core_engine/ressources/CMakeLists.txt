@@ -37,4 +37,5 @@ target_include_directories(${PROJECT_NAME}_core_engine__generated
 		${generated_files_INCLUDEDIR}/
 )
 
-# $<TARGET_PROPERTY:${PROJECT_NAME}_core_engine__generated_ressources,INCLUDE_DIRECTORIES>
+
+add_library(${PROJECT_NAME}::core_engine::generated ALIAS ${PROJECT_NAME}_core_engine__generated)

@@ -9,8 +9,8 @@
 
 using boost::asio::ip::tcp;
 
-#include "node.hpp"
-#include "utils.hpp"
+#include <b4mesh/core_engine/node.hpp>
+#include <b4mesh/utils/utils.hpp>
 
 // ----------------------------
 int EndHandler(const int signal, node * node_)
