@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake) # modules, dependencies
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Default build type")
@@ -26,6 +25,8 @@ if (${CMAKE_TOOLCHAIN_FILE} MATCHES ".*\/greensoftsdk\/.*\/toolchainfile\.cmake$
     include(${CMAKE_CURRENT_SOURCE_DIR}/toolchain/import.cmake)
 else()
     set(USING_GREEN_SDK OFF CACHE BOOL "GreenSDK toolchain autodetection" FORCE)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
+    # return() # only target allowed is toolchain generation
 endif()
 message(STATUS "[${PROJECT_NAME}] : Lazy Green SDK detection ... USING_GREEN_SDK is [${USING_GREEN_SDK}]")
 
