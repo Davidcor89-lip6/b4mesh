@@ -10,8 +10,16 @@ The following project requires a two-step actions.
 
 | Package name | Minimum release |
 | ------------ | --------------- |
-| CMake        | **3.14.2** *(>= 3.18.3975358 is better)* |
-| GCC          | **9.3.0** *(7.5 might work)* |
+| `CMake`        | **3.14.2** *(>= 3.18.3975358 is better)* |
+| `GCC`          | **9.3.0** *(7.5 might work)* |
+| One of:<br>- `gmake`<br>- `nmake`<br>- `make` | ? |
+| One of:<br>- `bash`<br>- `sh`      | ? |
+
+### Dependencies management
+
+Self-generated build diagram, using `b4mesh_generates_cmake_dependencies_diagram` target.
+
+![Self-generated build diagram](./doc/build/dependencies_diagram.png?raw=true)
 
 ### 🛠️ Toolchain generation
 
