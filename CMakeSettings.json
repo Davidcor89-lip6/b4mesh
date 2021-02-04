@@ -67,7 +67,7 @@
     },
     {
       "name": "Linux-GCC-Debug-WithGreenSDK",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "configurationType": "Debug",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],

@@ -1,5 +1,9 @@
 # Complete/Add unspecified elements from GreenSDK toolchain
 
+if (NOT DEFINED USING_GREEN_SDK OR NOT ${USING_GREEN_SDK})
+    message(FATAL_ERROR "[toolchain/import.cmake] GreenSDK toolchain not detected")
+endif()
+
 function(AssertFileExists)
     set(options)
     set(oneValueArgs)

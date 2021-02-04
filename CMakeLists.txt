@@ -17,18 +17,14 @@ enable_testing()
 message(STATUS "[${PROJECT_NAME}] : toolchain is [${CMAKE_TOOLCHAIN_FILE}]")
 message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE is [${CMAKE_BUILD_TYPE}]")
 
-if (${CMAKE_TOOLCHAIN_FILE} MATCHES ".*\/greensoftsdk\/.*\/toolchainfile\.cmake$")
-    if (NOT (EXISTS ${CMAKE_TOOLCHAIN_FILE}))
-        message(FATAL_ERROR "[${PROJECT_NAME}] : toolchain required but not found. Run greensoftsdk target.")
-    endif()
-    set(USING_GREEN_SDK ON CACHE BOOL "GreenSDK toolchain autodetection" FORCE)
+include(${CMAKE_CURRENT_SOURCE_DIR}/toolchain/lazy_detection.cmake)
+GreenSDK_Toolchain_lazyDetection()
+if (${USING_GREEN_SDK})
     include(${CMAKE_CURRENT_SOURCE_DIR}/toolchain/import.cmake)
-else()
-    set(USING_GREEN_SDK OFF CACHE BOOL "GreenSDK toolchain autodetection" FORCE)
+else ()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolchain)
-    # return() # only target allowed is toolchain generation
+    return() # only target allowed is toolchain generation
 endif()
-message(STATUS "[${PROJECT_NAME}] : Lazy Green SDK detection ... USING_GREEN_SDK is [${USING_GREEN_SDK}]")
 
 include(dependencies/libdbus-cpp)
 
