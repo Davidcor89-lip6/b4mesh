@@ -27,14 +27,14 @@ class node
 public:
     node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP);
     
-    void addClientToList(std::string IP, client * c);
+    void addClientToList(std::string IP, client * c, bool block);
     void removeClientFromList(std::string IP);
-    void addSessionToList(std::string IP, session * s);
+    void addSessionToList(std::string IP, session * s, bool block);
     void removeSessionFromList(std::string IP);
-    void handle_accept(session* new_session, const boost::system::error_code& error);
+    void handle_accept(session* new_session, bool block, const boost::system::error_code& error);
 
-    void SendPacket(std::string& IP, ApplicationPacket& packet);
-	void BroadcastPacket( ApplicationPacket& packet);
+    void SendPacket(std::string& IP, ApplicationPacket& packet, bool block);
+	void BroadcastPacket( ApplicationPacket& packet, bool block);
 
     std::string GetIp(void);
     void GenerateResults (void);
@@ -46,6 +46,7 @@ private:
 private:
     boost::asio::io_context& io_context_;
     tcp::acceptor acceptor_;
+    tcp::acceptor acceptorB_;
 
 public: 
     consensus consensus_;
@@ -57,6 +58,8 @@ private:
     std::vector<std::string> startListAddr; 
     std::map<std::string, session*> listSession;
     std::map<std::string, client*> listClient;
+    std::map<std::string, session*> listSessionB;
+    std::map<std::string, client*> listClientB;
 
 private:
     // polling Dbus

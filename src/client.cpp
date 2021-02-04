@@ -1,12 +1,13 @@
 #include "client.hpp"
 
-client::client(node* parent, boost::asio::io_context& io_context, std::string destIP, std::string port)
+client::client(node* parent, boost::asio::io_context& io_context, std::string destIP, std::string port, bool block)
     : parent_(parent),
       io_context_(io_context),
       socket_(io_context),
       resolver_(io_context),
       destIP_(destIP),
-      m_timer(io_context, std::chrono::steady_clock::now() + std::chrono::seconds(2))
+      m_timer(io_context, std::chrono::steady_clock::now() + std::chrono::seconds(2)),
+      forBlock(block)
 {
 
     endpoints = resolver_.resolve(destIP_, port);
@@ -22,7 +23,7 @@ void client::do_connect()
         if (!ec)
         {
             std::cout << " creation with " << socket_.remote_endpoint() << " ok" << std::endl;
-            parent_->addClientToList( destIP_, this);
+            parent_->addClientToList( destIP_, this, forBlock);
             do_read();
         } else {
             std::cout << "no connection : " << ec << std::endl; 
@@ -50,10 +51,21 @@ boost::asio::async_read(socket_, boost::asio::buffer(data_, max_length),
         }
         else
         {
-            std::cout << " closing connection with " << socket_.remote_endpoint() << " ok" << std::endl;
-            socket_.close();
+            std::cout << " closing connection :" << ec << std::endl;
             parent_->removeClientFromList(destIP_);
         }
     });
 }
 
+void client::closeSocket(void){
+    io_context_.post([this]() {
+        try
+        {
+            socket_.close();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+    });
+}

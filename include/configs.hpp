@@ -29,6 +29,9 @@
 #define WAIT_BEFORE 200 //us
 #define WAIT_AFTER 500 //us 
 
+//only in b4mesh class
+#define DEBUG std::cout << getSeconds() << " : "
+
 // the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"      /* Black */

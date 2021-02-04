@@ -16,9 +16,12 @@ class session
 public:
     session(B4Mesh* b4mesh, boost::asio::io_context& io_context)
     : b4mesh_(b4mesh),
+      io_context_(io_context),
       socket_(io_context){}
 
     tcp::socket& socket(){ return socket_;}
+
+    void closeSocket(void);
 
     void start();
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
@@ -30,6 +33,7 @@ private:
 private:
     B4Mesh * b4mesh_;
     std::string destIP_;
+    boost::asio::io_context& io_context_;
     tcp::socket socket_;
     boost::asio::streambuf response_;
 };

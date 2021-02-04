@@ -14,9 +14,11 @@ using boost::asio::ip::tcp;
 class client
 {
 public:
-	client(node* parent, boost::asio::io_context& io_context, std::string destIP, std::string port);
+	client(node* parent, boost::asio::io_service& io_service, std::string destIP, std::string port, bool block);
 	
 	tcp::socket& socket(){return socket_;}
+
+	void closeSocket(void);
 
 private:
 
@@ -33,6 +35,9 @@ private:
 	std::string destIP_;
     tcp::resolver::results_type endpoints;
 	boost::asio::steady_timer m_timer;
+
+	// connexion dedecated to block
+	bool forBlock;
  
 	enum { max_length = 4096 };
     char data_[max_length];

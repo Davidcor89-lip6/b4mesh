@@ -46,6 +46,7 @@ ApplicationPacket::ApplicationPacket(string &serie, size_t p_size ){
     const char* packet_payload = serie.data() + HeaderSize();
     payload = string(packet_payload, size-HeaderSize());
   } else {
+    std::cout << " ApplicationPacket : " << service << " : " << size << "/" << p_size << std::endl;
     service = NONE;
     payload = "";
     size = CalculateSize();
