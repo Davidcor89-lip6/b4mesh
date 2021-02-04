@@ -14,6 +14,18 @@ project(b4mesh
 )
 enable_testing()
 
+find_program(DOT_EXE NAME dot)
+if (NOT ${DOT_EXE})
+    set(DependenciesDiagramNameNoExt ${CMAKE_CURRENT_SOURCE_DIR}/doc/build/dependencies_diagram)
+    add_custom_target(${PROJECT_NAME}_generates_cmake_dependencies_diagram ALL
+        COMMAND ${CMAKE_COMMAND} "--graphviz=${DependenciesDiagramNameNoExt}.dot" .
+        COMMAND dot -Tpng ${DependenciesDiagramNameNoExt}.dot -o ${DependenciesDiagramNameNoExt}.png
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+else()
+    message(STATUS "[${PROJECT_NAME}] : Info : program [dot] not found. Install dot to enable [${PROJECT_NAME}_generates_cmake_dependencies_diagram] target")
+endif()
+
 message(STATUS "[${PROJECT_NAME}] : toolchain is [${CMAKE_TOOLCHAIN_FILE}]")
 message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE is [${CMAKE_BUILD_TYPE}]")
 

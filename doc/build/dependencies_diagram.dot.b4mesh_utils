@@ -1,0 +1,10 @@
+digraph "b4mesh_utils" {
+node [
+  fontsize = "12"
+];
+    "node7" [ label = "b4mesh_utils\n(b4mesh::utils)", shape = pentagon ];
+    "node1" [ label = "Boost::system", shape = septagon ];
+    "node7" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
+    "node8" [ label = "INTERFACE", shape = septagon ];
+    "node7" -> "node8"  // b4mesh_utils -> INTERFACE
+}

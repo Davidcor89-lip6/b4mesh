@@ -1,0 +1,6 @@
+digraph "b4mesh_core_engine__generated" {
+node [
+  fontsize = "12"
+];
+    "node6" [ label = "b4mesh_core_engine__generated\n(b4mesh::core_engine::generated)", shape = pentagon ];
+}
