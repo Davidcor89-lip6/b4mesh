@@ -1,27 +1,9 @@
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ressources) # Expose b4mesh_core_engine__generate_ressources, that generates some header-files
-
-add_library(${PROJECT_NAME}_coreEngine_implementation_headers INTERFACE)
-add_library(${PROJECT_NAME}::coreEngine::implementation_headers
-    ALIAS ${PROJECT_NAME}_coreEngine_implementation_headers
-)
-target_include_directories(${PROJECT_NAME}_coreEngine_implementation_headers
-    INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
-        ${CMAKE_CURRENT_SOURCE_DIR}/includes/interface
-        $<TARGET_PROPERTY:DBusCXX,INTERFACE_INCLUDE_DIRECTORIES>
-)
-add_dependencies(${PROJECT_NAME}_coreEngine_implementation_headers
-    ${PROJECT_NAME}::core_engine::generated
-    DBusCXX
-)
-target_link_libraries(${PROJECT_NAME}_coreEngine_implementation_headers
-    INTERFACE
-        ${PROJECT_NAME}::core_engine::generated
-        DBusCXX
-)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ressources)
+# Expose b4mesh_core_engine__generate_ressources, that generates some header-files
+# Aliased as b4mesh::core_engine::generate_ressources
 
 add_library(${PROJECT_NAME}_coreEngine SHARED
-# todo : INTERFACE?, hierarchy
+# todo : INTERFACE?, hierarchy -> check if all .cpp files are useless
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/application_packet.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/b4mesh_p.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/block.cpp
@@ -42,19 +24,14 @@ target_compile_features(${PROJECT_NAME}_coreEngine PRIVATE
     cxx_std_17 # cxx_std_20
 )
 target_include_directories(${PROJECT_NAME}_coreEngine
-    INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
+# todo : restrict headers exposure
     PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/includes/impl
         ${CMAKE_CURRENT_SOURCE_DIR}/includes/interface
 )
 
 # Dependencies
 ## Boost
-# set(Boost_USE_DEBUG_LIBS OFF)
-# set(Boost_USE_RELEASE_LIBS ON)
-# set(Boost_USE_STATIC_LIBS OFF) 
-# set(Boost_USE_MULTITHREADED ON)  
-# set(Boost_USE_STATIC_RUNTIME OFF) 
 find_package(Boost 1.65.0 REQUIRED
     COMPONENTS 
         random
@@ -66,16 +43,18 @@ add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::system
     DBusCXX
     ${PROJECT_NAME}::utils
-    ${PROJECT_NAME}::coreEngine::implementation_headers
+    ${PROJECT_NAME}::core_engine::generated
 )
 target_link_libraries(${PROJECT_NAME}_coreEngine
     PRIVATE
-        #Boost::math
         Boost::random
         Boost::system
-        DBusCXX
         ${PROJECT_NAME}::utils
-        ${PROJECT_NAME}::coreEngine::implementation_headers
+        ${PROJECT_NAME}::core_engine::generated
+    PUBLIC
+    # because of useless .cpp files, we need to push extra stuffs into PUBLIC exposure
+        DBusCXX
+        ${PROJECT_NAME}::core_engine::generated
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)
 
