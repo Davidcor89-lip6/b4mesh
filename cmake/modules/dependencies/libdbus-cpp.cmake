@@ -21,10 +21,10 @@ if (${USING_GREEN_SDK})
 
     add_library(DBusCXX SHARED IMPORTED GLOBAL)
     set_target_properties(DBusCXX PROPERTIES
-        IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
+        #IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
         IMPORTED_LOCATION               ${GREEN_SDK_LIBDIR}/libdbus-c++-1.so
-        INTERFACE_INCLUDE_DIRECTORIES   ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1/
-        INCLUDE_DIRECTORIES             ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1/
+        INTERFACE_INCLUDE_DIRECTORIES   ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1
+        INCLUDE_DIRECTORIES             ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1
     )
 else()
 # Autonomous build
@@ -97,4 +97,10 @@ else()
     )
     add_dependencies(DBusCXX_libs libdbuscpp_import)
     target_link_libraries(DBusCXX INTERFACE DBusCXX_libs)
+endif()
+
+# Check library integrity
+get_target_property(Check_DBusCXX_INCLUDEDIR DBusCXX INTERFACE_INCLUDE_DIRECTORIES)
+if (NOT (EXISTS "${Check_DBusCXX_INCLUDEDIR}/dbus-c++/dbus.h"))
+    message(FATAL_ERROR "[libdbus-cpp] Invalid include path, main header does not exists [${Check_DBusCXX_INCLUDEDIR}/dbus-c++/dbus.h]")
 endif()
