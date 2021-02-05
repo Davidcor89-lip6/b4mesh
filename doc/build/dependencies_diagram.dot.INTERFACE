@@ -1,0 +1,6 @@
+digraph "INTERFACE" {
+node [
+  fontsize = "12"
+];
+    "node8" [ label = "INTERFACE", shape = septagon ];
+}
