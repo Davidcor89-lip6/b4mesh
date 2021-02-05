@@ -1,6 +1,0 @@
-digraph "DBusCXX" {
-node [
-  fontsize = "12"
-];
-    "node5" [ label = "DBusCXX", shape = doubleoctagon ];
-}

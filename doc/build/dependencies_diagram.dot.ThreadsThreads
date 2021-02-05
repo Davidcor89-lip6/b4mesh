@@ -1,6 +1,0 @@
-digraph "Threads::Threads" {
-node [
-  fontsize = "12"
-];
-    "node2" [ label = "Threads::Threads", shape = pentagon ];
-}

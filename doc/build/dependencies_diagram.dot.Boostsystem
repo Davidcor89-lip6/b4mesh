@@ -1,6 +1,0 @@
-digraph "Boost::system" {
-node [
-  fontsize = "12"
-];
-    "node1" [ label = "Boost::system", shape = septagon ];
-}

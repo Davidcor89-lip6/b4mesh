@@ -1,8 +1,0 @@
-digraph "Threads::Threads" {
-node [
-  fontsize = "12"
-];
-    "node2" [ label = "Threads::Threads", shape = pentagon ];
-    "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
-    "node0" -> "node2" [ style = dotted ] // b4mesh_binary -> Threads::Threads
-}

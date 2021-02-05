@@ -3,9 +3,6 @@ build/*
 build_local/*
 Results/*
 
-# CMake
-cmake/external/*
-
 # MSVC
 .vscode
 *.vs
