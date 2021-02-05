@@ -49,9 +49,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/utils)         # ${PROJECT_NAME}::utils
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/core_engine)   # ${PROJECT_NAME}::core_engine
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/binary)        # ${PROJECT_NAME}::binary
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sources)
 
 # todo : install() ... include(GNUInstallDirs)
 # todo : option(b4mesh_BUILD_TESTS) => test() + gtest dependencies
