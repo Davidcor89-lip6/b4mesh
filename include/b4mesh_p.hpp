@@ -67,7 +67,13 @@ class B4Mesh
     /* Retunes the type of message serialized in the payload */
     int ExtractMessageType(const std::string& msg_payload);
 
-    /* Printing info at this end */
+    /**
+     * Function that generate the blockgraph file
+     */
+    void CreateGraph(Block &block);
+    /**
+     * This function generates files for performances
+     */
     void GenerateResults();
 
     public:
@@ -83,6 +89,10 @@ class B4Mesh
      * create a block. -Only Leader -Broadcast block to the local group
      */
     void GenerateBlocks();
+    /**
+     * Allow to select the transaction to put inside a block
+     */
+    vector<Transaction> SelectTransactions();
 
     void SendBlockToConsensus(Block b);
     /*
@@ -95,6 +105,10 @@ class B4Mesh
      */
     bool IsTxInMempool (Transaction t);
     /**
+     * Checks that the mempool of the node is not full
+     */
+    bool IsSpaceInMempool();
+    /**
      * Dump the mempool
      */
     void DumpMempool (void);
@@ -105,7 +119,7 @@ class B4Mesh
     /**
      * Updates the Txs Mempool once the Block is added to the BG
      */
-    void UpdatingMempool(Block &b);
+    void UpdatingMempool(vector<Transaction> transactions);
 
 
     public:
@@ -114,6 +128,14 @@ class B4Mesh
      * Do the tratment of a block befor adding it to the blockgraph
      */
     void BlockTreatment(Block block);
+    /**
+     * Checks is a block is the waiting list
+     */
+    bool IsBlockInWaitingList( std::string b_hash);
+    /**
+     * Check if the parents of the received block are known by the node
+     */
+    bool AreParentsKnown(Block &block);
     /**
      * Do the tratment of a transaction befor adding it to the mempool
      */
@@ -130,7 +152,7 @@ class B4Mesh
     /**
      * Get the hashes of unknown parents of the received block
      */
-    std::vector<std::string> GetUnknownParents(Block &block);
+    std::vector<std::string> GetUnknownParents(vector<string> parents);
     /**
      * This method is invok when a node doesn't know the parent(s) of a block
      * It will ask for them via their BlockHash to the block sender.
@@ -160,10 +182,33 @@ class B4Mesh
      * Send a full side-chain to the leader upon a GROUPBRANCH_REQ
      */
     void SendBranch4Sync(const std::string& msg_payload, std::string ip);
-
+    /**
+     *  Start the fast synchronization process of any node
+     *  after receiving a merge block
+     */
     void SyncNode(std::vector<std::string> unknown_p, std::string ip);
+    /**
+     * Updates the missing_parents_list. If new block is a missing parent
+     * it will ERASE it form the list
+     */
+    void EraseMissingBlock(string b_hash);
+    /**
+     * Updates the missing_parents_list. If new block has missing parents
+     * it will ADD them to the missing_parents_list
+     */
+    void UpdateMissingList(vector<string> unknown_p, std::string ip);
+    /**
+     *  Checks that the parents of the blocks in the waiting list are
+     *  all present in the local BG. If so, it add the block to the local
+     *  BG and erase it from the waiting list
+     */
+    void UpdateWaitingList();
+    /**
+     *  Add the block to the local blockgraph
+     */
+    void AddBlockToBlockgraph(Block block);
 
-    bool IsBlockMerge(Block &b);
+    bool IsBlockMerge(vector<string> parents);
     //-----------------------------
     /**
      * This method checks every 5s if there still missing blocks in the
@@ -217,6 +262,7 @@ class B4Mesh
     std::vector<std::pair<std::string, std::string>> missing_parents_list;
     std::string groupId;   // GroupId of a group
     std::map<std::string, Transaction> pending_transactions;  // mempool of transactions
+    std::map<std::string, Block> waiting_list; // blocks waiting for their ancestors
     Blockgraph blockgraph;  // The database of blocks
 
 private:

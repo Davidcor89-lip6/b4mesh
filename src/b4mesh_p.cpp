@@ -15,6 +15,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 
     missing_parents_list = std::vector<pair<string, std::string>> ();
     pending_transactions = std::map<std::string, Transaction>();
+	waiting_list = map<string, Block>();
     groupId = string(32,0);
 
     /* Variables for the blockchain performances */
@@ -164,7 +165,7 @@ void B4Mesh::TransactionsTreatment(Transaction t)
         DEBUG << "Transaction not in mempool. " << std::endl;
         if (!IsTxInBlockGraph(t)){
             DEBUG << "Transaction not in Blockgraph. " << std::endl;
-            if (pending_transactions.size() <= sizemempool){
+            if (IsSpaceInMempool()){
                 DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
                 pending_transactions[t.GetHash()] = t;
                 //DumpMempool();
@@ -195,6 +196,16 @@ bool B4Mesh::IsTxInMempool (Transaction t)
     }
 }
 
+bool B4Mesh::IsSpaceInMempool (){
+
+  if (pending_transactions.size() < sizemempool){
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void B4Mesh::DumpMempool (void)
 {
     DEBUG << "Dump MemPool " << std::endl;
@@ -222,37 +233,87 @@ void B4Mesh::BlockTreatment(Block b)
     DEBUG << " BlockTreatment: Block made by leader: " << b.GetLeader() << " with hash " << b.GetHash() << std::endl;
     // Checking if the block is already in BLOCKGRAPH
     if (!blockgraph.HasBlock(b)){
-        // Checking if the block is a missing block
-        if (IsBlockInMissingList(b.GetHash())){
-            updateMissingList(b.GetHash());
+    DEBUG << " BlockTreatment: This block "<< b.GetHash().data() << " is not in the blockgraph " << std::endl;
+    if (!IsBlockInWaitingList(b.GetHash())){
+      //Check ancestors blocks
+      if (!AreParentsKnown(b)){
+        // One or more parents of this block are unknown
+        DEBUG << " BlockTreatment: This block "<< b.GetHash().data() << " has missing parents" << std::endl;
+        // Getting unknown list of parents
+        std::vector<std::string> unknown_parents = GetUnknownParents(b.GetParents());
+        std::string ip = node_->consensus_.GetIPFromId(b.GetLeader());
+        // adding unknown parents to the list of missing blocks
+        UpdateMissingList(unknown_parents, ip);
+        // Check if block is merge block to start fast synchronization
+        if(IsBlockMerge(b.GetParents())){
+          DEBUG << " BlockTreatment: Block "<< b.GetHash().data() << " is a merge block" << std::endl;
+          DEBUG << "Starting synchronization process..." << std::endl;
+          SyncNode(unknown_parents, ip); // fast sync
         }
-        //Check ancestors blocks
-        if (!CheckBlockParents(b)){
-            // One or more parents of this block are unknown
-            // Getting unknown list of parents
-            vector<string> unknown_parents = GetUnknownParents(b);
-            std::string ip = node_->consensus_.GetIPFromId(b.GetLeader());
-            // adding unknown parents to the list of missing blocks
-            updateMissingList(unknown_parents, ip);
-            // Check if block is merge block to start fast synchronization
-            if(IsBlockMerge(b)){
-                DEBUG << "This block is a merge block." << std::endl;
-                //DEBUG << "Starting synchronization process..." << std::endl;
-                SyncNode(unknown_parents, ip); // fast sync
-            }
+        // Adding the block to the waiting list since parents aren't in BG yet
+        DEBUG << " BlockTreatment: Adding block: " << b.GetHash().data() << " to waiting_list: " << std::endl;
+        if (waiting_list.count(b.GetHash()) > 0){
+          DEBUG << "Block already in waiting list.... Dumping block." << std::endl;
+        } else {
+            waiting_list[b.GetHash()] = b;
         }
+      } else {
+        // All ancestors are known by the local node
         // Adding block to blockgraph
-        DEBUG << " BlockTreatment: Adding the block "<< b.GetHash() << " to the blockgraph" << std::endl;
-        blockgraph.AddBlock(b);
-        // Updating Mempool
-        UpdatingMempool(b);
-    } else {
-        // The block is already present in the local blockgraph
-        DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in blockgraph\n  Dumping block..." << std::endl;
+        DEBUG << " BlockTreatment: Adding the block "<< b.GetHash().data() << " to the blockgraph" << std::endl;
+        AddBlockToBlockgraph(b);
+        // Update the waiting list.
+        if (waiting_list.size() > 0){
+          UpdateWaitingList();
+        }
+      }
     }
+    else {
+      // The block is already present in waiting list
+      DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in waiting list\n  Dumping block..." << std::endl;
+    }
+  } else {
+    // The block is already present in the local blockgraph
+    DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in blockgraph\n  Dumping block..." << std::endl;
+  }
 }
 
-bool B4Mesh::CheckBlockParents(Block &b){
+bool B4Mesh::IsBlockInWaitingList(string b_hash){
+
+  for (auto &b : waiting_list){
+    if (b_hash == b.first){
+      return true;
+    }
+  }
+  return false;
+}
+
+bool B4Mesh::AreParentsKnown(Block &b){
+  vector<string> parents_of_block = b.GetParents();
+  vector<string> blocks_in_node = vector<string>();
+
+  DEBUG << "AreParentsKnown: Checking parents for newBlock "<< b.GetHash().data() << " in node: " << node_->consensus_.GetId() << std::endl;
+  for (auto &p : parents_of_block){
+    DEBUG << "AreParentsKnown: Parent block: " << p.data() << std::endl;
+  }
+
+  for(auto &blk : blockgraph.GetBlocks()){
+      blocks_in_node.push_back(blk.second.GetHash());
+  }
+
+  for (auto &parent : parents_of_block){
+    if(find(blocks_in_node.begin(), blocks_in_node.end(), parent) != blocks_in_node.end()){
+      DEBUG << " AreParentsKnown: Parent known!" << std::endl;
+    }
+    else {
+      DEBUG << " AreParentsKnown: Parent not known!" << std::endl;
+      return false;
+    }
+  }
+return true;
+}
+
+/*bool B4Mesh::CheckBlockParents(Block &b){
     vector<string> parents_of_block = b.GetParents();
     vector<string> blocks_in_node = vector<string>();
     // vector for performances
@@ -288,20 +349,19 @@ bool B4Mesh::CheckBlockParents(Block &b){
         }
     }
     return true;
-}
+}*/
 
-vector<string> B4Mesh::GetUnknownParents(Block &b)
+vector<string> B4Mesh::GetUnknownParents(vector<string> parents)
 {
-    vector<string> v_p_blk = b.GetParents();
-    vector<string> vn = vector<string>();
+    vector<string> v_node = vector<string>();
     vector<string> unknown_p = vector<string> ();
 
     for(auto &blk : blockgraph.GetBlocks()){
-        vn.push_back(blk.second.GetHash());
+        v_node.push_back(blk.second.GetHash());
     }
 
-    for (auto parent : v_p_blk){
-        if (find(vn.begin(), vn.end(), parent) != vn.end()){
+    for (auto parent : parents){
+        if (find(v_node.begin(), v_node.end(), parent) != v_node.end()){
             //there is element
         }
         else {
@@ -311,10 +371,9 @@ vector<string> B4Mesh::GetUnknownParents(Block &b)
     return unknown_p;
 }
 
-bool B4Mesh::IsBlockMerge(Block &b){
-  vector<string> parents_of_block = b.GetParents();
+bool B4Mesh::IsBlockMerge(vector<string> parents){
 
-  if(parents_of_block.size() > 1 ){
+  if(parents.size() > 1 ){
     return true;
   }
   else {
@@ -344,13 +403,89 @@ void B4Mesh::SyncNode(vector<string> unknown_p, std::string ip){
   }
 }
 
-void B4Mesh::UpdatingMempool (Block &b)
-{
-    vector<Transaction> t_in_b = b.GetTransactions();
 
+void B4Mesh::EraseMissingBlock(string b_hash){
+  // Checking that the new block is not a missing blocks
+  for (auto pair_m_b = missing_parents_list.begin(); pair_m_b != missing_parents_list.end(); pair_m_b++){
+    if(pair_m_b->first == b_hash){
+      DEBUG << "EraseMissingBlock: New Block " << b_hash.data() << " is a missing parent" << std::endl;
+      DEBUG << " EraseMissingBlock: Erasing block hash from missing_parents_list"<< std::endl;
+      missing_parents_list.erase(pair_m_b);
+      return;
+    }
+  }
+  DEBUG << "EraseMissingBlock: Not a missing block" << std::endl;
+}
+
+void B4Mesh::UpdateMissingList(vector<string> unknown_p, std::string ip){
+  // Updating missing_parents_list
+  bool flag = false;
+
+  for (auto &missing_p : unknown_p){
+    flag = false;
+    for (auto &pair_m_b : missing_parents_list){
+      if (missing_p == pair_m_b.first){
+        DEBUG << "updateMissingList: Parent " << missing_p << " already in list" << std::endl;
+        flag  = true;
+      }
+    }
+    if (flag == false){
+      DEBUG << "updateMissingList: Parent " << missing_p << " not founded in list" << std::endl;
+      DEBUG << "updateMissingList: Adding missing parent to list of missing blocks"<< std::endl;
+      missing_parents_list.push_back(make_pair(missing_p, ip));
+    }
+  }
+}
+
+void B4Mesh::UpdateWaitingList(){
+
+	bool addblock = true; 
+	while (addblock)
+	{ 
+		addblock = false;
+		for (auto &b : waiting_list){
+			DEBUG << "Update waiting list: starting with block: " << b.first.data() << std::endl;
+			size_t i = 0;
+			for(auto &hash : b.second.GetParents() ){
+				if (blockgraph.HasBlock(hash)){
+					i++;
+				}
+			}
+			if (b.second.GetParents().size() == i){ // if all parents are in blockgraph
+				DEBUG << "Update waiting list: All parents are present -> Adding block."<< std::endl;
+				AddBlockToBlockgraph(b.second);
+				waiting_list.erase(b.first);
+				addblock = true;
+				break;
+			} else {
+				DEBUG << "Not all parents from this block are present. keeping the block in the list" << std::endl;
+			}
+		}
+	}
+}
+
+void B4Mesh::AddBlockToBlockgraph(Block b){
+
+  // Checking if the block is a missing block
+  if (IsBlockInMissingList(b.GetHash())){
+    DEBUG << " AddBlockToBlockgraph: This block "<< b.GetHash().data()<< " is a missing block " << std::endl;
+    // erasing the missing block from the list of missing blocks.
+    EraseMissingBlock(b.GetHash());
+  }
+
+  UpdatingMempool(b.GetTransactions());
+  blockgraph.AddBlock(b);
+
+  // For traces propuses
+  CreateGraph(b);
+}
+
+
+void B4Mesh::UpdatingMempool (vector<Transaction> transactions)
+{
     //DumpMempool();
 
-    for (auto &t : t_in_b){
+    for (auto &t : transactions){
         if (pending_transactions.count(t.GetHash()) > 0){
             DEBUG << " UpdatingMempool: Transaction " << t.GetHash() << " founded" << std::endl;
             DEBUG << " UpdatingMempool: Erasing transaction from Mempool... " << std::endl;
@@ -384,11 +519,16 @@ void B4Mesh::UpdatingMempool (Block &b)
 }*/
 
 void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
-  Block block;
+
 
   if (blockgraph.HasBlock(hash_p)){
+	Block block;
     DEBUG << " SendParentBlock: Block " << hash_p << " founded!" << std::endl;
     block = blockgraph.GetBlock(hash_p);
+
+	DEBUG << " SendParentBlock: Sending block to node: " << destAddr << std::endl;
+  	ApplicationPacket packet(ApplicationPacket::BLOCK, block.Serialize());
+  	node_->SendPacket(destAddr, packet, true);
   }
     // Case when block is not present...
     // is very unlikely since we already check that this node has this block.
@@ -397,9 +537,6 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
     return;
   }
 
-  DEBUG << " SendParentBlock: Sending block to node: " << destAddr << std::endl;
-  ApplicationPacket packet(ApplicationPacket::BLOCK, block.Serialize());
-  node_->SendPacket(destAddr, packet, true);
 }
 
 void B4Mesh::SendChildlessBlocks(std::string destAddr){
@@ -611,6 +748,32 @@ bool B4Mesh::TestPendingTxs(){
     }
 }
 
+//Select the transactions with a small timestamp.
+vector<Transaction> B4Mesh::SelectTransactions(){
+
+  vector<Transaction> transactions;
+
+  while(transactions.size() < blocktxsSize - 1){
+    pair<string, double> min_ts = make_pair("0", 9999999);
+    for(auto &t : pending_transactions){
+      if(find(transactions.begin(), transactions.end(), t.second) != transactions.end()){
+        continue;
+      }
+      else {
+        if (t.second.GetTimestamp() < min_ts.second){
+          DEBUG << "Transaction: " << t.first << " with time stamp: " << t.second.GetTimestamp() << std::endl;
+          min_ts = make_pair(t.first, t.second.GetTimestamp());
+        } else {
+          continue;
+        }
+      }
+    }
+    DEBUG << "Getting tx: " << min_ts.first << " with Timestamp: " << min_ts.second << std::endl;
+    transactions.push_back(pending_transactions[min_ts.first]);
+  }
+  return transactions;
+}
+
 
 void B4Mesh::GenerateBlocks(){
 	// Initialize the block
@@ -620,13 +783,14 @@ void B4Mesh::GenerateBlocks(){
 
 	//filling the block with transactions
 	DEBUG << " GenerateBlock: Size of pending_transactions: " << pending_transactions.size() << std::endl;
-	vector<Transaction> transactions;
+	/*vector<Transaction> transactions;
 	for (auto &t : pending_transactions){
 		transactions.push_back(t.second);
 		if (transactions.size() > blocktxsSize - 1){
 			break;
 		}
-	}
+	}*/
+	vector<Transaction> transactions = SelectTransactions();
 	block.SetTransactions(transactions);
 
 	/*// Remove transactions from the list of pending transactions
@@ -701,6 +865,23 @@ void B4Mesh::CheckBlockgraphSync(){
 }
 // *************** TRACES AND PERFORMANCES ***********************************
 
+void B4Mesh::CreateGraph(Block &b){
+  vector<string> parents_of_block = b.GetParents();
+  pair<int,pair<int,int>> create_blockgraph = pair<int,pair<int,int>> ();
+
+  for (auto &p : parents_of_block){
+    if (p == "01111111111111111111111111111111"){
+      create_blockgraph = make_pair(0,
+                                  make_pair(0,stoi(b.GetHash())));
+      blockgraph_file.push_back(create_blockgraph);
+    } else {
+      create_blockgraph = make_pair(stoi(b.GetGroupId()),
+                                  make_pair(stoi(p),stoi(b.GetHash())));
+      blockgraph_file.push_back(create_blockgraph);
+    }
+  }
+}
+
 int B4Mesh::SizeMempoolBytes (){
     int ret = 0;
     for (auto &t : pending_transactions){
@@ -713,20 +894,24 @@ void B4Mesh::GenerateResults()
 {
     std::cout << " GenerateResults " << std::endl;
 
-    std::cout << "\nB4mesh: Stop B4Mesh on node : " << node_->consensus_.GetId() << std::endl;
-    std::cout << "B4mesh: Total number of blocks : " << blockgraph.GetBlocksCount() << std::endl;
-    std::cout << "B4Mesh: Taille moyenne d'un bloc (bytes): " << blockgraph.GetByteSize()/blockgraph.GetBlocksCount() << std::endl;
-    std::cout << "B4Mesh: Blocks restant is missing_parents_list: " << missing_parents_list.size() << std::endl;
-    for (auto &b : missing_parents_list){
-    	std::cout << "B4Mesh: - Block #: " << dump(b.first.data(), 10) << " is missing " << std::endl;
-    }
-    std::cout << "B4mesh: Total number of transactions in BG : " << blockgraph.GetTxsCount() << std::endl;
-    std::cout << "B4Mesh: Moyenne de transactions par block dans Blockgraph: " << blockgraph.MeanTxPerBlock() << std::endl;
-    std::cout << "B4Mesh: Total size of transactions (bytes): " << blockgraph.GetTxsByteSize() << std::endl;
-    std::cout << "B4Mesh: Transactions restant dans le mempool: " << pending_transactions.size() << std::endl;
-    std::cout << "B4Mesh: Transactions lost due to space: " << lostTrans << std::endl;
-	std::cout << "B4Mesh: Packets lost (transaction or block) due to network jamming: " << lostPacket << std::endl;
-    std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
+	std::cout << "\nB4mesh: Stop B4Mesh on node : " << node_->consensus_.GetId() << std::endl;
+	std::cout << "B4mesh: Total number of blocks : " << blockgraph.GetBlocksCount() << std::endl;
+	std::cout << "B4Mesh: Taille moyenne d'un bloc (bytes): " << blockgraph.GetByteSize()/blockgraph.GetBlocksCount() << std::endl;
+	std::cout << "B4mesh: Total number of transactions in BG : " << blockgraph.GetTxsCount() << std::endl;
+	std::cout << "B4Mesh: Moyenne de transactions par block dans Blockgraph: " << blockgraph.MeanTxPerBlock() << std::endl;
+	std::cout << "B4Mesh: Total size of transactions (bytes): " << blockgraph.GetTxsByteSize() << std::endl;
+	std::cout << "B4Mesh: Transactions restant dans le mempool: " << pending_transactions.size() << std::endl;
+	std::cout << "B4Mesh: Transactions lost due to space: " << lostTrans << std::endl;
+	std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
+	std::cout << "B4Mesh: Blocks restant is missing_parents_list: " << missing_parents_list.size() << std::endl;
+	for (auto &b : missing_parents_list){
+		std::cout << "B4Mesh: - Block #: " << b.first.data() << " is missing " << std::endl;
+	}
+	std::cout << "B4Mesh: Blocks restant is waiting_list: " << waiting_list.size() << std::endl;
+	for (auto &b : waiting_list){
+		std::cout << "B4Mesh: - Block #: " << b.first << " is in waiting_list " << std::endl;
+	}
+	std::cout << "B4Mesh: Packets lost due to messaging pb: " << lostPacket << std::endl;
     std::cout << "B4Mesh: Total Bytes : " << blockgraph.GetByteSize() << "\n" << std::endl;
 
 	// ---The blockgraph into file. ----
