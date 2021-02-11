@@ -40,7 +40,6 @@ public:
     void GenerateResults (void);
 
 private:
-    void SendOnNetwork(tcp::socket& socket, std::string string);
     void create_client(std::string addr);
 
 private:

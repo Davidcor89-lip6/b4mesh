@@ -12,7 +12,7 @@ void session::start_reading()
     destIP_ = socket_.remote_endpoint().address().to_string();
     boost::asio::async_read_until(socket_,
         response_,
-        "\r\n",
+        "end",
         boost::bind(&session::handle_read, this,
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
@@ -24,9 +24,24 @@ void session::handle_read(const boost::system::error_code& error,
     if (!error)
     {    
         std::string s((std::istreambuf_iterator<char>(&response_)), std::istreambuf_iterator<char>());
-        // remove end marker
-        s.erase(s.end()-2, s.end());
-        b4mesh_->ReceivePacket(s, destIP_);
+        
+        std::string sEnd ("end");
+        std::size_t found = s.find(sEnd);
+        while (found!=std::string::npos)
+        {
+            // extract message and work on it
+            std::string sStr = saveStr + s.substr(0,found);
+            b4mesh_->ReceivePacket(sStr, destIP_);
+
+            // erase the message and continue
+            s.erase(0, found+3);
+            found = s.find(sEnd);
+            saveStr = "";
+        }
+        if ( s.size() != 0)
+        {
+            saveStr = s;
+        }
 
         //restart reading
         start_reading();
@@ -54,6 +69,8 @@ void session::handle_write(const boost::system::error_code& error)
     }
     else
     {
+        std::cout << "Error with the session " << error << std::endl;
+        socket_.close();
         delete this;
     }
 }

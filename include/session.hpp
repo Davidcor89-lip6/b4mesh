@@ -17,7 +17,10 @@ public:
     session(B4Mesh* b4mesh, boost::asio::io_context& io_context)
     : b4mesh_(b4mesh),
       io_context_(io_context),
-      socket_(io_context){}
+      socket_(io_context)
+      {
+        saveStr = "";
+      }
 
     tcp::socket& socket(){ return socket_;}
 
@@ -36,6 +39,7 @@ private:
     boost::asio::io_context& io_context_;
     tcp::socket socket_;
     boost::asio::streambuf response_;
+    std::string saveStr;
 };
 
 #endif //B4MESH_SESSION

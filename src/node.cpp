@@ -209,22 +209,6 @@ void node::handle_accept(session* new_session, bool block, const boost::system::
     }
 }
 
-void node::SendOnNetwork(tcp::socket& socket, std::string string)
-{
-    //adding symbole to the end 
-    std::string s = string + std::string("\r\n");
-    try
-    {
-        //std::cout << "message: sending size " << string.size() << " size+ender : " << s.size() << std::endl;
-        boost::asio::write(socket, boost::asio::buffer(s, s.size()));
-    }
-    catch(const std::exception& e)
-    {
-        std::cout << "Error: SendOnNetwork :" << e.what() << std::endl;
-    }
-    
-    
-}
 
 void node::BroadcastPacket( ApplicationPacket& packet, bool block)
 {
@@ -236,7 +220,7 @@ void node::BroadcastPacket( ApplicationPacket& packet, bool block)
             std::string IP = it.first;
             client* c = it.second;
             std::cout << "(block) message to " << IP << std::endl;
-            SendOnNetwork(c->socket(), packet.Serialize());
+            c->write_message(packet.Serialize());
         }
     } else {
         for (auto const& it : listClient)
@@ -244,7 +228,7 @@ void node::BroadcastPacket( ApplicationPacket& packet, bool block)
             std::string IP = it.first;
             client* c = it.second;
             std::cout << "message to " << IP << std::endl;
-            SendOnNetwork(c->socket(), packet.Serialize());
+            c->write_message(packet.Serialize());
         }
     }
     
@@ -263,7 +247,7 @@ void node::SendPacket(std::string& IP, ApplicationPacket& packet, bool block)
     if (c != NULL)
     {
         //std::cout << "message to " << IP <<  " " << packet << std::endl;
-        SendOnNetwork(c->socket(), packet.Serialize());
+        c->write_message(packet.Serialize());
     } else {
         std::cout << RED << "Client missing : can 't send message to " << IP <<  RESET << " " << packet << std::endl;
         std::cout << "listClientB : " ;

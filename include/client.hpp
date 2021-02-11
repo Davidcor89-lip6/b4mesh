@@ -2,6 +2,7 @@
 #define B4MESH_CLIENT
 
 #include <iostream>
+#include <deque>
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -20,11 +21,16 @@ public:
 
 	void closeSocket(void);
 
+	void write_message(const std::string& message);
+
 private:
 
 	void do_connect();
 	void on_ready_to_reconnect(const boost::system::error_code &error) { do_connect();}
 	void do_read();
+	void writeImpl(const std::string& message);
+	void write();
+	void writeHandler(const boost::system::error_code& error,const size_t bytesTransferred);
 	
 	//parent
 	node * parent_;
@@ -32,6 +38,8 @@ private:
 	boost::asio::io_context& io_context_;
     tcp::socket socket_;
 	tcp::resolver resolver_;
+	boost::asio::io_service::strand strand_;
+    std::deque<std::string> outbox_;
 	std::string destIP_;
     tcp::resolver::results_type endpoints;
 	boost::asio::steady_timer m_timer;
