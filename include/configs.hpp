@@ -1,38 +1,37 @@
 #ifndef B4MESH_CONFIGS
 #define B4MESH_CONFIGS
 
-// default port
+// Default port
 #define DEFAULT_PORT 5000
 
 // Dbus
 #define POLLING_DBUS 5
 
-// merge
+// Merge
 #define MERGE_TIMING 5
 
-// payload size
+// Payload size
 #define PAYLOAD_MIN 300
 #define PAYLOAD_MAX 600
 
-// transaction generation
+// Transaction generation
 #define WAIT_FOR_FIRST_TRANSACTION 5 // wait a bit that everyone is started
 #define LAMBDA_DIST 0.5 // = 1/mean
 
-// b4mesh recurrent task (Ask4missingblock)
+// B4mesh recurrent task (Ask4missingblock)
 #define RECCURENT_TIMER 10
 
-// blockgraph
+// Blockgraph
 #define SIZE_BLOCK 10        // 130
 #define SIZE_MEMPOOL 500
 
-// Avoiding collision
-#define WAIT_BEFORE 200 //us
-#define WAIT_AFTER 500 //us 
+// Retransmit transaction timing
+#define T_RETRANS 60
 
-//only in b4mesh class
+// Only in b4mesh class
 #define DEBUG std::cout << getSeconds() << " : "
 
-// the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
+// The following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"      /* Black */
 #define RED     "\033[31m"      /* Red */

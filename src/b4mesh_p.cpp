@@ -22,6 +22,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
     blocktxsSize = SIZE_BLOCK; // Number of txs in mempool to creat a block.
     sizemempool = SIZE_MEMPOOL; //Limit size of the mempool in num of txs
     numTxsG = 0;  //Num of txs generated
+	numRTxsG = 0;
     lostTrans = 0;
 	lostPacket = 0;
     blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
@@ -133,11 +134,10 @@ void B4Mesh::GenerateTransactions(){
     DEBUG << " Node: " << node_->consensus_.GetId() << " size payload " << size_payload << std::endl;
 
     SendTransaction(t);
-	usleep(WAIT_BEFORE); // TODO : maybe need a sleep of 500ms here ? to avoid colliding transaction and block 
 	TransactionsTreatment(t);
 
     // restart transaction generation
-    int interval = dist_exp()*1000 + WAIT_AFTER; // TODO : added 500ms to avoid colliding if interval equal 0
+    int interval = dist_exp()*1000; 
     DEBUG << " -> Next Transaction in : " << interval << "ms" <<std::endl;
     timer_generateT.expires_from_now(std::chrono::milliseconds(interval));
     timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
@@ -723,14 +723,31 @@ void B4Mesh::Ask4MissingBlocks()
             DEBUG << " block: " << a.first << std::endl;
         }
         for (auto &pair_m_b : missing_parents_list){
-            DEBUG << "Ask4MissingBlocks: asking for block: " << pair_m_b.first << std::endl;
-            string serie = pair_m_b.first;
-            ApplicationPacket packet(ApplicationPacket::REQUEST_BLOCK, serie);
-            node_->SendPacket(pair_m_b.second, packet, false);
+			if (!IsBlockInWaitingList(pair_m_b.first))
+			{
+				DEBUG << "Ask4MissingBlocks: asking for block: " << pair_m_b.first << std::endl;
+				string serie = pair_m_b.first;
+				ApplicationPacket packet(ApplicationPacket::REQUEST_BLOCK, serie);
+				node_->SendPacket(pair_m_b.second, packet, false);
+			}
         }
     } else {
         DEBUG << " Ask4MissingBlocks: No blocks in waiting list" << std::endl;
     }
+
+	if (pending_transactions.size() > 0)
+	{
+		for(auto &mem_i: pending_transactions)
+		{
+			Transaction t = mem_i.second;
+			if ( t.GetTimestamp() + T_RETRANS < getSeconds() )
+			{
+				DEBUG << YELLOW << "--> Retransmission transation" << RESET << std::endl;
+				numRTxsG ++;
+				SendTransaction(t);
+			}
+		}
+	}
 }
 
 
@@ -903,6 +920,7 @@ void B4Mesh::GenerateResults()
 	std::cout << "B4Mesh: Transactions restant dans le mempool: " << pending_transactions.size() << std::endl;
 	std::cout << "B4Mesh: Transactions lost due to space: " << lostTrans << std::endl;
 	std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
+	std::cout << "B4Mesh: Num of re transaction: " << numRTxsG << std::endl;
 	std::cout << "B4Mesh: Blocks restant is missing_parents_list: " << missing_parents_list.size() << std::endl;
 	for (auto &b : missing_parents_list){
 		std::cout << "B4Mesh: - Block #: " << b.first.data() << " is missing " << std::endl;
