@@ -25,28 +25,32 @@ int main(int argc, char* argv[])
 	int opt = 0;
 	const char *arg_mIP = NULL;
 	const char *arg_port = NULL;
+	const char *arg_autogen = NULL;
 
 	std::istringstream iss_name(argv[0]);
     std::vector<std::string> split_line_name(std::istream_iterator<std::string>{iss_name}, std::istream_iterator<std::string>());
 
-    std::string usage = "./b4mesh -i <my IP> -p <port>";
+    std::string usage = "./b4mesh -i <my IP> -p <port> -r true";
+	std::string usage2 = "-i allows to force the IP \n-p allows to change the used port (5000) \n-r desactived the Auto generation of the transaction";
 
 	// options parsing
-    while ((opt = getopt(argc, argv, "i:p:h")) != -1)
+    while ((opt = getopt(argc, argv, "i:p:r:h")) != -1)
     {
         switch (opt)
         {
         case 'i':
             arg_mIP = optarg;
-            //std::cout << "my IP : " << arg_mIP << std::endl;
             break;
         case 'p':
             arg_port = optarg;
-            //std::cout << "used port : " << arg_port << std::endl;
+            break;
+		case 'r':
+            arg_autogen = optarg;
             break;
         case '?':
         case 'h':
             std::cout << usage << std::endl;
+			std::cout << usage2 << std::endl;
             return -1;
             break;
         }
@@ -55,6 +59,7 @@ int main(int argc, char* argv[])
 	
 	std::string myIP;
 	short port;
+	bool geneTrans = true;
 
 	if (arg_mIP == NULL)
 	{
@@ -68,8 +73,12 @@ int main(int argc, char* argv[])
 	} else {
 		port = DEFAULT_PORT;
 	}
+	if (arg_autogen != NULL)
+	{
+		geneTrans = false;
+	}
 
-	std::cout << " -> " << myIP << ":" << port << std::endl;
+	std::cout << " -> " << myIP << ":" << port << ", autoGeneTrans : " << geneTrans << std::endl;
 	
 	//create network service
     boost::asio::io_context io_context;
@@ -82,7 +91,7 @@ int main(int argc, char* argv[])
 	std::cout << "Connection Dbus ok" << std::endl;
 
 	//create b4mesh node
-    node s(io_context, conn, port, myIP);
+    node s(io_context, conn, port, myIP, geneTrans);
 
 	sighandler.async_wait([&io_context, &s](const boost::system::error_code&, const int&) {
 		std::cout << " Signal that end the program" << std::endl;

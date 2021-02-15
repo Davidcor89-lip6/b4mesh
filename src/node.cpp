@@ -4,7 +4,7 @@
 #include "b4mesh_p.hpp"
 #include "configs.hpp"
 
-node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP)
+node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP, bool geneTrans)
     : io_context_(io_context),
       acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
       acceptorB_(io_context, tcp::endpoint(tcp::v4(), port+1)),
@@ -16,7 +16,7 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
       timer_merging(io_context,std::chrono::steady_clock::now())
 {
     // blockgraph pointeur
-    b4mesh_ = new B4Mesh (this, io_context, port_, myIP);
+    b4mesh_ = new B4Mesh (this, io_context, port_, myIP, geneTrans);
 
     //Starting Server part
     std::cout << " starting connection acceptor " << std::endl;

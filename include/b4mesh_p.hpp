@@ -53,7 +53,7 @@ class B4Mesh
     /**
      * Constructors and destructor
      */
-    B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP);
+    B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP, bool geneTrans);
     ~B4Mesh();
 
     public:
@@ -82,6 +82,10 @@ class B4Mesh
      * it to the local group.
      */
     void GenerateTransactions();
+    /**
+     * Allows to register a transaction in the blockgraph
+     */ 
+    void RegisterTransaction(std::string payload);
 
     void SendTransaction(Transaction t);
     /**

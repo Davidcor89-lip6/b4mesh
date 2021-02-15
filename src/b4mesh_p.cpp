@@ -1,7 +1,7 @@
 #include "b4mesh_p.hpp"
 
 //Constructor - Global variables initialization
-B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP)
+B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP, bool geneTrans)
     : node_(node),
 	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
@@ -32,9 +32,8 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
     //lancement transaction
-    //if ( node_->consensus_.AmILeader() )
+    if ( geneTrans )
     {
-        //DEBUG << "i m leader " << std::endl;
         timer_generateT.expires_from_now(std::chrono::seconds(WAIT_FOR_FIRST_TRANSACTION));
         timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
     }
@@ -134,7 +133,7 @@ void B4Mesh::GenerateTransactions(){
     DEBUG << " Node: " << node_->consensus_.GetId() << " size payload " << size_payload << std::endl;
 
     SendTransaction(t);
-	TransactionsTreatment(t);
+	  TransactionsTreatment(t);
 
     // restart transaction generation
     int interval = dist_exp()*1000; 
@@ -142,6 +141,14 @@ void B4Mesh::GenerateTransactions(){
     timer_generateT.expires_from_now(std::chrono::milliseconds(interval));
     timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
 
+}
+
+void B4Mesh::RegisterTransaction(std::string payload){
+    Transaction t;
+    t.SetPayload(payload);
+    t.SetTimestamp(getSeconds());
+    SendTransaction(t);
+    TransactionsTreatment(t);
 }
 
 void B4Mesh::SendTransaction(Transaction t){

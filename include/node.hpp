@@ -25,7 +25,7 @@ class B4Mesh;
 class node
 {
 public:
-    node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP);
+    node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP, bool geneTrans);
     
     void addClientToList(std::string IP, client * c, bool block);
     void removeClientFromList(std::string IP);
