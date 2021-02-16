@@ -239,9 +239,16 @@ void node::SendPacket(std::string& IP, ApplicationPacket& packet, bool block)
     client* c = NULL;
     if (block)
     {
-        c = listClientB.find(IP)->second;
+        auto it = listClientB.find(IP);
+        if ( it != listClientB.end()){
+            c = it->second;
+        }
     } else {
-        c = listClient.find(IP)->second;
+        auto it = listClient.find(IP);
+        if ( it != listClient.end()){
+            c = it->second;
+        }
+        
     }
 
     if (c != NULL)
