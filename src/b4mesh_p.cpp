@@ -450,22 +450,23 @@ void B4Mesh::UpdateWaitingList(){
 	while (addblock)
 	{ 
 		addblock = false;
-		for (auto &b : waiting_list){
-			DEBUG << "Update waiting list: starting with block: " << b.first.data() << std::endl;
+		for (auto it = waiting_list.cbegin(); it != waiting_list.cend();){
+			DEBUG << "Update waiting list: starting with block: " << it->first.data() << std::endl;
 			size_t i = 0;
-			for(auto &hash : b.second.GetParents() ){
+			for(auto &hash : it->second.GetParents() ){
 				if (blockgraph.HasBlock(hash)){
 					i++;
 				}
 			}
-			if (b.second.GetParents().size() == i){ // if all parents are in blockgraph
+			if (it->second.GetParents().size() == i){ // if all parents are in blockgraph
 				DEBUG << "Update waiting list: All parents are present -> Adding block."<< std::endl;
-				AddBlockToBlockgraph(b.second);
-				waiting_list.erase(b.first);
+				AddBlockToBlockgraph(it->second);
+				waiting_list.erase(it->first);
 				addblock = true;
 				break;
 			} else {
 				DEBUG << "Not all parents from this block are present. keeping the block in the list" << std::endl;
+                ++it;
 			}
 		}
 	}
