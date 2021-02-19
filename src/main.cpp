@@ -108,12 +108,18 @@ int main(int argc, char* argv[])
 				{
 					"0.0.0.0:4242/add_transaction",
 					{ method::put, method::post},
-					[&s](std::string_view request_datas)
-						-> std::string
+					[&s](b4mesh::http::request_data_type && request_datas)
+						-> b4mesh::http::response_data_type
 					{
-						std::cout << "add_transaction : [PUT, POST] received : [" << request_datas << "]\n";
-						s.RegisterTransaction(std::string(request_datas));
-						return "ok from /add_transaction\n";
+						std::cout << "add_transaction : [PUT, POST] received : [" << request_datas.body << "]\n";
+						s.RegisterTransaction(std::string(request_datas.body));
+						return {
+							"application/json",
+							R"({
+								"operation":"add_transaction",
+								"return_value": "OK"
+							})"
+						};
 					}
 				}
 			}

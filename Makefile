@@ -6,7 +6,7 @@ BUILD_DIR=./build
 APPNAME=b4mesh
 GREEN_BUILDROOT=../greencom/greensoft-sdk-2021-01-25-14ae3/
 
-HTTP_SERVER_INC=./b4mesh_http/includes/b4mesh_http
+HTTP_SERVER_INC=./dependencies/b4mesh_http/includes/b4mesh_http
 
 DEPS=$(wildcard ${INC_DIR}/*.hpp) 
 SRC=$(wildcard ${SRC_DIR}/*.cpp)
