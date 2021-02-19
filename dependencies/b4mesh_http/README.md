@@ -94,7 +94,7 @@ Thus, the implementation might looks like :
 using first_argument_type = boost::io_context &;
 using second_argument_type = std::initializer_list</*unspecified : see specifications above*/>;
 
-auto b4mesh:http::add_enpoints(
+auto b4mesh::http::add_enpoints(
     first_argument_type first_argument,
     second_argument_type second_argument
 )
@@ -108,7 +108,7 @@ const auto      threads_count = 1;
 net::io_context io_service{threads_count};
 
 using method = boost::beast::http::verb;
-auto listeners = b4mesh:http::add_enpoints(
+auto listeners = b4mesh::http::add_enpoints(
     io_service,
     {
         {
@@ -162,7 +162,7 @@ There is a strong guarantee that `std::size(/*listeners_type : value*/)` is equa
 For instance :
 
 ```cpp
-auto listeners = b4mesh:http::add_enpoints(
+auto listeners = b4mesh::http::add_enpoints(
     io_service,
     {
         {
