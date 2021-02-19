@@ -126,14 +126,7 @@ void B4Mesh::GenerateTransactions(){
     /* Génération des variable aleatoires pour definir la taille de la transaction */
     int size_payload = dist(rng);
 
-    Transaction t;
-    t.SetPayload(string(size_payload, 'A'+node_->consensus_.GetId()));
-    t.SetTimestamp(getSeconds());
-
-    DEBUG << " Node: " << node_->consensus_.GetId() << " size payload " << size_payload << std::endl;
-
-    SendTransaction(t);
-	  TransactionsTreatment(t);
+    RegisterTransaction(string(size_payload, 'A'+node_->consensus_.GetId()));
 
     // restart transaction generation
     int interval = dist_exp()*1000; 
@@ -147,6 +140,7 @@ void B4Mesh::RegisterTransaction(std::string payload){
     Transaction t;
     t.SetPayload(payload);
     t.SetTimestamp(getSeconds());
+    DEBUG << " Node: " << node_->consensus_.GetId() << " size payload " << payload.size() << std::endl;
     SendTransaction(t);
     TransactionsTreatment(t);
 }
