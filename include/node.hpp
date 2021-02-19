@@ -38,6 +38,7 @@ public:
 
     std::string GetIp(void);
     void GenerateResults (void);
+    void RegisterTransaction (std::string payload);
 
 private:
     void create_client(std::string addr);

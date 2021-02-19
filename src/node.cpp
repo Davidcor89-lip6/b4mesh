@@ -281,3 +281,8 @@ void node::GenerateResults (void)
 {
     b4mesh_->GenerateResults();
 }
+
+void node::RegisterTransaction (std::string payload)
+{
+    b4mesh_->RegisterTransaction(payload);
+}

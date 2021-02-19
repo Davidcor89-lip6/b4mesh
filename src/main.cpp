@@ -16,6 +16,7 @@ using boost::asio::ip::tcp;
 #include "utils.hpp"
 #include "configs.hpp"
 
+#include "b4mesh/http/endpoint.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -98,6 +99,26 @@ int main(int argc, char* argv[])
     	io_context.stop();
 		s.GenerateResults();
   	});
+
+	if (!geneTrans){
+		using method = boost::beast::http::verb;
+		auto listeners = b4mesh::http::add_enpoints(
+			io_context,
+			{
+				{
+					"0.0.0.0:4242/add_transaction",
+					{ method::put, method::post},
+					[&s](std::string_view request_datas)
+						-> std::string
+					{
+						std::cout << "add_transaction : [PUT, POST] received : [" << request_datas << "]\n";
+						s.RegisterTransaction(std::string(request_datas));
+						return "ok from /add_transaction\n";
+					}
+				}
+			}
+		);
+	}
 
 	//launch network service
     io_context.run();
