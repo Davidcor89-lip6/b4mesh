@@ -75,7 +75,9 @@ Each endpoint is generated using an initializer-list of :
 struct /*unspecified : endpoint_argument */ {
     std::string /*unspecified : uri [protocol://ip:port/path/to/ressource]*/;
     std::initializer_list<boost::beast::http::verb> /* unspecified : methods */;
-    /* unspecified -> std::convertible_to<std::function<std::string(std::string_view)>> */ 
+    /* unspecified -> std::convertible_to<
+                        std::function<b4mesh::http::response_data_type(b4mesh::http::request_data_type &&)>
+                      > */ 
 };
 
 // Using structure-binding :
@@ -112,8 +114,8 @@ auto listeners = b4mesh:http::add_enpoints(
         {
             "0.0.0.0:4242/benchmark",
             { method::put, method::post},
-            [](std::string_view request_datas)
-                -> std::string
+            [](b4mesh::http::request_data_type && request_datas)
+                -> b4mesh::http::response_data_type
             {
                 return {};
             }
@@ -121,21 +123,28 @@ auto listeners = b4mesh:http::add_enpoints(
         {
             "0.0.0.0:4242/error",
             { method::get },
-            [](std::string_view request_datas)
-                -> std::string
+            [](b4mesh::http::request_data_type && request_datas)
+                -> b4mesh::http::response_data_type
             {
-                std::cout << "error : [GET] received : [" << request_datas << "]\n";
+                std::cout << "error : [GET] received : [" << request_datas.body << "]\n";
                 throw std::runtime_error{"test error\n"};
+                return{};
             }
         },
         {
             "0.0.0.0:4242/add_transaction",
             { method::put, method::post},
-            [](std::string_view request_datas)
-                -> std::string
+            [](b4mesh::http::request_data_type && request_datas)
+                -> b4mesh::http::response_data_type
             {
-                std::cout << "add_transaction : [PUT, POST] received : [" << request_datas << "]\n";
-                return "ok from /add_transaction\n";
+                std::cout << "add_transaction : [PUT, POST] received : [" << request_datas.body << "]\n";
+                return {
+                    "application/json",
+                    R"({
+                        "operation":"add_transaction",
+                        "return_value": "OK"
+                    })"
+                };
             }
         }
     }
@@ -159,12 +168,16 @@ auto listeners = b4mesh:http::add_enpoints(
         {
             "0.0.0.0:4242/benchmark",
             { method::put, method::post},
-            [](std::string_view request_datas){ return std::string{};}
+            [](b4mesh::http::request_data_type && request_datas)
+                    -> b4mesh::http::response_data_type
+            {}
         },
         {
             "0.0.0.0:4242/error",
             { method::get },
-            [](std::string_view request_datas){ return std::string{};}
+            [](b4mesh::http::request_data_type && request_datas)
+                    -> b4mesh::http::response_data_type
+            {}
         }
     }
 );
@@ -213,8 +226,31 @@ When received, a request is processed threw an internal router which redirect it
 
 Such `behavior_callback` is designed the following simple way :
 
+Its `operator()` use one argument of type `b4mesh::http::request_data_type &&` which is meant to be consumed,  
+and return a quite similar `b4mesh::http::response_data_type` value.
+
+**`b4mesh::http::request_data_type`** :
+
+This type, even if publicly accessible for convinience, match the following interface :
+
+```cpp
+struct /*unspecified : b4mesh::http::request_data_type */ {
+    boost::string_view  mime_information;   // "text/html", "application/json", etc.
+    std::string         body;               // request's body, can be moved
+};
+```
+
+**`b4mesh::http::response_data_type`** : 
+
+```cpp
+struct /*unspecified : b4mesh::http::request_data_type */ {
+    std::string  mime_information;   // "text/html", "application/json", etc.
+    std::string  body;               // response's body, will be consumed by move
+};
+```
+
 - Request body is passed as argument (as `std::string_view`)
-- Return (as moveable `std::string`) is sent back to the request's emitter, as response
+- Return (as moveable `b4mesh::http::response_data_type`) is sent back to the request's emitter, as response
 - Any thrown exception will result in a server_error, which's body is equal to `error : '<msg>'`, where `msg` is the return of `std::exception::what()`.
 - Any thrown value which does not satisfy `std::derived_from<std::exception>` concept results in the same behavior described previously, with `msg` set to `"unknown error"`;
 
@@ -226,9 +262,26 @@ Otherwise, `decltype(add_endpoints())` value destruction will clean any allocate
 
 ## Limitations
 
-Currently, no mime-type are provided as both `behavior_callback` argument and return type.
+Currently, none.  
+Please create an Github issue if you have any problem using this component.
 
-> Easy to implement though
+## Simple test
+
+Compile and run the sample *(don't forget to enable tests in **CMake**)*.
+
+```bash
+# /add_transaction
+curl --header "Content-Type: application/json" --request PUT --data "{ "transactions": [{ "payload": "0123456789"}]}" 0.0.0.0:4242/add_transaction
+
+# /error
+curl --request GET  0.0.0.0:4242/error
+
+# Not existing ressources
+curl --request GET  0.0.0.0:4242/not_existing # not_existing is not a valid ressource
+
+# Not allowed method
+curl --request DELETE  0.0.0.0:4242/error # DELETE is not a valid method for /error
+```
 
 ## Performances / Benchmarks
 
@@ -237,7 +290,7 @@ Using `Apache-Bench`.
 Payload :
 
 ```json
-{ "transaction": [
+{ "transactions": [
     { "payload": "0123456789"}
 ]}
 ```
@@ -247,5 +300,4 @@ Payload :
 |                1 |                   1 | 3234.60 [#/sec]  |  0.309 [ms]      | ab -t 1000 -c 1 -T 'application/json' -u add_transaction.payload.json http://0.0.0.0:4242/benchmark |
 |                4 |                   1 | 4171.57 [#/sec]  |  0.240 [ms]      | ab -t 1000 -c 4 -T 'application/json' -u add_transaction.payload.json http://0.0.0.0:4242/benchmark |
 |                4 |                   4 | 8116.32 [#/sec]  |  0.123 [ms]      | ab -t 1000 -c 4 -T 'application/json' -u add_transaction.payload.json http://0.0.0.0:4242/benchmark |
-
 

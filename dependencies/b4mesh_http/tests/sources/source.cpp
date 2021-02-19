@@ -21,8 +21,8 @@ void test(std::chrono::seconds run_duration, int threads_count)
             {
                 "0.0.0.0:4242/benchmark",
                 { method::put, method::post},
-                [](std::string_view request_datas)
-                    -> std::string
+                [](b4mesh::http::request_data_type && request_datas)
+                    -> b4mesh::http::response_data_type
                 {
                     return {};
                 }
@@ -30,21 +30,28 @@ void test(std::chrono::seconds run_duration, int threads_count)
             {
                 "0.0.0.0:4242/error",
                 { method::get },
-                [](std::string_view request_datas)
-                    -> std::string
+                [](b4mesh::http::request_data_type && request_datas)
+                    -> b4mesh::http::response_data_type
                 {
-                    std::cout << "error : [GET] received : [" << request_datas << "]\n";
+                    std::cout << "error : [GET] received : [" << request_datas.body << "]\n";
                     throw std::runtime_error{"test error\n"};
+                    return{};
                 }
             },
             {
                 "0.0.0.0:4242/add_transaction",
                 { method::put, method::post},
-                [](std::string_view request_datas)
-                    -> std::string
+                [](b4mesh::http::request_data_type && request_datas)
+                    -> b4mesh::http::response_data_type
                 {
-                    std::cout << "add_transaction : [PUT, POST] received : [" << request_datas << "]\n";
-                    return "ok from /add_transaction\n";
+                    std::cout << "add_transaction : [PUT, POST] received : [" << request_datas.body << "]\n";
+                    return {
+                        "application/json",
+                        R"({
+                            "operation":"add_transaction",
+                            "return_value": "OK"
+                        })"
+                    };
                 }
             }
         }

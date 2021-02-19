@@ -27,14 +27,36 @@ namespace b4mesh
     namespace beast = boost::beast;   // from <boost/beast.hpp>
     using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
 
-    class http /*struct-as-namespace*/ {
+    struct http /*struct-as-namespace*/ {
 
+        enum class message_type : bool
+        {
+            request,
+            response
+        };
+        template <message_type message_type_arg>
+        struct message_data_type {
+
+            constexpr static auto message_type_identifier_v = message_type_arg;
+            constexpr static auto is_request_v =
+                (message_type_identifier_v == decltype(message_type_identifier_v)::request);
+            constexpr static auto is_response_v = not is_request_v;
+
+            using mime_type = std::conditional_t<is_request_v, boost::string_view, std::string>;
+            mime_type mime_information;
+            using body_type = std::string;
+            body_type body;
+        };
+        using request_data_type = message_data_type<message_type::request>;
+        using response_data_type = message_data_type<message_type::response>;
+
+      private:
         using endpoint_argument = struct {
             using target_type = std::string;
             target_type target;
             using method_type = boost::beast::http::verb;
             std::initializer_list<method_type> methods;
-            using callback_type = std::function<std::string(std::string_view)>;
+            using callback_type = std::function<response_data_type(request_data_type &&)>;
             callback_type callback;
         };
 
@@ -60,12 +82,15 @@ namespace b4mesh
                 return res;
             };
 
-            // todo : return { mime-type, body_content }
-
-            decltype(request_handler_callback(req.body())) request_return;
+            response_data_type request_return;
             try
             {
-                request_return = request_handler_callback(req.body());
+                using message_header_type = typename std::remove_reference_t<decltype(req)>::header_type;
+                auto request_mime_information =
+                    static_cast<const message_header_type&>(req)[beast::http::field::content_type]; // sw
+
+                request_return = request_handler_callback(
+                    {std::move(request_mime_information), std::forward<std::string&&>(req.body())});
             }
             catch (const std::exception& error)
             {
@@ -78,12 +103,13 @@ namespace b4mesh
                 return;
             }
 
-            auto const request_return_size = request_return.size(); // Cache the size since we need it after the move
+            const auto request_return_size =
+                request_return.body.size(); // Cache the size since we need it after the move
 
             beast::http::response<beast::http::string_body> res{
-                beast::http::status::ok, req.version(), std::move(request_return)};
+                beast::http::status::ok, req.version(), std::move(request_return.body)};
             res.set(beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-            res.set(beast::http::field::content_type, "text/html"); // todo : mime_type
+            res.set(beast::http::field::content_type, request_return.mime_information);
             res.content_length(request_return_size);
             res.keep_alive(req.keep_alive());
             return send(std::move(res));
