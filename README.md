@@ -77,7 +77,7 @@ Otherwise, the created program "b4mesh" can be use as is :
 
 means that you forget the "sudo" ;)
 
- + -i : indicates the IP the the Green Communication network (their is a auto detection that can failed)
+ + -i : indicates the IP the the Green Communication network (their is a auto detection that can failed).
  + -p : indicates the used port to communicate (5000 by default). In fact, the port number and the port number +1 is used (ex. 5000 and 5001). 
  + -r : desactives the autogeneration of transaction inside B4Mesh and open a local endpoint to register transactions from outside this program. 
 
@@ -95,6 +95,32 @@ You can visualize manualy using :
 >$ cd Results  
 >$ ./txt2Png blockgraph-X.txt res-X.png  
 >$ eog res-X.png
+
+## Nginx configuration
+
+### manually
+>$ sudo rwdo -s
+>$ vi /etc/nginx/conf.d/qolyester-http.conf 
+
+server {
+        listen  *:80;
+        listen  [::]:80;
+        include local_server_name.conf;
+
+        ...
+
+        include qolyester.d/*.conf;
+
+        location /add_transaction {
+                 proxy_pass http://127.0.0.1:4242/add_transaction;
+        }
+}
+
+>$ sudo nginx -s reload
+
+### by makefile
+
+>$ make patch-nginx IP=10.181.172.130
 
 
  
