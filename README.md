@@ -102,6 +102,7 @@ You can visualize manualy using :
 >$ sudo rwdo -s
 >$ vi /etc/nginx/conf.d/qolyester-http.conf 
 
+``` bash
 server {
         listen  *:80;
         listen  [::]:80;
@@ -115,6 +116,7 @@ server {
                  proxy_pass http://127.0.0.1:4242/add_transaction;
         }
 }
+```
 
 >$ sudo nginx -s reload
 
@@ -122,5 +124,4 @@ server {
 
 >$ make patch-nginx IP=10.181.172.130
 
-
- 
+sudo password has to be typed two times.
