@@ -100,9 +100,12 @@ int main(int argc, char* argv[])
 		s.GenerateResults();
   	});
 
+	using listeners_type = decltype(b4mesh::http::add_enpoints(io_context, {}));
+	listeners_type listeners;
+
 	if (!geneTrans){
 		using method = boost::beast::http::verb;
-		auto listeners = b4mesh::http::add_enpoints(
+		b4mesh::http::add_enpoints(
 			io_context,
 			{
 				{
