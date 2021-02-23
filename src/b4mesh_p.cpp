@@ -26,6 +26,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	numRTxsG = 0;
     lostTrans = 0;
 	lostPacket = 0;
+  numDumpingBlock = 0;
     blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
 
     //recurrent task
@@ -256,6 +257,7 @@ void B4Mesh::BlockTreatment(Block b)
         DEBUG << " BlockTreatment: Adding block: " << b.GetHash().data() << " to waiting_list: " << std::endl;
         if (waiting_list.count(b.GetHash()) > 0){
           DEBUG << "Block already in waiting list.... Dumping block." << std::endl;
+          numDumpingBlock++;
         } else {
             waiting_list[b.GetHash()] = b;
         }
@@ -277,6 +279,7 @@ void B4Mesh::BlockTreatment(Block b)
   } else {
     // The block is already present in the local blockgraph
     DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in blockgraph\n  Dumping block..." << std::endl;
+    numDumpingBlock ++;
   }
 }
 
@@ -951,6 +954,7 @@ void B4Mesh::GenerateResults()
 	std::cout << "B4Mesh: Transactions lost due to space: " << lostTrans << std::endl;
 	std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
 	std::cout << "B4Mesh: Num of re transaction: " << numRTxsG << std::endl;
+	std::cout << "B4Mesh: Num of dumped block (already in waiting list or in the blockgraph): " <<  numDumpingBlock << std::endl;
 	std::cout << "B4Mesh: Blocks restant is missing_parents_list: " << missing_parents_list.size() << std::endl;
 	for (auto &b : missing_parents_list){
 		std::cout << "B4Mesh: - Block #: " << b.first.data() << " is missing " << std::endl;
