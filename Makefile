@@ -5,7 +5,7 @@ SRC_DIR=./src
 BUILD_DIR=./build
 APPNAME=b4mesh
 GREEN_BUILDROOT=../greencom/greensoft-sdk-2021-01-25-14ae3/
-
+JSON_INC=./dependencies/
 HTTP_SERVER_INC=./dependencies/b4mesh_http/includes/b4mesh_http
 
 DEPS=$(wildcard ${INC_DIR}/*.hpp) 
@@ -41,7 +41,7 @@ CCPFLAGS=${OPTIM} -fcompare-debug-second -std=c++17 -Wall
 LDFLAGS= -lpthread -L${GREEN_LIB} -ldbus-c++-1 -ldbus-c++-asio-1
 endif
 
-CCPFLAGS+= -I$(BUILD_DIR) -I${INC_DIR} -I${GREEN_INCLUDE} -I${HTTP_SERVER_INC}
+CCPFLAGS+= -I$(BUILD_DIR) -I${INC_DIR} -I${GREEN_INCLUDE} -I${HTTP_SERVER_INC} -I${JSON_INC}
 
 $(BUILD_DIR)/%.o: ${SRC_DIR}/%.cpp $(DEPS) ${GLUE_FILES}
 	$(CC) $(CCPFLAGS) -c -o $@ $< 

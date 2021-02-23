@@ -2,7 +2,8 @@
 
 //Constructor - Global variables initialization
 B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP, bool geneTrans)
-    : node_(node),
+    : visuBlock("/tmp/blockgraph"),
+      node_(node),
 	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
       io_context_(io_context),
@@ -480,6 +481,32 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
 
   // For traces propuses
   CreateGraph(b);
+
+  // For visualisation
+  AddBlockToVisuFile(b);
+}
+
+void B4Mesh::AddBlockToVisuFile(Block b){
+
+    json j;
+    j["node"]["hash"] =  stoi(b.GetHash());
+    j["node"]["groupId"] = stoi(b.GetGroupId());
+
+    std::vector<std::string> parents_of_block = b.GetParents();
+    std::vector<int> parents_of_block_prettify;
+
+    for (auto &p : parents_of_block){
+      if (p == "01111111111111111111111111111111"){
+          parents_of_block_prettify.push_back(0);
+      } else {
+          parents_of_block_prettify.push_back(stoi(p));
+      }
+    }
+
+    j["node"]["parent"] = parents_of_block_prettify;
+
+    visuBlock << j << std::endl;
+
 }
 
 
@@ -957,5 +984,7 @@ void B4Mesh::GenerateResults()
       output_file2 << it.second << std::endl; 
     }
 	output_file2.close();
+
+    visuBlock.close();
     
 }
