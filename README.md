@@ -71,7 +71,7 @@ You can transfer the script "launcher" on the router to simplify the program lau
 
 Otherwise, the created program "b4mesh" can be use as is :
 
-> sudo ./b4mesh -i <myIP> -p <myport> -r true
+> sudo ./b4mesh -i myIP -p myport -r true
 
 > Exception: Rejected send message, 1 matched rules; type="method_call", sender=":1.65888" (uid=1004 pid=5516 comm="./b4mesh -r true ") interface="org.freedesktop.DBus.Properties" member="Get" error name="(unset)" requested_reply="0" destination="net.qolsr.Consensus" (uid=1015 pid=1667 comm="/usr/sbin/qolsr-consensusd --pidfile /run/qolyeste")
 
@@ -81,7 +81,7 @@ means that you forget the "sudo" ;)
  + -p : indicates the used port to communicate (5000 by default). In fact, the port number and the port number +1 is used (ex. 5000 and 5001). 
  + -r : desactives the autogeneration of transaction inside B4Mesh and open a local endpoint to register transactions from outside this program. 
 
- >$ curl -X PUT -d "<serialiezd payload>" 0.0.0.0:4242/add_transaction
+ >$ curl -X PUT -d "serialiezd payload" 0.0.0.0:4242/add_transaction
  
 ## results
 
@@ -124,4 +124,4 @@ server {
 
 >$ make patch-nginx IP=10.181.172.130
 
-sudo password has to be typed two times.
+sudo password has to be typed two times. (b4meshroot)

@@ -737,6 +737,7 @@ void B4Mesh::Ask4MissingBlocks()
         DEBUG << " Ask4MissingBlocks: No blocks in waiting list" << std::endl;
     }
 
+    /* retransmission of transaction to be sure that old transaction are register */
 	if (pending_transactions.size() > 0)
 	{
 		for(auto &mem_i: pending_transactions)
