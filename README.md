@@ -125,3 +125,14 @@ server {
 >$ make patch-nginx IP=10.181.172.130
 
 sudo password has to be typed two times. (b4meshroot)
+
+## live visualisation
+
+In the file "/tmp/blockgraph", you can find a live feed of the blockgraph under a json format.
+Each node is under the format : 
+
+```json
+{"node":{"groupId":217,"hash":7144646,"parent":[9288542]}}
+{"node":{"groupId":217,"hash":2681597,"parent":[7144646]}}
+{"node":{"groupId":26,"hash":7377976,"parent":[2681597,8515655]}}
+```
