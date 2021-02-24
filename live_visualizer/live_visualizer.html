@@ -27,14 +27,13 @@
                 .duration(750)
                 .ease(d3.easeLinear);
             var rendering = graphContainer
-                        .graphviz()
-                        .transition(transition)
-                        .width(width)
-                        .height(height)
-                        .fit(true);
+                .graphviz()
+                .transition(transition)
+                .width(width)
+                .height(height)
+                .fit(true);
 
             var render_graph = function(datas) {
-
                 rendering
                     .renderDot(datas)
                     .zoom(true);
@@ -58,6 +57,6 @@
             worker.onerror = function(event){
                 console.log("[error](polling) worker error : " + event.message);
             };
-          </script>
+        </script>
     </body>
 </html>

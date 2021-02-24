@@ -8,7 +8,8 @@ Green's NGinx server might serve `live_visualizer.html` on a `/visualization` en
 
 ## Configuration
 
-In `scripts/poll_worker_tasks.js`, see configuration object :
+The web-worker which polls datas to render, defined in `scripts/poll_worker_tasks.js`, use `configuration.js` as configuration file.  
+Feel free to modify any variables in, in order to change the worker's behavior.
 
 ```js
 const configuration = {
