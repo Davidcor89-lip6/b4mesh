@@ -17,7 +17,7 @@ var json_to_dot = function(datas)
         groups_map[group_id].push([ hash_id, parents.split(',') ]);
     });
 
-    var output = "digraph Q {\n";
+    var output = "digraph blockGraph_transactions {\n";
     output += "rankdir=LR;\n"
     // output += "node [shape=record fontname=Arial]";
     for (var group_id in groups_map)
