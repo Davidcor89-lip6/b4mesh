@@ -35,3 +35,40 @@ Requesting `blockgraph_as_dot_API_accesspoint` endpoint, the visualizer expect a
     }
 }
 ```
+
+## Dependencies
+
+This components relies on :
+
+- D3
+- WASM
+- [d3-graphviz](https://github.com/magjac/d3-graphviz)
+
+## Limitations
+
+This component relies on two external components, in order to draw dot graphs *(see dependencies section)*.
+
+However, such components do not currently support all dot-graph features, such as :
+
+- Clusters outlines  
+  ```dot
+  subgraph cluster_MyClusterName
+  {
+      // content
+  }
+  ```
+- ~~Orientations *(graphs are drawn in a top-bottom way only)*~~  
+    **Fixed** with components update
+
+## Tests
+
+- Run a simple http server using Python :
+  ```bash
+   py ./tests/server.py
+  ```
+
+- Visit [http://127.0.0.1:8000/live_visualizer.html] using a web-browser *(but IE)*, or whatever url/port you specified
+
+## Improvements / nice-to-have / todos
+
+- [ ] Manage zoom/focus properly
