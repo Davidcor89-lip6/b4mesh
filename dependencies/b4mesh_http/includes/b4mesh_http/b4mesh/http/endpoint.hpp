@@ -398,7 +398,7 @@ namespace b4mesh
                     {std::move(path), std::move(methods), std::move(callback)}); // todo : forward
             };
             // create endpoints
-            using endpoint_type = std::shared_ptr<listener>;
+            //using endpoint_type = std::shared_ptr<listener>;
             std::vector<std::shared_ptr<listener>> listeners;
             for (auto&& [listener_ip, listener_argument] : listener_arguments_deduplicator)
             {
