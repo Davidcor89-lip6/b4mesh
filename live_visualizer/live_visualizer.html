@@ -2,7 +2,9 @@
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 <html>
+    <title>Blockgraph live visualizer</title>
     <head>
+        <link rel="icon" href="favicon.ico" />
         <link rel="stylesheet" href="style.css">
         <script src="//d3js.org/d3.v5.min.js"></script>
         <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
@@ -34,7 +36,8 @@
             var render_graph = function(datas) {
 
                 rendering
-                    .renderDot(datas);
+                    .renderDot(datas)
+                    .zoom(true);
             }
             var worker = new Worker("scripts/poll_worker_task.js");
             worker.onmessage = function(event) {
