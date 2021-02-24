@@ -2,7 +2,8 @@
 
 //Constructor - Global variables initialization
 B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP, bool geneTrans)
-    : visuBlock("/tmp/blockgraph"),
+    : visuBlock(LIVEBLOCK_FILE),
+	  visuMemPool(LIVEMEMPOOL_FILE),
       node_(node),
 	  mIP_(myIP),
       time_start(std::chrono::steady_clock::now()),
@@ -26,8 +27,14 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	numRTxsG = 0;
     lostTrans = 0;
 	lostPacket = 0;
-  numDumpingBlock = 0;
+	numDumpingBlock = 0;
     blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
+	total_missingBlockTime = 0;
+    count_missingBlock = 0;
+	total_waitingBlockTime = 0;
+    count_waitingBlock = 0;
+	total_pendingTxTime = 0;
+    count_pendingTx = 0;
 
     //recurrent task
     timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
@@ -171,6 +178,10 @@ void B4Mesh::TransactionsTreatment(Transaction t)
             if (IsSpaceInMempool()){
                 DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
                 pending_transactions[t.GetHash()] = t;
+
+				// trace purpose
+				pending_transactions_time[t.GetHash()] = getSeconds();
+
                 //DumpMempool();
             } else { // No space in mempool.
                 DEBUG << "Transaction's Mempool is full" << std::endl;
@@ -260,6 +271,9 @@ void B4Mesh::BlockTreatment(Block b)
           numDumpingBlock++;
         } else {
             waiting_list[b.GetHash()] = b;
+
+			//trace purpose
+			waiting_list_time[b.GetHash()] = getSeconds();
         }
       } else {
         // All ancestors are known by the local node
@@ -416,6 +430,11 @@ void B4Mesh::EraseMissingBlock(string b_hash){
       DEBUG << "EraseMissingBlock: New Block " << b_hash.data() << " is a missing parent" << std::endl;
       DEBUG << " EraseMissingBlock: Erasing block hash from missing_parents_list"<< std::endl;
       missing_parents_list.erase(pair_m_b);
+
+	  //trace purpose
+	  total_missingBlockTime += getSeconds() - missing_list_time[pair_m_b->first];
+	  count_missingBlock ++;
+	  missing_list_time.erase(pair_m_b->first);
       return;
     }
   }
@@ -438,6 +457,9 @@ void B4Mesh::UpdateMissingList(vector<string> unknown_p, std::string ip){
       DEBUG << "updateMissingList: Parent " << missing_p << " not founded in list" << std::endl;
       DEBUG << "updateMissingList: Adding missing parent to list of missing blocks"<< std::endl;
       missing_parents_list.push_back(make_pair(missing_p, ip));
+
+	  // Trace purpose
+	  missing_list_time[missing_p] = getSeconds();
     }
   }
 }
@@ -461,6 +483,11 @@ void B4Mesh::UpdateWaitingList(){
 				AddBlockToBlockgraph(it->second);
 				waiting_list.erase(it->first);
 				addblock = true;
+
+				//Trace purpose
+				total_waitingBlockTime += getSeconds() - waiting_list_time[it->first];
+	  			count_waitingBlock ++;
+	  			waiting_list_time.erase(it->first);
 				break;
 			} else {
 				DEBUG << "Not all parents from this block are present. keeping the block in the list" << std::endl;
@@ -522,6 +549,11 @@ void B4Mesh::UpdatingMempool (vector<Transaction> transactions)
             DEBUG << " UpdatingMempool: Transaction " << t.GetHash() << " founded" << std::endl;
             DEBUG << " UpdatingMempool: Erasing transaction from Mempool... " << std::endl;
             pending_transactions.erase(t.GetHash());
+
+			//Trace purpose
+			total_pendingTxTime += getSeconds() - pending_transactions_time[t.GetHash()];
+	  		count_pendingTx ++;
+	  		pending_transactions_time.erase(t.GetHash());
         }
         else {
             DEBUG << " UpdatingMempool:  I don't know this transaction " << t.GetHash() << std::endl;
@@ -767,7 +799,7 @@ void B4Mesh::Ask4MissingBlocks()
         DEBUG << " Ask4MissingBlocks: No blocks in waiting list" << std::endl;
     }
 
-    /* retransmission of transaction to be sure that old transaction are register */
+    // retransmission of transaction to be sure that old transaction are register 
 	if (pending_transactions.size() > 0)
 	{
 		for(auto &mem_i: pending_transactions)
@@ -781,6 +813,9 @@ void B4Mesh::Ask4MissingBlocks()
 			}
 		}
 	}
+
+	// For trace purpose
+	visuMemPool << pending_transactions.size() << " " << (float)(pending_transactions.size())/(float)(SIZE_MEMPOOL) << "%" << std::endl;
 }
 
 
@@ -932,12 +967,47 @@ void B4Mesh::CreateGraph(Block &b){
   }
 }
 
-int B4Mesh::SizeMempoolBytes (){
+int B4Mesh::SizeMempoolBytes(void){
     int ret = 0;
     for (auto &t : pending_transactions){
     ret += t.second.GetSize();
     }
     return ret;
+}
+
+int B4Mesh::CountTxInBlockGraph (Transaction t)
+{
+	int count = 0;
+    for (const auto bkg : blockgraph.GetBlocks()){
+        for (auto& t2 : bkg.second.GetTransactions()){
+            if(t2.GetHash() == t.GetHash()){
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+int B4Mesh::ComputeTransactionRepetition(void)
+{
+	int count = 0;
+	std::map<std::string,int> mem;
+	for (const auto bkg : blockgraph.GetBlocks()){
+		for (auto& t : bkg.second.GetTransactions()){
+			int res = CountTxInBlockGraph(t);
+			if ( res > 1){
+				auto it = mem.find(t.GetHash());
+				if (it == mem.end())
+				{
+					std::cout << stoi(t.GetHash()) << " : " << res << std::endl;
+					count++;
+					mem[t.GetHash()] = res;
+				}
+				
+			}
+		}
+	}
+	return count;
 }
 
 void B4Mesh::GenerateResults()
@@ -948,21 +1018,28 @@ void B4Mesh::GenerateResults()
 	std::cout << "B4mesh: Total number of blocks : " << blockgraph.GetBlocksCount() << std::endl;
 	std::cout << "B4Mesh: Taille moyenne d'un bloc (bytes): " << blockgraph.GetByteSize()/blockgraph.GetBlocksCount() << std::endl;
 	std::cout << "B4mesh: Total number of transactions in BG : " << blockgraph.GetTxsCount() << std::endl;
+	std::cout << "B4mesh: number of transactions in BG / seconds : " << (float)(blockgraph.GetTxsCount())/getSeconds() << std::endl;
 	std::cout << "B4Mesh: Moyenne de transactions par block dans Blockgraph: " << blockgraph.MeanTxPerBlock() << std::endl;
 	std::cout << "B4Mesh: Total size of transactions (bytes): " << blockgraph.GetTxsByteSize() << std::endl;
 	std::cout << "B4Mesh: Transactions restant dans le mempool: " << pending_transactions.size() << std::endl;
+	std::cout << "B4Mesh: mean time of transaction in the mempool : " << total_pendingTxTime / count_pendingTx << std::endl;
 	std::cout << "B4Mesh: Transactions lost due to space: " << lostTrans << std::endl;
 	std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
 	std::cout << "B4Mesh: Num of re transaction: " << numRTxsG << std::endl;
+	std::cout << "B4Mesh: Num of transaction with multiple occurance in the blockgraph: "  << std::endl;
+	int TxRep = ComputeTransactionRepetition();
+	std::cout << TxRep << std::endl;
 	std::cout << "B4Mesh: Num of dumped block (already in waiting list or in the blockgraph): " <<  numDumpingBlock << std::endl;
 	std::cout << "B4Mesh: Blocks restant is missing_parents_list: " << missing_parents_list.size() << std::endl;
 	for (auto &b : missing_parents_list){
 		std::cout << "B4Mesh: - Block #: " << b.first.data() << " is missing " << std::endl;
 	}
+	std::cout << "B4Mesh: mean time of missing block in the list : " << total_missingBlockTime / count_missingBlock << std::endl;
 	std::cout << "B4Mesh: Blocks restant is waiting_list: " << waiting_list.size() << std::endl;
 	for (auto &b : waiting_list){
 		std::cout << "B4Mesh: - Block #: " << b.first << " is in waiting_list " << std::endl;
 	}
+	std::cout << "B4Mesh: mean time of waiting block in the list : " << total_waitingBlockTime / count_waitingBlock << std::endl;
 	std::cout << "B4Mesh: Packets lost due to messaging pb: " << lostPacket << std::endl;
     std::cout << "B4Mesh: Total Bytes : " << blockgraph.GetByteSize() << "\n" << std::endl;
 
@@ -989,6 +1066,8 @@ void B4Mesh::GenerateResults()
     }
 	output_file2.close();
 
+	// close live file
     visuBlock.close();
+	visuMemPool.close();
     
 }
