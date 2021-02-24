@@ -1,0 +1,52 @@
+<!doctype html>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+        <script src="https://cpettitt.github.io/project/graphlib-dot/v0.4.10/graphlib-dot.min.js"></script>
+        <script src="https://cpettitt.github.io/project/dagre-d3/v0.1.5/dagre-d3.min.js"></script>
+        <script src="scripts/json_to_dot.js"></script>
+        <script type="text/javascript">
+
+            if (!window.Worker)
+                console.log('[error](polling) Browser does not support workers')
+
+            var render_graph = function(datas) {
+                // Parse the DOT syntax into a graphlib object.
+                var g = graphlibDot.parse(datas);
+                var renderer = new dagreD3.Renderer();
+                renderer.run(g, d3.select("svg g"));
+                // Optional - resize the SVG element based on the contents.
+                var svg = document.querySelector('#graphContainer');
+                var bbox = svg.getBBox();
+                svg.style.width = bbox.width + 40.0 + "px";
+                svg.style.height = bbox.height + 40.0 + "px";
+            }
+            var worker = new Worker("scripts/poll_worker_task.js");
+            worker.onmessage = function(event) {
+                // console.log("worker message : [" + event.data.toString() + "]");
+                var datas_as_dot = null;
+                try { datas_as_dot = json_to_dot(event.data); }
+                catch (error) {
+                    console.error('[error](rendering) graph rendering failed : ' + error)
+                    throw(error);
+                }
+
+                try {
+                    render_graph(datas_as_dot);
+                }
+                catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
+            };
+            worker.onerror = function(event){
+                console.log("[error](polling) worker error : " + event.message);
+            };
+          </script>
+    </head>
+    <body>
+        <svg id="graphContainer">
+            <g/>
+        </svg>
+    </body>
+</html>
