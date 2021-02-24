@@ -125,6 +125,10 @@ class B4Mesh
      */
     bool IsTxInBlockGraph (Transaction t);
     /**
+     * Count the number of occurance of a transaction in the blockgraph
+     */
+    int CountTxInBlockGraph (Transaction t);
+    /**
      * Updates the Txs Mempool once the Block is added to the BG
      */
     void UpdatingMempool(vector<Transaction> transactions);
@@ -277,8 +281,19 @@ class B4Mesh
     int numRTxsG; // The number of retransaction 
     int numDumpingBlock; //The number of dumped block because it is already in Waiting list or in Blockgraph
 
-    std::ofstream visuBlock;
+    std::ofstream visuBlock; //File to visualize live the blockgraph 
     void AddBlockToVisuFile(Block b);
+    std::ofstream visuMemPool; //File to visualize live the number of transaction in the mempool and usage rate
+    int ComputeTransactionRepetition(void);
+    std::map<std::string, double> pending_transactions_time;  // time when a transaction enter the mempool
+    double total_pendingTxTime;
+    double count_pendingTx;
+    std::map<std::string, double> waiting_list_time; // time when a blocks enter the waiting list
+    double total_waitingBlockTime;
+    double count_waitingBlock;
+    std::map<std::string, double> missing_list_time; // time when a blocks enter the missing list
+    double total_missingBlockTime;
+    double count_missingBlock;
 
 private:
     //parent

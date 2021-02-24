@@ -22,11 +22,15 @@
 #define RECCURENT_TIMER 10
 
 // Blockgraph
-#define SIZE_BLOCK 10        // 130
+#define SIZE_BLOCK 20        // 130
 #define SIZE_MEMPOOL 500
 
 // Retransmit transaction timing
 #define T_RETRANS 60
+
+// Trace option
+#define LIVEBLOCK_FILE "/tmp/blockgraph"
+#define LIVEMEMPOOL_FILE "./live_mempool.txt"
 
 // Only in b4mesh class
 #define DEBUG std::cout << getSeconds() << " : "
