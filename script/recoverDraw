@@ -1,6 +1,6 @@
 #!/bin/bash
 
-List_node="130 26 217 170"
+List_node="130 26 217 170 210"
 
 rm *.txt *.png
 make -C ../ recoverResultAll
