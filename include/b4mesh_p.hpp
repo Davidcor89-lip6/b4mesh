@@ -156,11 +156,14 @@ class B4Mesh
 
     void StartMerge();
 
-
     /**
      * Check if the parents of the received block are known by the node
      */
     bool CheckBlockParents(Block &block);
+
+    vector<string> GetParentsNotInBG(vector<string> parents);
+    vector<string> GetParentsNotInWL(vector<string> p_notIn_BG);
+
     /**
      * Get the hashes of unknown parents of the received block
      */
@@ -180,7 +183,7 @@ class B4Mesh
      * Method executed by the leader when a topology change is detected
      * This method causes a CHILDLESSBLOCK_REQ
      */
-    void CheckBlockgraphSync();
+    void Ask4ChildlessBlocks();
     /**
      * Send the childless blocks to leader upon a CHILDLESSBLOCK_REQ
      */
@@ -199,6 +202,7 @@ class B4Mesh
      *  after receiving a merge block
      */
     void SyncNode(std::vector<std::string> unknown_p, std::string ip);
+    void SyncNode2(vector<Transaction> transactions);
     /**
      * Updates the missing_parents_list. If new block is a missing parent
      * it will ERASE it form the list
@@ -273,6 +277,11 @@ class B4Mesh
     std::map<std::string, Transaction> pending_transactions;  // mempool of transactions
     std::map<std::string, Block> waiting_list; // blocks waiting for their ancestors
     Blockgraph blockgraph;  // The database of blocks
+    bool mergeBlock;
+    std::vector<std::string> missing_childless;
+    std::map<int, std::string> recover_branch;
+    std::multimap<int, std::string> nodes_res;
+    double lastBlock;
 
     // Trace
     int lostTrans; // counts the number of transactions lost because of space limit

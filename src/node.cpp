@@ -31,9 +31,9 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
     boost::asio::placeholders::error));
 
     //First Intialisation with the client list 
-    startListAddr = consensus_.getNodeList();
+    currentListAddr = consensus_.getNodeList();
     std::cout << " try to connect the list " << std::endl;
-    for (auto addr = startListAddr.begin(); addr != startListAddr.end(); ++addr)
+    for (auto addr = currentListAddr.begin(); addr != currentListAddr.end(); ++addr)
     {
         create_client(*addr);
     }
@@ -48,35 +48,28 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
 void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/) 
 {
 	std::cout << "Status Dbus" << std::endl; 
-    std::vector<std::string> listAddr = consensus_.getNodeList();
-    /*std::cout << "new list " << std::endl;
-    for (auto it : listAddr)
-    {
-        std::cout << it << std::endl;
-    }
-    std::cout << "start list " << std::endl;
-    for (auto it : startListAddr)
-    {
-        std::cout << it << std::endl;
-    }*/
+    previousListAddr = currentListAddr;
+    currentListAddr = consensus_.getNodeList();
 
     std::cout << "leader " << consensus_.getLeader() << std::endl;
 
-    for (auto it : listAddr)
+    for (auto it : currentListAddr)
     {
-        auto Addr = std::find (startListAddr.begin(), startListAddr.end(), it);
-        if (Addr == startListAddr.end())
+        auto Addr = std::find (previousListAddr.begin(), previousListAddr.end(), it);
+        if (Addr == previousListAddr.end())
         {
             std::cout << "timer_pollDbus_fct: adding " << it << std::endl;
             create_client(it);
             merge +=2;
+            int ID = consensus_.GetIdFromIP(it);
+            new_nodes.push_back(pair<int, std::string>(ID, it));
         }
     }
 
-    for (auto it : startListAddr)
+    for (auto it : previousListAddr)
     {
-        auto Addr = std::find (listAddr.begin(), listAddr.end(), it);
-        if (Addr == listAddr.end())
+        auto Addr = std::find (currentListAddr.begin(), currentListAddr.end(), it);
+        if (Addr == currentListAddr.end())
         {
             std::cout << "timer_pollDbus_fct: removing " << it << std::endl;
             removeClientFromList(it);
@@ -89,8 +82,6 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
         timer_merging.expires_from_now(std::chrono::seconds(MERGE_TIMING));
         timer_merging.async_wait(boost::bind(&node::merge_launcher_fct, this, boost::asio::placeholders::error));
     }
-
-    startListAddr = listAddr;
 
     timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));
 	timer_pollDbus.async_wait(boost::bind(&node::timer_pollDbus_fct, this, boost::asio::placeholders::error));

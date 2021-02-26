@@ -88,6 +88,8 @@ public:
    */
   //vector<string> GetChildlessBlocks ();
   vector<Block> GetChildlessBlocks();
+  vector<string> GetChildlessBlockList ();
+  
   /**
    *  Checks if the block given is a childlesblock
    */
