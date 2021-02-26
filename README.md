@@ -4,7 +4,7 @@ Développment du projet b4mesh sur le materiel de GreenCom.
 ## configure all yours routers
 
 use the green communication tutorial
-(Testbed / your own internet)
+(GreenPi-b4mesh / b4meshnetwork)
 
 ## buildroot configuration / toolchain compilation
 
