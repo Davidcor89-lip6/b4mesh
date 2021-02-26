@@ -38,7 +38,17 @@
                     .renderDot(datas)
                     .zoom(true);
             }
-            var worker = new Worker("scripts/poll_worker_task.js");
+
+            var worker = function(){
+                // fix Chrome security error (Firefox allow local files, not Chrome)
+                const poll_worker_task_URL = function() {
+                    var url = new URL(window.location.href);
+                    url.search = "";
+                    url.pathname = "scripts/poll_worker_task.js";
+                    return url;
+                }();
+                return new Worker(poll_worker_task_URL.toString());
+            }();
             worker.onmessage = function(event) {
 
                 console.log("worker.onmessage ... size=[" + event.data + "]")
