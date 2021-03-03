@@ -12,6 +12,9 @@
         <script src="scripts/json_to_dot.js"></script>
     </head>
     <body>
+        <p style="width: 100%;">
+            Blockgraph live visualizer
+        </p>
         <div id="graph-container" style="width: 100%; height: 600px; margin:auto; border: 1px solid black"></div>
         
         <script type="text/javascript">
@@ -19,25 +22,25 @@
             if (!window.Worker)
                 console.log('[error](polling) Browser does not support workers')
 
-
             const graphContainer = d3.select("#graph-container");
-            const width = graphContainer.node().clientWidth;
-            const height = graphContainer.node().clientHeight;
             var transition = d3.transition()
                 .duration(750)
                 .ease(d3.easeLinear);
             var rendering = graphContainer
                 .graphviz()
-                .transition(transition)
-                .width(width)
-                .height(height)
-                .fit(true);
+                .transition(transition);
 
             var render_graph = function(datas) {
                 rendering
+                    .width(graphContainer.node().clientWidth)
+                    .height(graphContainer.node().clientHeight)
+                    .fit(true)
                     .renderDot(datas)
                     .zoom(true);
             }
+            window.onresize = function() {
+                console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
+            };
 
             var worker = function(){
                 // fix Chrome security error (Firefox allow local files, not Chrome)
@@ -51,7 +54,14 @@
             }();
             worker.onmessage = function(event) {
 
-                console.log("worker.onmessage ... size=[" + event.data + "]")
+                if (document.hidden)
+                {
+                    console.log('Tab is not focused, canceling datas update ...')
+                    return; // do not update if the tab is inactive
+                }
+
+                // console.log("worker.onmessage ... [" + event.data + "]")
+                // todo : update only if different
                 var datas_as_dot = null;
                 try { datas_as_dot = json_to_dot(event.data); }
                 catch (error) {
