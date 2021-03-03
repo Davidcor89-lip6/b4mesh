@@ -28,18 +28,22 @@
                 .ease(d3.easeLinear);
             var rendering = graphContainer
                 .graphviz()
-                .transition(transition);
+                .transition(transition)
+                .width(graphContainer.node().clientWidth)
+                .height(graphContainer.node().clientHeight)
+                .fit(true)
+                .zoom(true);
 
             var render_graph = function(datas) {
-                rendering
-                    .width(graphContainer.node().clientWidth)
-                    .height(graphContainer.node().clientHeight)
-                    .fit(true)
-                    .renderDot(datas)
-                    .zoom(true);
+                rendering.renderDot(datas);
             }
             window.onresize = function() {
                 console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
+                rendering
+                .width(graphContainer.node().clientWidth)
+                .height(graphContainer.node().clientHeight)
+                .fit(true)
+                .render();
             };
 
             var worker = function(){
@@ -52,6 +56,19 @@
                 }();
                 return new Worker(poll_worker_task_URL.toString());
             }();
+
+            String.prototype.hashCode = function() {
+                var hash = 0, i, chr;
+                if (this.length === 0) return hash;
+                for (i = 0; i < this.length; i++) {
+                    chr   = this.charCodeAt(i);
+                    hash  = ((hash << 5) - hash) + chr;
+                    hash |= 0; // Convert to 32bit integer
+                }
+                return hash;
+            };
+
+            var previous_datas_hashcode = 0;
             worker.onmessage = function(event) {
 
                 if (document.hidden)
@@ -59,9 +76,16 @@
                     console.log('Tab is not focused, canceling datas update ...')
                     return; // do not update if the tab is inactive
                 }
+                const current_datas_hashcode = event.data.hashCode();
+                if (current_datas_hashcode == previous_datas_hashcode)
+                {
+                    console.log('polled same datas, canceling datas update ...')
+                    return; // do not update if datas already rendered
+                }
+                previous_datas_hashcode = event.data.hashCode();
 
                 // console.log("worker.onmessage ... [" + event.data + "]")
-                // todo : update only if different
+
                 var datas_as_dot = null;
                 try { datas_as_dot = json_to_dot(event.data); }
                 catch (error) {
