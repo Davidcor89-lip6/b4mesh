@@ -1,11 +1,14 @@
-var json_to_dot = function(datas)
+var json_to_dot = function(datas, options = {})
 {
+    // options
+    if (options.orientation === undefined)
+      options.orientation = "LR";
+    // parsing
     const re = /\{\"node\"\:\{\"groupId\"\:(\d+)\,\"hash\"\:(\d+)\,\"parent\"\:\[(.*)\]\}\}/gm;
     var matches = re[Symbol.matchAll](datas);
     var parsed_datas = Array.from(matches);
 
     var groups_map = {};
-
     parsed_datas.forEach(function(item){
         
         var group_id = item[1];
@@ -17,8 +20,9 @@ var json_to_dot = function(datas)
         groups_map[group_id].push([ hash_id, parents.split(',') ]);
     });
 
+    // generation
     var output = "digraph blockGraph_transactions {\n";
-    output += "rankdir=LR;\n"
+    output += "rankdir=" + options.orientation + ";\n"
     // output += "node [shape=record fontname=Arial]";
 
     // to avoid wrong clustering, first print clusters
@@ -29,7 +33,7 @@ var json_to_dot = function(datas)
         output += "subgraph cluster_" + group_id + " {\n";
         output += "label=" + group_id + ";";
         // output += "mode=\"hier\"\n";
-        output += "rankdir=LR;\n"
+        output += "rankdir=" + options.orientation + ";\n"
         output += "node[group=\"\"];\n"
         var count = 0;
         groups_map[group_id].forEach(function(item){

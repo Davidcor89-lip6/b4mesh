@@ -10,10 +10,20 @@
         <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
         <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
         <script src="scripts/json_to_dot.js"></script>
+        <script src="scripts/string_hash.js"></script>
     </head>
     <body>
         <p style="width: 100%;">
             Blockgraph live visualizer
+        </p>
+        <p>
+            <p>Orientation : </p>
+            <select id=graph_orientations>
+                <option value="TD">            top-down</option>
+                <option value="BU" selected>   bottom-up</option>
+                <option value="LR">            left-right</option>
+                <option value="RL">            right-left</option>
+            </select>
         </p>
         <div id="graph-container" style="width: 100%; height: 600px; margin:auto; border: 1px solid black"></div>
         
@@ -46,6 +56,8 @@
             }
             window.onresize = function() {
                 console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
+                if (rendering.data() === null)
+                    return; // not initialized yet
                 rendering
                     .width(graphContainer.node().clientWidth)
                     .height(graphContainer.node().clientHeight)
@@ -64,40 +76,15 @@
                 return new Worker(poll_worker_task_URL.toString());
             }();
 
-            String.prototype.hashCode = function() {
-                var hash = 0, i, chr;
-                if (this.length === 0) return hash;
-                for (i = 0; i < this.length; i++) {
-                    chr   = this.charCodeAt(i);
-                    hash  = ((hash << 5) - hash) + chr;
-                    hash |= 0; // Convert to 32bit integer
-                }
-                return hash;
-            };
-
-            var previous_datas_hashcode = 0;
-            worker.onmessage = function(event) {
-
-                if (document.hidden)
-                {
-                    console.log('Tab is not focused, canceling datas update ...')
-                    return; // do not update if the tab is inactive
-                }
-                const current_datas_hashcode = event.data.hashCode();
-                if (current_datas_hashcode == previous_datas_hashcode)
-                {
-                    console.log('polled same datas, canceling datas update ...')
-                    return; // do not update if datas already rendered
-                }
-                previous_datas_hashcode = event.data.hashCode();
-
-                // console.log("worker.onmessage ... [\n" + event.data + "\n]")
-
-                var datas_as_dot = null;
+            var datas_as_dot = null;
+            var draw = function(datas_as_json)
+            {
                 try
                 {
-                    // todo : orientation as parameter (TD, BT, LR, RL)
-                    datas_as_dot = json_to_dot(event.data);
+                    var options = {
+                        orientation : graph_option_html_references.orientation_node.selectedOptions[0].value
+                    };
+                    datas_as_dot = json_to_dot(datas_as_json, options);
                     // console.log("json_to_dot : [\n" + datas_as_dot + "\n]")
                 }
                 catch (error) {
@@ -109,9 +96,42 @@
                     render_graph(datas_as_dot);
                 }
                 catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
+            }
+
+            var previous_datas_hashcode = 0;
+            worker.onmessage = function(event) {
+                // Check if rendering is useless ...
+                if (document.hidden)
+                {
+                    console.log('Tab is not focused, canceling datas update ...')
+                    return; // do not update if the tab is inactive
+                }
+                // console.log("worker.onmessage ... [\n" + event.data + "\n]")
+                draw(event.data);
             };
             worker.onerror = function(event){
                 console.log("[error](polling) worker error : " + event.message);
+            };
+
+            // options management
+            var graph_option_html_references = {
+                orientation_node : document.getElementById("graph_orientations")
+            };
+            graph_option_html_references.orientation_node.onselectionchange = function(){
+                if (rendering.data() === null ||
+                    datas_as_dot == null)
+                    return; // not initialized yet
+
+                // temporary worker.onmessage event disable
+                worker._onmessage = worker.onmessage;
+                worker.onmessage = function(event){};
+
+                const regex = /rankdir=\w\w/g;
+                datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions.value);
+                render_graph(datas_as_dot);
+
+                worker.onmessage = worker._onmessage;
+                worker._onmessage = null;
             };
         </script>
     </body>
