@@ -27,13 +27,18 @@
                     <option value="RL">            right-left</option>
                 </select>
             </div>
+            <button class="toolbar_element" type="button" id="reset_zoom_button" >
+                Reset zoom
+            </button>
         </div>
         <div id="graph-container" class="graph_container"></div>
         
         <script type="text/javascript">
 
-            if (!window.Worker)
-                console.log('[error](polling) Browser does not support workers')
+            // options management
+            var graph_option_html_references = {
+                orientation_node : document.getElementById("graph_orientations")
+            };
 
             const graphContainer = d3.select("#graph-container");
             var transition = d3.transition()
@@ -47,37 +52,22 @@
                 .fit(true)
                 .zoom(true);
 
+            const zoom = d3.zoom()
+                .scaleExtent([1, 8])
+                ;
+
             var render_graph = function(datas) {
                 rendering
                     .renderDot(datas)
                     .on("end", function(){
                         d3.selectAll(".node").on("click", function(){
-                            console.log('Focusing node : ' +  d3.select(this).selectAll('title').text());
+                            var element = d3.select(this);
+                            console.log('Focusing node : ' + element.selectAll('title').text());
+                            d3.selection.call(d3.zoom(100))
                         });
                         //render();
                     });
             }
-            window.onresize = function() {
-                console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
-                if (rendering.data() === null)
-                    return; // not initialized yet
-                rendering
-                    .width(graphContainer.node().clientWidth)
-                    .height(graphContainer.node().clientHeight)
-                    .fit(true)
-                    .render();
-            };
-
-            var worker = function(){
-                // fix Chrome security error (Firefox allow local files, not Chrome)
-                const poll_worker_task_URL = function() {
-                    var url = new URL(window.location.href);
-                    url.search = "";
-                    url.pathname = "scripts/poll_worker_task.js";
-                    return url;
-                }();
-                return new Worker(poll_worker_task_URL.toString());
-            }();
 
             var datas_as_dot = null;
             var draw = function(datas_as_json)
@@ -101,6 +91,18 @@
                 catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
             }
 
+            if (!window.Worker)
+                console.log('[poll_worker] Error : Browser does not support workers');
+            var worker = function(){
+                // fix Chrome security error (Firefox allow local files, not Chrome)
+                const poll_worker_task_URL = function() {
+                    var url = new URL(window.location.href);
+                    url.search = "";
+                    url.pathname = "scripts/poll_worker_task.js";
+                    return url;
+                }();
+                return new Worker(poll_worker_task_URL.toString());
+            }();
             var previous_datas_hashcode = 0;
             worker.onmessage = function(event) {
                 // Check if rendering is useless ...
@@ -116,19 +118,26 @@
                 console.log("[error](polling) worker error : " + event.message);
             };
 
-            // options management
-            var graph_option_html_references = {
-                orientation_node : document.getElementById("graph_orientations")
+            // events
+            window.onerror = function myErrorHandler(msg, url, lineNumber) {
+                alert("Error : " + errorMsg);
+                return false;
+            }
+            window.onresize = function() {
+                console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
+                if (rendering.data() === null)
+                    return; // not initialized yet
+                rendering
+                    .width(graphContainer.node().clientWidth)
+                    .height(graphContainer.node().clientHeight)
+                    .fit(true)
+                    .render();
             };
             graph_option_html_references.orientation_node.onchange = function(){
-
-                console.log("onselectionchange");
 
                 if (rendering.data() === null ||
                     datas_as_dot === null)
                     return; // not initialized yet
-
-                console.log("onselectionchange : OK");
 
                 // temporary worker.onmessage event disable
                 worker._onmessage = worker.onmessage;
@@ -140,6 +149,9 @@
 
                 worker.onmessage = worker._onmessage;
                 worker._onmessage = null;
+            };
+            document.getElementById('reset_zoom_button').onclick  = function(event){
+                rendering.resetZoom(d3.transition().duration(1000));
             };
         </script>
     </body>

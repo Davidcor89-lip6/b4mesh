@@ -38,6 +38,7 @@ html {
   display: grid;
   border: 1px solid black;
   background-color: lightslategray;
+  display: flex; 
 }
 .toolbar_element {
   align-content: center;
