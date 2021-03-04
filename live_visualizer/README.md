@@ -1,6 +1,6 @@
 # Blockgraph live visualizer
 
-Blockgraph nodes live rendering, in HTML/CSS
+Blockgraph nodes live rendering, in HTML/CSS + Javascript
 
 ## Usage
 

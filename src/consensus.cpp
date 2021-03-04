@@ -112,6 +112,7 @@ std::string consensus::GetIPFromId(int id)
     {
         return mIP_;
     }
+    getNodeList();
     for (auto it = listAddr.begin(); it != listAddr.end(); ++it)
     {
         if ( id == GetIdFromIP(*it) )

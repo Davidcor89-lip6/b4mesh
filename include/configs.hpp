@@ -28,6 +28,9 @@
 // Retransmit transaction timing
 #define T_RETRANS 60
 
+// Limit in seconds for the block creation
+#define SAFETIME 5
+
 // Trace option
 #define LIVEBLOCK_FILE "/tmp/blockgraph"
 #define LIVEMEMPOOL_FILE "./live_mempool.txt"

@@ -143,6 +143,25 @@ vector<Block> Blockgraph::GetChildlessBlocks (){
 }
 
 
+vector<string> Blockgraph::GetChildlessBlockList (){
+  vector<string> ret = vector<string> ();
+  set<string> childless;
+
+  for (auto& b : blocks)
+    childless.insert(b.first);
+
+  for (auto& b : blocks){
+    for (auto& p : b.second.GetParents())
+        childless.erase(p);
+  }
+
+  for (auto &e : childless){
+    ret.push_back(e);
+  }
+
+return ret;
+}
+
 
 bool Blockgraph::IsChildless(Block &block){
 
