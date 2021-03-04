@@ -20,6 +20,10 @@ var json_to_dot = function(datas)
     var output = "digraph blockGraph_transactions {\n";
     output += "rankdir=LR;\n"
     // output += "node [shape=record fontname=Arial]";
+
+    // to avoid wrong clustering, first print clusters
+    // with their content (nodes)
+    output += "// clusters and nodes ...\n";
     for (var group_id in groups_map)
     {
         output += "subgraph cluster_" + group_id + " {\n";
@@ -27,17 +31,33 @@ var json_to_dot = function(datas)
         // output += "mode=\"hier\"\n";
         output += "rankdir=LR;\n"
         output += "node[group=\"\"];\n"
+        var count = 0;
         groups_map[group_id].forEach(function(item){
             var hash_id = item[0];
             var parents_array = item[1];
 
           	for (var index in parents_array)
             {
-               output += parents_array[index] + " -> " + hash_id + "\n";
+                output += hash_id + (++count % 5 == 0 ? ";\n" : ";");
             }
 
         });
-        output += "}\n";
+        output += "\n}";
+    }
+    // then nodes relationships
+    output += "// relationships ...\n";
+    for (var group_id in groups_map)
+    {
+        groups_map[group_id].forEach(function(item){
+            var hash_id = item[0];
+            var parents_array = item[1];
+
+          	for (var index in parents_array)
+            {
+                output += parents_array[index] + " -> " + hash_id + ";\n";
+            }
+
+        });
     }
     output += "}";
   	return output;
