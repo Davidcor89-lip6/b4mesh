@@ -1,6 +1,7 @@
 <!doctype html>
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <html>
     <title>Blockgraph live visualizer</title>
     <head>
@@ -13,19 +14,21 @@
         <script src="scripts/string_hash.js"></script>
     </head>
     <body>
-        <p style="width: 100%;">
+        <h1 style="width: 100%;">
             Blockgraph live visualizer
-        </p>
-        <p>
-            <p>Orientation : </p>
-            <select id=graph_orientations>
-                <option value="TD">            top-down</option>
-                <option value="BU" selected>   bottom-up</option>
-                <option value="LR">            left-right</option>
-                <option value="RL">            right-left</option>
-            </select>
-        </p>
-        <div id="graph-container" style="width: 100%; height: 600px; margin:auto; border: 1px solid black"></div>
+        </h1>
+        <div class="toolbar">
+            <div class="toolbar_element">
+                <span>Orientation :</span>
+                <select id=graph_orientations>
+                    <option value="BT" selected>   bottom-up</option>
+                    <option value="TD">            top-down</option>
+                    <option value="LR">            left-right</option>
+                    <option value="RL">            right-left</option>
+                </select>
+            </div>
+        </div>
+        <div id="graph-container" class="graph_container"></div>
         
         <script type="text/javascript">
 
@@ -103,7 +106,7 @@
                 // Check if rendering is useless ...
                 if (document.hidden)
                 {
-                    console.log('Tab is not focused, canceling datas update ...')
+                    console.log('[poll_worker::onmessage] Tab is not focused, canceling datas update ...')
                     return; // do not update if the tab is inactive
                 }
                 // console.log("worker.onmessage ... [\n" + event.data + "\n]")
@@ -117,17 +120,22 @@
             var graph_option_html_references = {
                 orientation_node : document.getElementById("graph_orientations")
             };
-            graph_option_html_references.orientation_node.onselectionchange = function(){
+            graph_option_html_references.orientation_node.onchange = function(){
+
+                console.log("onselectionchange");
+
                 if (rendering.data() === null ||
-                    datas_as_dot == null)
+                    datas_as_dot === null)
                     return; // not initialized yet
+
+                console.log("onselectionchange : OK");
 
                 // temporary worker.onmessage event disable
                 worker._onmessage = worker.onmessage;
                 worker.onmessage = function(event){};
 
-                const regex = /rankdir=\w\w/g;
-                datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions.value);
+                const regex = /rankdir=\w\w\;/g;
+                datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions[0].value + ';');
                 render_graph(datas_as_dot);
 
                 worker.onmessage = worker._onmessage;

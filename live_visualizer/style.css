@@ -1,6 +1,18 @@
 body {
+  height: 90%;
+  margin: 0;
   padding: 2em;
 }
+html {
+  height: 90%;
+}
+.graph_container {
+  width: 100%;
+  height: 100%;
+  margin:auto;
+  border: 1px solid black;
+}
+/* Rendering elements */
 /* svg {
   overflow: hidden;
   margin: 1em;
@@ -17,4 +29,23 @@ body {
   stroke: #333;
   stroke-width: 1.5px;
   fill: none;
+}
+
+/* toolbar */
+.toolbar {
+  width: 100%;
+  margin:auto;
+  display: grid;
+  border: 1px solid black;
+  background-color: lightslategray;
+}
+.toolbar_element {
+  align-content: center;
+  margin: 2px;
+  border: 1px solid darkslateblue;
+  display: grid;
+  width:max-content;
+  background-color: white;
+  border-radius: 5px;
+  padding: 5px;
 }
