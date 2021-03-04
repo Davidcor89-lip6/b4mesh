@@ -23,6 +23,8 @@ var json_to_dot = function(datas)
     for (var group_id in groups_map)
     {
         output += "subgraph cluster_" + group_id + " {\n";
+        output += "label=" + group_id + ";";
+        // output += "mode=\"hier\"\n";
         output += "rankdir=LR;\n"
         output += "node[group=\"\"];\n"
         groups_map[group_id].forEach(function(item){
