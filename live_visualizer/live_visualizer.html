@@ -35,15 +35,22 @@
                 .zoom(true);
 
             var render_graph = function(datas) {
-                rendering.renderDot(datas);
+                rendering
+                    .renderDot(datas)
+                    .on("end", function(){
+                        d3.selectAll(".node").on("click", function(){
+                            console.log('Focusing node : ' +  d3.select(this).selectAll('title').text());
+                        });
+                        //render();
+                    });
             }
             window.onresize = function() {
                 console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
                 rendering
-                .width(graphContainer.node().clientWidth)
-                .height(graphContainer.node().clientHeight)
-                .fit(true)
-                .render();
+                    .width(graphContainer.node().clientWidth)
+                    .height(graphContainer.node().clientHeight)
+                    .fit(true)
+                    .render();
             };
 
             var worker = function(){
@@ -84,10 +91,15 @@
                 }
                 previous_datas_hashcode = event.data.hashCode();
 
-                // console.log("worker.onmessage ... [" + event.data + "]")
+                // console.log("worker.onmessage ... [\n" + event.data + "\n]")
 
                 var datas_as_dot = null;
-                try { datas_as_dot = json_to_dot(event.data); }
+                try
+                {
+                    // todo : orientation as parameter (TD, BT, LR, RL)
+                    datas_as_dot = json_to_dot(event.data);
+                    // console.log("json_to_dot : [\n" + datas_as_dot + "\n]")
+                }
                 catch (error) {
                     console.error('[error](rendering) graph rendering failed : ' + error)
                     throw(error);
