@@ -36,8 +36,8 @@ class B4Mesh
 
     public:
     static const int TIME_UNIT = 10;
-    enum{CHILDLESSBLOCK_REQ, CHILDLESSBLOCK_REP, GROUPBRANCH_REQ,
-            GROUPCHANGE_REQ};
+    enum{CHILDLESSBLOCK_REQ, CHILDLESSBLOCK_REP, 
+        GROUPBRANCH_REQ, GROUPCHANGE_REQ};
     enum{RAFT, B4MESH_RAFT};
 
     public:
@@ -192,7 +192,7 @@ class B4Mesh
      * The leader checks 4 missing side-chains from followers CHILDLESSBLOCK_REP
      * If a childless block groupId is unkwnow, leader ask for the whole branch
      */
-    void CheckBranchesSync(const std::string& msg_payload, std::string ip);
+    void ChildlessBlockTreatment(const std::string& msg_payload, std::string ip);
     /**
      * Send a full side-chain to the leader upon a GROUPBRANCH_REQ
      */
@@ -201,16 +201,15 @@ class B4Mesh
      *  Start the fast synchronization process of any node
      *  after receiving a merge block
      */
-    void SyncNode(std::vector<std::string> unknown_p, std::string ip);
-    void SyncNode2(vector<Transaction> transactions);
+    void SyncNode(vector<Transaction> transactions);
     /**
-     * Updates the missing_parents_list. If new block is a missing parent
+     * Updates the missing_block_list. If new block is a missing parent
      * it will ERASE it form the list
      */
     void EraseMissingBlock(string b_hash);
     /**
-     * Updates the missing_parents_list. If new block has missing parents
-     * it will ADD them to the missing_parents_list
+     * Updates the missing_block_list. If new block has missing parents
+     * it will ADD them to the missing_block_list
      */
     void UpdateMissingList(vector<string> unknown_p, std::string ip);
     /**
@@ -228,23 +227,23 @@ class B4Mesh
     //-----------------------------
     /**
      * This method checks every 5s if there still missing blocks in the
-     * missing_parents_list. If so, it will ask for them to the node who
+     * missing_block_list. If so, it will ask for them to the node who
      * send the child block of the missing parent.
      */
     void Ask4MissingBlocks();
     /**
      * Checks if the hash of the block received as paremeter is present
-     * in the missing_parents_list
+     * in the missing_block_list
      */
     bool IsBlockInMissingList(std::string b_hash);
     /**
-     * Updates the missing_parents_list. If new block is a missing parent
+     * Updates the missing_block_list. If new block is a missing parent
      * it will ERASE it form the list
      */
     void updateMissingList(std::string b_hash);
     /**
-     * Updates the missing_parents_list. If new block has missing parents
-     * it will ADD them to the missing_parents_list
+     * Updates the missing_block_list. If new block has missing parents
+     * it will ADD them to the missing_block_list
      */
     void updateMissingList(std::vector<std::string> unknown_p, std::string ip);
 
@@ -272,15 +271,15 @@ class B4Mesh
     private:
     unsigned int blocktxsSize; // the critiria of num of txs in mempool to create a block
     // List of missing blocks in the local BG <BlockHash, IpOfNodeWhoHasTheMissingParent>
-    std::vector<std::pair<std::string, std::string>> missing_parents_list;
+    std::vector<std::pair<std::string, std::string>> missing_block_list;
     std::string groupId;   // GroupId of a group
     std::map<std::string, Transaction> pending_transactions;  // mempool of transactions
     std::map<std::string, Block> waiting_list; // blocks waiting for their ancestors
     Blockgraph blockgraph;  // The database of blocks
     bool mergeBlock;
+    bool createBlock;
     std::vector<std::string> missing_childless;
-    std::map<int, std::string> recover_branch;
-    std::multimap<int, std::string> nodes_res;
+    std::multimap<int, std::string> recover_branch;
     double lastBlock;
 
     // Trace
