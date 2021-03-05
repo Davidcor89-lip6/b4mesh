@@ -52,6 +52,9 @@
                 .fit(true)
                 .zoom(true);
 
+            var zoom = d3.zoom()
+                //.scaleExtent([0.7, 8])
+                ;
             var render_graph = function(datas) {
                 rendering
                     .renderDot(datas)
@@ -59,6 +62,36 @@
                         d3.selectAll(".node").on("click", function(){
                             var element = d3.select(this);
                             console.log('Focusing node : ' + element.selectAll('title').text());
+
+                            var transform = d3.zoomTransform(this);
+                            const element_bbox = this.getBBox(); // test element.node().getBBox();
+                            
+                            const svg_bbox = graphContainer.select("svg").node().getBBox();
+                            
+                            const translate_to = {
+                                x : ( -element_bbox.x - element_bbox.width / 2) * transform.k + (svg_bbox.width) / 2 / transform.k,
+                                y : ( -element_bbox.y - element_bbox.height / 2) * transform.k + (svg_bbox.height) / 2 / transform.k
+                            };
+
+                            // console.log('WIP scale        : [' + transform.k + ']');
+                            // console.log('WIP transform    : [' + transform.x + ', ' + transform.y + ']');
+                            // console.log('WIP element_bbox : [' + element_bbox.x + ', ' + element_bbox.y + '], [' + element_bbox.width + ', ' + element_bbox.height + ']');
+                            // console.log('WIP svg_bbox     : [' + svg_bbox.x + ', ' + svg_bbox.y + '], [' + svg_bbox.width + ', ' + svg_bbox.height + ']');
+                            // console.log('WIP tranlate_to  : [' + translate_to.x + ', ' + translate_to.y + ']');
+
+                            d3.select(this).transition().style("fill", "red");
+                            d3.select("svg")
+                                //.transition().duration(750)
+                                .call(
+                                    zoom.transform,
+                                    d3.zoomIdentity
+                                        .translate(
+                                            translate_to.x,
+                                            translate_to.y
+                                        )
+                                        .scale(transform.k)
+                                );
+                            rendering.render();
                         });
                     });
             }
@@ -91,7 +124,7 @@
             }
 
             if (!window.Worker)
-                console.log('[poll_worker] Error : Browser does not support workers');
+                throw('[poll_worker] Error : Browser does not support workers');
             var worker = function(){
                 // fix Chrome security error (Firefox allow local files, not Chrome)
                 const poll_worker_task_URL = function() {
