@@ -52,10 +52,6 @@
                 .fit(true)
                 .zoom(true);
 
-            const zoom = d3.zoom()
-                .scaleExtent([1, 8])
-                ;
-
             var render_graph = function(datas) {
                 rendering
                     .renderDot(datas)
@@ -63,14 +59,12 @@
                         d3.selectAll(".node").on("click", function(){
                             var element = d3.select(this);
                             console.log('Focusing node : ' + element.selectAll('title').text());
-                            d3.selection.call(d3.zoom(100))
                         });
-                        //render();
                     });
             }
 
             var datas_as_dot = null;
-            var draw = function(datas_as_json)
+            var draw_fetched_datas = function(datas_as_json)
             {
                 try
                 {
@@ -81,11 +75,16 @@
                     // console.log("json_to_dot : [\n" + datas_as_dot + "\n]")
                 }
                 catch (error) {
-                    console.error('[error](rendering) graph rendering failed : ' + error)
+                    console.error('[draw_fetched_datas] Error : graph rendering failed : ' + error)
                     throw(error);
                 }
 
                 try {
+                    if (document.hidden)
+                    {   // Check if rendering is useless ...
+                        console.log('[draw_fetched_datas] Tab is not focused, canceling datas update ...')
+                        return; // do not update if the tab is inactive
+                    }
                     render_graph(datas_as_dot);
                 }
                 catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
@@ -103,22 +102,20 @@
                 }();
                 return new Worker(poll_worker_task_URL.toString());
             }();
-            var previous_datas_hashcode = 0;
             worker.onmessage = function(event) {
-                // Check if rendering is useless ...
-                if (document.hidden)
-                {
-                    console.log('[poll_worker::onmessage] Tab is not focused, canceling datas update ...')
-                    return; // do not update if the tab is inactive
-                }
                 // console.log("worker.onmessage ... [\n" + event.data + "\n]")
-                draw(event.data);
+                draw_fetched_datas(event.data);
             };
             worker.onerror = function(event){
                 console.log("[error](polling) worker error : " + event.message);
             };
 
             // events
+            document.onvisibilitychange = function() {
+                if (document.hidden || datas_as_dot == null)
+                    return;
+                render_graph(datas_as_dot); // force rendering on tab selection
+            };
             window.onerror = function myErrorHandler(msg, url, lineNumber) {
                 alert("Error : " + errorMsg);
                 return false;
@@ -151,6 +148,8 @@
                 worker._onmessage = null;
             };
             document.getElementById('reset_zoom_button').onclick  = function(event){
+                if (d3 === null || rendering === null)
+                    return;
                 rendering.resetZoom(d3.transition().duration(1000));
             };
         </script>
