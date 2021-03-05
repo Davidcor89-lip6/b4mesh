@@ -2,7 +2,7 @@ importScripts('../configuration.js')
 importScripts('./string_hash.js')
 
 var myRequest = new Request(configuration.blockgraph_as_dot_API_accesspoint);
-setInterval(() => {
+fetchDatas = function() {
     fetch(myRequest, {cache: "reload"}) // always force cache
         .then(function(reponse) {
             return reponse.text();
@@ -19,4 +19,10 @@ setInterval(() => {
             this.cache = data_hashCode;
             self.postMessage(data);
         })
+}
+setInterval(() => {
+    fetchDatas();
 }, configuration.refresh_rate_ms);
+
+// Initial fetch
+fetchDatas();
