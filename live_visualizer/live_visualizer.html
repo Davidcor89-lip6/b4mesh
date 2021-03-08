@@ -58,12 +58,14 @@
             const graphContainer = d3.select("#graph-container");
             // svg => graphContainer.node().firstElementChild;
             // g (top) => svg.firstElementChild
-            var transition = d3.transition()
-                .duration(750)
-                .ease(d3.easeLinear);
             var rendering = graphContainer
                 .graphviz()
-                .transition(transition)
+                .transition(function () {
+                    return d3.transition("main")
+                        .ease(d3.easeLinear)
+                        .delay(40)
+                        .duration(1000);
+                })
                 .width(graphContainer.node().clientWidth)
                 .height(graphContainer.node().clientHeight)
                 .fit(true)
@@ -81,6 +83,7 @@
                 document.getElementById("view_clusters_count").innerHTML = d3.select(".graph").selectAll(".cluster").nodes().length
             };
 
+            var focused_node = null;
             var render_graph = function(datas) {
                 rendering
                     .renderDot(datas)
@@ -94,22 +97,27 @@
                             var transform = d3.zoomTransform(this);
                             const element_bbox = this.getBBox(); // test element.node().getBBox();
                             
-                            const svg_bbox = graphContainer.select("svg").node().getBBox();
-                            
+                            const svg_bbox = graphContainer.select("svg").select("g").node().getBBox();
+                            const scale = transform.k + 4;
+
                             const translate_to = {
-                                x : ( -element_bbox.x - element_bbox.width / 2) * transform.k + (svg_bbox.width) / 2 / transform.k,
-                                y : ( -element_bbox.y - element_bbox.height / 2) * transform.k + (svg_bbox.height) / 2 / transform.k
+                                x : ( -element_bbox.x - element_bbox.width / 2) * scale + (svg_bbox.width) / 2,
+                                y : ( -element_bbox.y - element_bbox.height / 2) * scale + (svg_bbox.height) / 2
                             };
+                            console.log('>>> ' + element_bbox.width)
 
-                            // console.log('WIP scale        : [' + transform.k + ']');
-                            // console.log('WIP transform    : [' + transform.x + ', ' + transform.y + ']');
-                            // console.log('WIP element_bbox : [' + element_bbox.x + ', ' + element_bbox.y + '], [' + element_bbox.width + ', ' + element_bbox.height + ']');
-                            // console.log('WIP svg_bbox     : [' + svg_bbox.x + ', ' + svg_bbox.y + '], [' + svg_bbox.width + ', ' + svg_bbox.height + ']');
-                            // console.log('WIP tranlate_to  : [' + translate_to.x + ', ' + translate_to.y + ']');
-
-                            d3.select(this).transition().style("fill", "red");
+                            d3.select(this).transition()
+                                .style("fill", "red")
+                                .style("opacity", .5)
+                                .style("fill-opacity", .5)
+                                ;
                             d3.select("svg")
-                                //.transition().duration(750)
+                                .transition(function () {
+                                    return d3.transition("main")
+                                        .ease(d3.easeLinear)
+                                        .delay(40)
+                                        .duration(500);
+                                })
                                 .call(
                                     zoom.transform,
                                     d3.zoomIdentity
@@ -117,8 +125,11 @@
                                             translate_to.x,
                                             translate_to.y
                                         )
-                                        .scale(transform.k)
+                                        .scale(scale)
                                 )
+                                // .on("end", function(){
+                                //     rendering.render();
+                                // })
                             rendering.render();
                         });
                     });
@@ -204,6 +215,7 @@
                 const regex = /rankdir=\w\w\;/g;
                 datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions[0].value + ';');
                 render_graph(datas_as_dot);
+                rendering.resetZoom(d3.transition().duration(1000));
 
                 worker.onmessage = worker._onmessage;
                 worker._onmessage = null;
