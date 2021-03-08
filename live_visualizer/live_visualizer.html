@@ -83,55 +83,55 @@
                 document.getElementById("view_clusters_count").innerHTML = d3.select(".graph").selectAll(".cluster").nodes().length
             };
 
-            var focused_node = null;
+            var center_and_zoom_element = function(target) {
+                var bbox = target.getBBox();
+                var element = d3.select(target);
+
+                var transform = d3.zoomTransform(target);
+                const element_bbox = target.getBBox(); // test element.node().getBBox();
+                
+                const svg_bbox = graphContainer.select("svg").select("g").node().getBBox();
+                const scale = transform.k + 4;
+
+                const translate_to = {
+                    x : ( -element_bbox.x - element_bbox.width / 2) * scale + (svg_bbox.width) / 2,
+                    y : ( -element_bbox.y - element_bbox.height / 2) * scale + (svg_bbox.height) / 2
+                };
+
+                d3.select("svg")
+                    .call(
+                        zoom.transform,
+                        d3.zoomIdentity
+                            .translate(
+                                translate_to.x,
+                                translate_to.y
+                            )
+                            .scale(scale)
+                    )
+                    // .on("end", function(){
+                    //     rendering.render();
+                    // })
+                rendering.render();
+            };
             var render_graph = function(datas) {
                 rendering
                     .renderDot(datas)
                     .on("end", function(){
                         update_views();
                         d3.selectAll(".node").on("click", function(){
-                            var bbox = this.getBBox();
-                            var element = d3.select(this);
-                            console.log('Focusing node : ' + element.selectAll('title').text());
-
-                            var transform = d3.zoomTransform(this);
-                            const element_bbox = this.getBBox(); // test element.node().getBBox();
-                            
-                            const svg_bbox = graphContainer.select("svg").select("g").node().getBBox();
-                            const scale = transform.k + 4;
-
-                            const translate_to = {
-                                x : ( -element_bbox.x - element_bbox.width / 2) * scale + (svg_bbox.width) / 2,
-                                y : ( -element_bbox.y - element_bbox.height / 2) * scale + (svg_bbox.height) / 2
-                            };
-                            console.log('>>> ' + element_bbox.width)
-
-                            d3.select(this).transition()
-                                .style("fill", "red")
-                                .style("opacity", .5)
-                                .style("fill-opacity", .5)
-                                ;
-                            d3.select("svg")
-                                .transition(function () {
-                                    return d3.transition("main")
-                                        .ease(d3.easeLinear)
-                                        .delay(40)
-                                        .duration(500);
-                                })
-                                .call(
-                                    zoom.transform,
-                                    d3.zoomIdentity
-                                        .translate(
-                                            translate_to.x,
-                                            translate_to.y
-                                        )
-                                        .scale(scale)
-                                )
-                                // .on("end", function(){
-                                //     rendering.render();
-                                // })
-                            rendering.render();
+                            console.log('Focusing node : ' + d3.select(this).selectAll('title').text());
+                            center_and_zoom_element(this);
                         });
+                        // d3.selectAll('.cluster').on("mouseenter", function() {
+                        //     var this_polygon = d3.select(this).select('polygon').node();
+                        //     this_polygon.style.strokeWidth = 3;
+                        //     this_polygon.style.stroke = "darkslateblue";
+                        // });
+                        // d3.selectAll('.cluster').on("mouseleave", function() {
+                        //     var this_polygon = d3.select(this).select('polygon').node();
+                        //     this_polygon.style.strokeWidth = 1;
+                        //     this_polygon.style.stroke = "black";
+                        // });
                     });
             }
 
@@ -214,8 +214,8 @@
 
                 const regex = /rankdir=\w\w\;/g;
                 datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions[0].value + ';');
-                render_graph(datas_as_dot);
                 rendering.resetZoom(d3.transition().duration(1000));
+                render_graph(datas_as_dot);
 
                 worker.onmessage = worker._onmessage;
                 worker._onmessage = null;
