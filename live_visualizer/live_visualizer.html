@@ -17,22 +17,37 @@
         <h1 style="width: 100%;">
             Blockgraph live visualizer
         </h1>
-        <div class="toolbar">
-            <div class="toolbar_element">
-                <span>Orientation :</span>
-                <select id=graph_orientations>
-                    <option value="BT" selected>   bottom-up</option>
-                    <option value="TD">            top-down</option>
-                    <option value="LR">            left-right</option>
-                    <option value="RL">            right-left</option>
-                </select>
+        <div class="bar_container">
+            <!-- Toolbar  -->
+            <div class="toolbar">
+                <div class="toolbar_element">
+                    <span class="information_label">Orientation</span>
+                    <select id=graph_orientations style="background-color: lightgray;">
+                        <option value="BT" selected>   bottom-up</option>
+                        <option value="TD">            top-down</option>
+                        <option value="LR">            left-right</option>
+                        <option value="RL">            right-left</option>
+                    </select>
+                </div>
+                <button class="toolbar_element" type="button" id="reset_zoom_button" style="background-color: lightgray;">
+                    Reset zoom
+                </button>
             </div>
-            <button class="toolbar_element" type="button" id="reset_zoom_button" >
-                Reset zoom
-            </button>
+            <!-- Graph informations -->
+            <div class="informations">
+                <div class="toolbar_element">
+                    <span class="information_label">Nodes counts</span>
+                    <span class="information_value" id=view_nodes_count></span>
+                </div>
+                <div class="toolbar_element">
+                    <span class="information_label">Clusters counts</span>
+                    <span class="information_value" id=view_clusters_count></span>
+                </div>
+            </div>
         </div>
+        <!-- Graph -->
         <div id="graph-container" class="graph_container"></div>
-        
+
         <script type="text/javascript">
 
             // options management
@@ -41,47 +56,68 @@
             };
 
             const graphContainer = d3.select("#graph-container");
-            var transition = d3.transition()
-                .duration(750)
-                .ease(d3.easeLinear);
+            // svg => graphContainer.node().firstElementChild;
+            // g (top) => svg.firstElementChild
             var rendering = graphContainer
                 .graphviz()
-                .transition(transition)
+                .transition(function () {
+                    return d3.transition("main")
+                        .ease(d3.easeLinear)
+                        .delay(40)
+                        .duration(1000);
+                })
                 .width(graphContainer.node().clientWidth)
                 .height(graphContainer.node().clientHeight)
                 .fit(true)
                 .zoom(true);
 
             var zoom = d3.zoom()
-                //.scaleExtent([0.7, 8])
-                ;
+                // .translateExtent([0, 0])
+                // .scaleExtent([.5, 20])
+                // .on("zoom", function(){
+                // })
+            ;
+
+            var update_views = function(){
+                document.getElementById("view_nodes_count").innerHTML = d3.select(".graph").selectAll(".node").nodes().length;
+                document.getElementById("view_clusters_count").innerHTML = d3.select(".graph").selectAll(".cluster").nodes().length
+            };
+
+            var focused_node = null;
             var render_graph = function(datas) {
                 rendering
                     .renderDot(datas)
                     .on("end", function(){
+                        update_views();
                         d3.selectAll(".node").on("click", function(){
+                            var bbox = this.getBBox();
                             var element = d3.select(this);
                             console.log('Focusing node : ' + element.selectAll('title').text());
 
                             var transform = d3.zoomTransform(this);
                             const element_bbox = this.getBBox(); // test element.node().getBBox();
                             
-                            const svg_bbox = graphContainer.select("svg").node().getBBox();
-                            
+                            const svg_bbox = graphContainer.select("svg").select("g").node().getBBox();
+                            const scale = transform.k + 4;
+
                             const translate_to = {
-                                x : ( -element_bbox.x - element_bbox.width / 2) * transform.k + (svg_bbox.width) / 2 / transform.k,
-                                y : ( -element_bbox.y - element_bbox.height / 2) * transform.k + (svg_bbox.height) / 2 / transform.k
+                                x : ( -element_bbox.x - element_bbox.width / 2) * scale + (svg_bbox.width) / 2,
+                                y : ( -element_bbox.y - element_bbox.height / 2) * scale + (svg_bbox.height) / 2
                             };
+                            console.log('>>> ' + element_bbox.width)
 
-                            // console.log('WIP scale        : [' + transform.k + ']');
-                            // console.log('WIP transform    : [' + transform.x + ', ' + transform.y + ']');
-                            // console.log('WIP element_bbox : [' + element_bbox.x + ', ' + element_bbox.y + '], [' + element_bbox.width + ', ' + element_bbox.height + ']');
-                            // console.log('WIP svg_bbox     : [' + svg_bbox.x + ', ' + svg_bbox.y + '], [' + svg_bbox.width + ', ' + svg_bbox.height + ']');
-                            // console.log('WIP tranlate_to  : [' + translate_to.x + ', ' + translate_to.y + ']');
-
-                            d3.select(this).transition().style("fill", "red");
+                            d3.select(this).transition()
+                                .style("fill", "red")
+                                .style("opacity", .5)
+                                .style("fill-opacity", .5)
+                                ;
                             d3.select("svg")
-                                //.transition().duration(750)
+                                .transition(function () {
+                                    return d3.transition("main")
+                                        .ease(d3.easeLinear)
+                                        .delay(40)
+                                        .duration(500);
+                                })
                                 .call(
                                     zoom.transform,
                                     d3.zoomIdentity
@@ -89,8 +125,11 @@
                                             translate_to.x,
                                             translate_to.y
                                         )
-                                        .scale(transform.k)
-                                );
+                                        .scale(scale)
+                                )
+                                // .on("end", function(){
+                                //     rendering.render();
+                                // })
                             rendering.render();
                         });
                     });
@@ -135,6 +174,8 @@
                 }();
                 return new Worker(poll_worker_task_URL.toString());
             }();
+
+            // events
             worker.onmessage = function(event) {
                 // console.log("worker.onmessage ... [\n" + event.data + "\n]")
                 draw_fetched_datas(event.data);
@@ -142,15 +183,13 @@
             worker.onerror = function(event){
                 console.log("[error](polling) worker error : " + event.message);
             };
-
-            // events
             document.onvisibilitychange = function() {
                 if (document.hidden || datas_as_dot == null)
                     return;
                 render_graph(datas_as_dot); // force rendering on tab selection
             };
             window.onerror = function myErrorHandler(msg, url, lineNumber) {
-                alert("Error : " + errorMsg);
+                alert("Error : " + msg);
                 return false;
             }
             window.onresize = function() {
@@ -176,6 +215,7 @@
                 const regex = /rankdir=\w\w\;/g;
                 datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions[0].value + ';');
                 render_graph(datas_as_dot);
+                rendering.resetZoom(d3.transition().duration(1000));
 
                 worker.onmessage = worker._onmessage;
                 worker._onmessage = null;
