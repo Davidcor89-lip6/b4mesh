@@ -33,6 +33,10 @@
                 <button class="toolbar_element" type="button" id="reset_zoom_button" style="background-color: lightgray;">
                     Reset zoom
                 </button>
+                <div class="toolbar_element">
+                    <span class="information_label">Automate camera ?</span>
+                    <input type="checkbox" id="automate_camera" checked style="background-color: lightgray;">
+                </div>
             </div>
             <!-- Graph informations -->
             <div class="informations">
@@ -69,7 +73,7 @@
                     return d3.transition("main")
                         .ease(d3.easeLinear)
                         .delay(40)
-                        .duration(1000);
+                        .duration(750);
                 })
                 .width(graphContainer.node().clientWidth)
                 .height(graphContainer.node().clientHeight)
@@ -80,6 +84,27 @@
                 document.getElementById("view_nodes_count").innerHTML = d3.select(".graph").selectAll(".node").nodes().length;
                 document.getElementById("view_clusters_count").innerHTML = d3.select(".graph").selectAll(".cluster").nodes().length
             };
+
+            let freshest_node_type = class {
+                hash = null;
+                get node() {
+                    var node_hash = this.hash;
+                    var value = d3.selectAll('.node').nodes().filter(
+                        function(d, i){
+                            return d3.select(d).select('title').node().textContent == node_hash;
+                        }
+                    );
+                    return value.length == 0 ? null : value[0];
+                }
+                center_node() {
+                    // no rendering here, only centering
+                    if (freshest_node.node == null)
+                        return;
+                    center_element(freshest_node.node);
+                    // rendering.render();
+                }
+            };
+            freshest_node = new freshest_node_type();
 
             var render_graph = function(datas) {
                 rendering
@@ -107,22 +132,14 @@
                         //     this_polygon.style.stroke = "black";
                         // });
                     });
+                    if (document.getElementById('automate_camera').checked)
+                        {
+                            freshest_node.center_node();
+                            rendering.render();
+                        }
             }
 
             var datas_as_dot = null;
-            let freshest_node_type = class {
-                hash = null;
-                get node() {
-                    var node_hash = this.hash;
-                    var value = d3.selectAll('.node').nodes().filter(
-                        function(d, i){
-                            return d3.select(d).select('title').node().textContent == node_hash;
-                        }
-                    );
-                    return value.length == 0 ? null : value[0];
-                }
-            };
-            freshest_node = new freshest_node_type();
             var draw_fetched_datas = function(datas_as_json)
             {
                 try
@@ -149,7 +166,7 @@
                 catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
 
                 try
-                {   // refresh `freshest_node_hash` value
+                {   // refresh `freshest_node` value
                     var lines = datas_as_json.split('\n');
                     const regex = /\"hash\"\:(\d+)\,/;
                     if (lines.length == 0)
