@@ -36,6 +36,9 @@ in External options
 >$ make toolchain
 
 WAIT !!!
+Install boost1.73
+in greencom/greensdk/
+>$ make libdbus-cpp
 
 Add the path of the sdk tool inside your basrc   
 > export PATH="'path/to/greencomsdk/root'/output/host/bin:$PATH"   
