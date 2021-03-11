@@ -75,7 +75,7 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
             removeClientFromList(it);
         }
     }
-
+    
     if (merge > 0)
     {
         std::cout << RED << "Start merge waiting (" << merge << ")" << RESET << std::endl;

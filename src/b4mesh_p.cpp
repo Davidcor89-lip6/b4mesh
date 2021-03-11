@@ -867,7 +867,7 @@ void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string
     DEBUG << "A merge block can be created now." << std::endl;
     createBlock = true;
     GenerateBlocks();
-	node_->ClearnewNodes();
+  	node_->ClearnewNodes();
   }
 }
 
@@ -962,12 +962,13 @@ vector<Transaction> B4Mesh::SelectTransactions(){
 
 void B4Mesh::GenerateBlocks(){
   std::vector<string> myChildless = blockgraph.GetChildlessBlockList();
+  std::vector<std::string> p_block = vector <string> ();
+  
 	// Initialize the block
 	Block block;
 	block.SetLeader(node_->consensus_.GetId());
 	block.SetGroupId(node_->consensus_.GetGroupId());
 	// Getting Parents of the futur Block
-	std::vector<std::string> p_block = vector <string> ();
 	for (auto& parent : myChildless){
 		p_block.push_back(parent);
 	}
@@ -977,12 +978,12 @@ void B4Mesh::GenerateBlocks(){
     DEBUG << " GenerateBlock: Creation of a merge block" << std::endl;
 		DEBUG << " GenerateBlock: Merge block transactions are: " << std::endl;
 		for (auto hash : p_block){
-			Transaction t;
-			string payload = to_string(node_->consensus_.GetId()) + " " + hash;
-			DEBUG << payload << endl;
-			t.SetPayload(payload);
-			t.SetTimestamp(getSeconds());
-			transactions.push_back(t);
+      Transaction t;
+      string payload = to_string(node_->consensus_.GetId()) + " " + hash;
+      DEBUG << payload << endl;
+      t.SetPayload(payload);
+      t.SetTimestamp(getSeconds());
+      transactions.push_back(t);
 		}
 
 		for (auto &node : recover_branch){
@@ -1000,7 +1001,6 @@ void B4Mesh::GenerateBlocks(){
 		if(missing_childless.size() > 0){
 			for (auto &pb : missing_childless){
 				if(find(p_block.begin(), p_block.end(), pb) == p_block.end()){
-					DEBUG << " GenerateBlock: Hash parent is: " << pb << std::endl;
 					p_block.push_back(pb);
 				}
 			}
@@ -1019,6 +1019,11 @@ void B4Mesh::GenerateBlocks(){
 			//for (auto &t : transactions)
 			//  pending_transactions.erase(t.GetHash()); //Not in case of POC
 	}
+
+  DEBUG << " GenerateBlock: Parents of new block are: " << std::endl;
+  for (auto &p : p_block){
+    DEBUG << " GenerateBlock: Block: " << p << std::endl;
+  }
 
 	block.SetParents(p_block);
 

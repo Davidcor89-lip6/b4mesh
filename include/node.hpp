@@ -43,7 +43,7 @@ public:
     std::vector<std::string> GetcurrentListAddr(void) { return currentListAddr; }
     std::vector<std::string> GetpreviousListAddr(void) { return previousListAddr; }
     std::vector<pair<int, std::string>> GetnewNodes(void) { return new_nodes; }
-    void ClearnewNodes(void) { new_nodes.clear();}
+    void ClearnewNodes(void) { new_nodes.clear(); }
 
 private:
     void create_client(std::string addr);
