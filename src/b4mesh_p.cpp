@@ -289,8 +289,8 @@ void B4Mesh::BlockTreatment(Block b){
           // Adding the block to the waiting list since parents aren't in BG yet
           DEBUG << " BlockTreatment: Adding new block: " << b.GetHash().data() << " to waiting_list: " << std::endl;
           waiting_list[b.GetHash()] = b;
-    // Trace purpose
-    waiting_list_time[b.GetHash()] = getSeconds();
+          // Trace purpose
+          waiting_list_time[b.GetHash()] = getSeconds();
         } else {
           // All ancestors are known by the local node
           // Adding block to blockgraph
@@ -514,7 +514,6 @@ void B4Mesh::UpdateMissingList(vector<string> unknown_p, std::string ip){
 }
 
 void B4Mesh::UpdateWaitingList(){
-
 	bool addblock = true; 
 	while (addblock)
 	{ 
@@ -530,8 +529,8 @@ void B4Mesh::UpdateWaitingList(){
 			if (it->second.GetParents().size() == i){ // if all parents are in blockgraph
 				//Trace purpose
 				total_waitingBlockTime += getSeconds() - waiting_list_time[it->first];
-	  			count_waitingBlock ++;
-	  			waiting_list_time.erase(it->first);
+        count_waitingBlock ++;
+        waiting_list_time.erase(it->first);
 				
 				DEBUG << "Update waiting list: All parents are present -> Adding block."<< std::endl;
 				AddBlockToBlockgraph(it->second);
@@ -541,7 +540,7 @@ void B4Mesh::UpdateWaitingList(){
 				break;
 			} else {
 				DEBUG << "Not all parents from this block are present. keeping the block in the list" << std::endl;
-                ++it;
+           ++it;
 			}
 		}
 	}
@@ -727,7 +726,7 @@ void B4Mesh::Ask4ChildlessBlocks(){
 
   // Asking to new nodes for childless blocks
   for (auto &dest : node_->GetnewNodes()){
-	node_->SendPacket(dest.second, packet, false);
+	  node_->SendPacket(dest.second, packet, false);
   }
 }
 

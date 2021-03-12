@@ -44,12 +44,28 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
 
 }
 
+/*
+void node::setGroupId (std::vector<std::string> new_listnodes){
+
+    std::string groupstring;
+    for (auto &ip : new_listnodes){
+        groupstring += ip;
+    }
+    groupId = hashing(groupstring); 
+
+}
+*/
+
 // ************** Recurrent Task **************************************
 void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/) 
 {
+    bool findNode = false;
 	std::cout << "Status Dbus" << std::endl; 
+
     previousListAddr = currentListAddr;
     currentListAddr = consensus_.getNodeList();
+
+//    setGroupId(currentListAddr);
 
     std::cout << "leader " << consensus_.getLeader() << std::endl;
 
@@ -71,6 +87,20 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
         auto Addr = std::find (currentListAddr.begin(), currentListAddr.end(), it);
         if (Addr == currentListAddr.end())
         {
+            // This code avoids the case when a node was added as client but sockets weren't stablished
+            // This cause that the program was waiting to connect to a node that is not longer in the group.
+            if (merge > 0){
+                findNode = false;
+                for (auto &ip : listClientB){
+                    if (it == ip.first){
+                        findNode = true;
+                    }
+                }
+                if (findNode){
+                    std::cout << "Decrementing merge before removing a node that could't connect " << endl;
+                    merge-=2;
+                }
+            }
             std::cout << "timer_pollDbus_fct: removing " << it << std::endl;
             removeClientFromList(it);
         }

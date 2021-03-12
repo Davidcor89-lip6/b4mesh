@@ -22,7 +22,7 @@
 #define RECCURENT_TIMER 10
 
 // Blockgraph
-#define SIZE_BLOCK 20        // 130
+#define SIZE_BLOCK 40        // 130
 #define SIZE_MEMPOOL 500
 
 // Retransmit transaction timing
