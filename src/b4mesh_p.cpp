@@ -33,6 +33,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   lostTrans = 0;
 	lostPacket = 0;
 	numDumpingBlock = 0;
+  numDumpingTxs = 0;
 	total_missingBlockTime = 0;
   count_missingBlock = 0;
 	total_waitingBlockTime = 0;
@@ -72,57 +73,56 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
     DEBUG << "ReceivePacket: size " << packet.size() << " from " << ip << std::endl; 
     try
     {
-        ApplicationPacket p(packet, packet.size());
-        //DEBUG << "message " << p << std::endl;
+      ApplicationPacket p(packet, packet.size());
+      //DEBUG << "message " << p << std::endl;
 
-        // ------------ TRANSACTION PACKET ------------------ 
-        if (p.GetService() == ApplicationPacket::TRANSACTION){
-            Transaction t(p.GetPayload());
-            DEBUG << BOLDCYAN << " Received a new transaction packet : " << t << " from " <<  ip << " with hash " << t.GetHash() << RESET << std::endl;
-            TransactionsTreatment(t);
+      // ------------ TRANSACTION PACKET ------------------ 
+      if (p.GetService() == ApplicationPacket::TRANSACTION){
+          Transaction t(p.GetPayload());
+          DEBUG << BOLDCYAN << " Received a new transaction packet : " << t << " from " <<  ip << " with hash " << t.GetHash() << RESET << std::endl;
+          TransactionsTreatment(t);
+      }
+      // ------------ BLOCK PACKET ------------------
+      else if (p.GetService() == ApplicationPacket::BLOCK){
+          Block b(p.GetPayload());
+          DEBUG << GREEN << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << RESET << std::endl;
+          BlockTreatment(b);
+      }
+      // ------------ REQUEST_BLOCK PACKET ------------------ 
+      else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
+          string req_block = p.GetPayload();
+          DEBUG << BLUE << " REQUEST_BLOCK: looking for block: " << req_block << RESET << std::endl;
+          SendParentBlock(req_block, ip);
+      }
+		  /* ------------ CHANGE_TOPO PACKET ------------------ */
+      else if (p.GetService() == ApplicationPacket::CHANGE_TOPO){
+        int message_type = ExtractMessageType(p.GetPayload());
+        /* ------------ CHILDLESSBLOCK_REQ PACKET ------------------ */
+        if ( message_type == CHILDLESSBLOCK_REQ){
+          //Upon reception: send to leader childless blocks.
+          DEBUG << RED << " CHILDLESSBLOCK_REQ: " << ip << RESET << std::endl;
+          SendChildlessBlocks(ip);
         }
-        // ------------ BLOCK PACKET ------------------
-        else if (p.GetService() == ApplicationPacket::BLOCK){
-            Block b(p.GetPayload());
-            DEBUG << GREEN << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << RESET << std::endl;
-            BlockTreatment(b);
+        /* ------------ CHILDLESSBLOCK_REP PACKET ------------------ */
+        else if (message_type == CHILDLESSBLOCK_REP){
+          // Upon reception: Leader execute this functin -
+          DEBUG << BOLDYELLOW << " CHILDLESSBLOCK_REP: " << ip << RESET << std::endl;
+          ChildlessBlockTreatment(p.GetPayload(), ip);
         }
-        // ------------ REQUEST_BLOCK PACKET ------------------ 
-        else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
-            string req_block = p.GetPayload();
-            DEBUG << BLUE << " REQUEST_BLOCK: looking for block: " << req_block << RESET << std::endl;
-            SendParentBlock(req_block, ip);
+        /* ------------ GROUPBRANCH_REQ PACKET ------------------ */
+        else if (message_type == GROUPBRANCH_REQ){
+          // Send a branch of the blockhraph to a node
+          DEBUG << MAGENTA << " GROUPBRANCH_REQ: " << ip << RESET << std::endl;
+          SendBranch4Sync(p.GetPayload(), ip);
         }
-		/* ------------ CHANGE_TOPO PACKET ------------------ */
-		else if (p.GetService() == ApplicationPacket::CHANGE_TOPO){
-			int message_type = ExtractMessageType(p.GetPayload());
-      /* ------------ CHILDLESSBLOCK_REQ PACKET ------------------ */
-			if ( message_type == CHILDLESSBLOCK_REQ){
-				//Upon reception: send to leader childless blocks.
-				DEBUG << RED << " CHILDLESSBLOCK_REQ: " << ip << RESET << std::endl;
-				SendChildlessBlocks(ip);
-			}
-      /* ------------ CHILDLESSBLOCK_REP PACKET ------------------ */
-			else if (message_type == CHILDLESSBLOCK_REP){
-				// Upon reception: Leader execute this functin -
-				DEBUG << BOLDYELLOW << " CHILDLESSBLOCK_REP: " << ip << RESET << std::endl;
-				ChildlessBlockTreatment(p.GetPayload(), ip);
-			}
-      /* ------------ GROUPBRANCH_REQ PACKET ------------------ */
-			else if (message_type == GROUPBRANCH_REQ){
-				// Send a branch of the blockhraph to a node
-				DEBUG << MAGENTA << " GROUPBRANCH_REQ: " << ip << RESET << std::endl;
-				SendBranch4Sync(p.GetPayload(), ip);
-			}
-			else {
-				DEBUG << " Packet CHANGE_TOPO type unsupported" << std::endl;
-			}
-		}
+        else {
+          DEBUG << " Packet CHANGE_TOPO type unsupported" << std::endl;
+        }
+      }
         else{
             DEBUG << RED << " Packet type unsupported or faulty!" << RESET << std::endl;
 			lostPacket++;
         }
-  
     }
     catch(const std::exception& e)
     {
@@ -196,9 +196,11 @@ void B4Mesh::TransactionsTreatment(Transaction t)
             }
         } else { // Transaction already in blockgraph
             DEBUG << "Transaction already present in Blockgraph\n Dumping transaction ...  " << std::endl;
+            numDumpingTxs++;
         }
     } else { // Transaction already in mempool
         DEBUG << "Transaction already present in Memepool\n Dumping transaction ... " << std::endl;
+        numDumpingTxs++;
     }
     // If leader and enough transactions in mempool. Then create block.
     if(node_->consensus_.AmILeader() == true && TestPendingTxs() == true && createBlock == true){
@@ -303,10 +305,12 @@ void B4Mesh::BlockTreatment(Block b){
     } else {
       // The block is already present in waiting list
       DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in waiting list\n  Dumping block..." << std::endl;
+      numDumpingBlock++;
     }
   } else {
     // The block is already present in the local blockgraph
     DEBUG << " BlockTreatment: Block " << b.GetHash().data() << " already present in blockgraph\n  Dumping block..." << std::endl;
+    numDumpingBlock++;
   }
 }
 
@@ -1113,37 +1117,43 @@ int B4Mesh::ComputeTransactionRepetition(void)
 
 void B4Mesh::GenerateResults()
 {
-    std::cout << " GenerateResults " << std::endl;
+  std::cout << " GenerateResults " << std::endl;
 
 	std::cout << "\nB4mesh: Stop B4Mesh on node : " << node_->consensus_.GetId() << std::endl;
-	std::cout << "\nB4mesh: Execution time : " << getSeconds() << "s" << std::endl;
+  std::cout << "************** BLOCKGRAPH RELATED PERFORMANCES **************" << std::endl;
+	std::cout << "B4mesh: Execution time : " << getSeconds() << "s" << std::endl;
+  std::cout << "B4Mesh: Size of the blockgraph (bytes): " << blockgraph.GetByteSize() << std::endl;
+  std::cout << "B4Mesh: Packets lost due to messaging pb: " << lostPacket << std::endl;
+  
+  std::cout << "************** BLOCK RELATED PERFORMANCES **************" << std::endl;
 	std::cout << "B4mesh: Total number of blocks : " << blockgraph.GetBlocksCount() << std::endl;
-	std::cout << "B4Mesh: Taille moyenne d'un bloc (bytes): " << blockgraph.GetByteSize()/blockgraph.GetBlocksCount() << std::endl;
-	std::cout << "B4mesh: Total number of transactions in BG : " << blockgraph.GetTxsCount() << std::endl;
-	std::cout << "B4mesh: number of transactions in BG / seconds : " << (float)(blockgraph.GetTxsCount())/getSeconds() << std::endl;
-	std::cout << "B4Mesh: Moyenne de transactions par block dans Blockgraph: " << blockgraph.MeanTxPerBlock() << std::endl;
-	std::cout << "B4Mesh: Total size of transactions (bytes): " << blockgraph.GetTxsByteSize() << std::endl;
-	std::cout << "B4Mesh: Transactions restant dans le mempool: " << pending_transactions.size() << std::endl;
-	std::cout << "B4Mesh: mean time of transaction in the mempool : " << total_pendingTxTime / count_pendingTx << std::endl;
-	std::cout << "B4Mesh: Transactions lost due to space: " << lostTrans << std::endl;
-	std::cout << "B4Mesh: Num of transaction generated in this node: " << numTxsG << std::endl;
-	std::cout << "B4Mesh: Num of re transaction: " << numRTxsG << std::endl;
-	std::cout << "B4Mesh: Num of transaction with multiple occurance in the blockgraph: "  << std::endl;
-	int TxRep = ComputeTransactionRepetition();
-	std::cout << TxRep << std::endl;
-	std::cout << "B4Mesh: Num of dumped block (already in waiting list or in the blockgraph): " <<  numDumpingBlock << std::endl;
-	std::cout << "B4Mesh: Blocks restant is missing_block_list: " << missing_block_list.size() << std::endl;
-	for (auto &b : missing_block_list){
+	std::cout << "B4Mesh: Mean size of a block in the blockgraph (bytes): " << blockgraph.GetByteSize()/blockgraph.GetBlocksCount() << std::endl;
+  std::cout << "B4Mesh: Number of dumped blocks (already in waiting list or in the blockgraph): " <<  numDumpingBlock << std::endl;
+  std::cout << "B4Mesh: Number of remaining blocks' references in the missing_block_list: " << missing_block_list.size() << std::endl;
+  for (auto &b : missing_block_list){
 		std::cout << "B4Mesh: - Block #: " << b.first.data() << " is missing " << std::endl;
 	}
-	std::cout << "B4Mesh: mean time of missing block in the list : " << total_missingBlockTime / count_missingBlock << std::endl;
-	std::cout << "B4Mesh: Blocks restant is waiting_list: " << waiting_list.size() << std::endl;
-	for (auto &b : waiting_list){
-		std::cout << "B4Mesh: - Block #: " << b.first << " is in waiting_list " << std::endl;
-	}
-	std::cout << "B4Mesh: mean time of waiting block in the list : " << total_waitingBlockTime / count_waitingBlock << std::endl;
-	std::cout << "B4Mesh: Packets lost due to messaging pb: " << lostPacket << std::endl;
-    std::cout << "B4Mesh: Total Bytes : " << blockgraph.GetByteSize() << "\n" << std::endl;
+	std::cout << "B4Mesh: Mean time that a blocks' reference spends in the missing_block_list: " << total_missingBlockTime / count_missingBlock << std::endl;
+  std::cout << "B4Mesh: Number of remaining blocks in the waiting_list: " << waiting_list.size() << std::endl;
+    for (auto &b : waiting_list){
+      std::cout << "B4Mesh: - Block #: " << b.first << " is in waiting_list " << std::endl;
+    }
+	std::cout << "B4Mesh: Mean time that a block spends in the waiting_list: " << total_waitingBlockTime / count_waitingBlock << std::endl;
+  std::cout << "************** TRANSACTIONS RELATED PERFORMANCES **************" << std::endl;
+	std::cout << "B4mesh: Total number of transactions in the blockgraph: " << blockgraph.GetTxsCount() << std::endl;
+  std::cout << "B4Mesh: Number of transactions generated by this node: " << numTxsG << std::endl;
+	std::cout << "B4mesh: Number of committed transactions per seconds: " << (float)(blockgraph.GetTxsCount())/getSeconds() << std::endl;
+  std::cout << "B4Mesh: Size of all transactions in the blockgraph (bytes): " << blockgraph.GetTxsByteSize() << std::endl;
+	std::cout << "B4Mesh: Mean number of transactions per block: " << blockgraph.MeanTxPerBlock() << std::endl;
+	std::cout << "B4Mesh: Mean time that a transaction spend in the mempool: " << total_pendingTxTime / count_pendingTx << std::endl;
+	std::cout << "B4Mesh: Number of remaining transactions in the mempool: " << pending_transactions.size() << std::endl;
+	std::cout << "B4Mesh: Number of re transaction: " << numRTxsG << std::endl;
+  std::cout << "B4Mesh: Transactions lost due to mempool space: " << lostTrans << std::endl;
+  std::cout << "B4Mesh: Number of droped transactions (already in blockgraph or in mempool):  " << numDumpingTxs << std::endl;
+	std::cout << "B4Mesh: Transactions with multiple occurance in the blockgraph: "  << std::endl;
+	int TxRep = ComputeTransactionRepetition();
+	std::cout << TxRep << std::endl;
+	
 
 	// ---The blockgraph into file. ----
 	ofstream output_file;
