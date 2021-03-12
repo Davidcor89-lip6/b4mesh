@@ -77,8 +77,9 @@
                 })
                 .width(graphContainer.node().clientWidth)
                 .height(graphContainer.node().clientHeight)
+                //.zoom(true)
                 .fit(true)
-                .zoom(true);
+                ;
 
             var update_views = function(){
                 document.getElementById("view_nodes_count").innerHTML = d3.select(".graph").selectAll(".node").nodes().length;
@@ -107,10 +108,18 @@
             freshest_node = new freshest_node_type();
 
             var render_graph = function(datas) {
+
+                const is_camera_automated = document.getElementById('automate_camera').checked;
+
                 rendering
                     .renderDot(datas)
                     .on("end", function(){
                         update_views();
+                        if (is_camera_automated)
+                        {
+                            freshest_node.center_node();
+                            //rendering.render();
+                        }
                         d3.selectAll(".node").on("click", function(){
                             console.log('Focusing node : ' + d3.select(this).selectAll('title').text());
                             center_element(this);
@@ -132,11 +141,6 @@
                         //     this_polygon.style.stroke = "black";
                         // });
                     });
-                    if (document.getElementById('automate_camera').checked)
-                        {
-                            freshest_node.center_node();
-                            rendering.render();
-                        }
             }
 
             var datas_as_dot = null;

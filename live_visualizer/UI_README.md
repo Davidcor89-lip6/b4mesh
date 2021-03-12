@@ -2,6 +2,8 @@
 
 This documentation details UI features.
 
+![fork_merge_animation](./documentation/fork_merge_animation.gif)
+
 ## Table of content
 
 - [Blockgraph live visualizer : UI guide](#blockgraph-live-visualizer--ui-guide)
