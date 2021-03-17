@@ -12,7 +12,8 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   dist(PAYLOAD_MIN,PAYLOAD_MAX),  // payload size
   dist_exp(rng, boost::exponential_distribution<>(LAMBDA_DIST)), 
   timer_generateT(io_context,std::chrono::steady_clock::now()),
-  timer_recurrentTask(io_context,std::chrono::steady_clock::now())
+  timer_recurrentTask(io_context,std::chrono::steady_clock::now()),
+  timer_childless(io_context,std::chrono::steady_clock::now())
 {
 
   groupId = string(32,0);
@@ -55,6 +56,11 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 }
 
 B4Mesh::~B4Mesh(){
+}
+
+void B4Mesh::setCreateBlock (bool cb)
+{
+  createBlock = cb;
 }
 
 // ************** Recurrent Task **************************************
@@ -203,8 +209,12 @@ void B4Mesh::TransactionsTreatment(Transaction t)
         numDumpingTxs++;
     }
     // If leader and enough transactions in mempool. Then create block.
-    if(node_->consensus_.AmILeader() == true && TestPendingTxs() == true && createBlock == true){
+    if(node_->consensus_.AmILeader() == true)
+    {
+      if (TestPendingTxs() == true && createBlock == true)
+      {
         GenerateBlocks();
+      }
     }
 }
 
@@ -711,13 +721,12 @@ void B4Mesh::StartMerge(){
   DEBUG << " StartMerge: Leader node: " << node_->consensus_.GetId()
         << " starting the leader synchronization process..." << std::endl;
 
-
-  createBlock = false;
+//  createBlock = false;
   Ask4ChildlessBlocks();
 }
 
 void B4Mesh::Ask4ChildlessBlocks(){
-  DEBUG << " Ask4ChildlessBlocks: In leader synch process "<< std::endl;
+  DEBUG << YELLOW << " Ask4ChildlessBlocks: In leader synch process "<< std::endl;
   childlessblock_req_hdr_t ch_req;
   ch_req.msg_type = CHILDLESSBLOCK_REQ;
 
@@ -726,8 +735,24 @@ void B4Mesh::Ask4ChildlessBlocks(){
 
   // Asking to new nodes for childless blocks
   for (auto &dest : node_->GetnewNodes()){
+    DEBUG << YELLOW << " Ask4ChildlessBlocks: Sending CHILDLESSBLOCK_REQ to node: " << node_->consensus_.GetIdFromIP(dest.second) << std::endl;
 	  node_->SendPacket(dest.second, packet, false);
   }
+  /* new code */
+  timer_childless.expires_from_now(std::chrono::seconds(3));
+  timer_childless.async_wait(boost::bind(&B4Mesh::timer_childless_fct, this, boost::asio::placeholders::error));
+}
+
+void B4Mesh::timer_childless_fct(const boost::system::error_code& /*e*/) 
+{
+    if (!createBlock)
+    {
+      mergeBlock = true;
+      DEBUG << CYAN << "Timer_childless has expired. Creating merge block" << std::endl;
+      GenerateBlocks();
+      createBlock = true;
+    	node_->ClearnewNodes();
+    }
 }
 
 void B4Mesh::SendChildlessBlocks(std::string destAddr){
@@ -864,7 +889,7 @@ void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string
       i++;
     }
   }
-  if (i == 0){
+  if (i == 0 && !createBlock){
     // Create Merge BLOCK
     mergeBlock = true;
     DEBUG << "A merge block can be created now." << std::endl;
@@ -923,16 +948,16 @@ bool B4Mesh::TestPendingTxs(){
 
 	if (getSeconds() - lastBlock > SAFETIME){
 		if (pending_transactions.size() > blocktxsSize){
-			DEBUG << " TestPendingTxs: Enough txs to create a block." << std::endl;
+			DEBUG << YELLOW << " TestPendingTxs: Enough txs to create a block." << std::endl;
 			return true;
 		}
 		else {
-			DEBUG << " Not enough transactions to form a block" << std::endl;
+			DEBUG << YELLOW << " TestPendingTxs: Not enough transactions to form a block" << std::endl;
 			return false;
 		}
 	}
 
-	DEBUG <<" TestPendingTxs: Not allow to create a block so fast"<< std::endl;
+	DEBUG << YELLOW << " TestPendingTxs: Not allow to create a block so fast"<< std::endl;
     return false;
 }
 
@@ -970,7 +995,8 @@ void B4Mesh::GenerateBlocks(){
 	// Initialize the block
 	Block block;
 	block.SetLeader(node_->consensus_.GetId());
-	block.SetGroupId(node_->consensus_.GetGroupId());
+	block.SetGroupId(node_->GetGroupId());
+  DEBUG << " GenerateBlock: Block's groupId is: " << node_->GetGroupId() << std::endl;
 	// Getting Parents of the futur Block
 	for (auto& parent : myChildless){
 		p_block.push_back(parent);

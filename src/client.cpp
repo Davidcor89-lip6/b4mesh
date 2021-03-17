@@ -32,8 +32,7 @@ void client::do_connect()
             socket_.close();
             m_timer.expires_from_now(std::chrono::seconds(2));
             m_timer.async_wait(boost::bind(&client::on_ready_to_reconnect, this, boost::asio::placeholders::error));
-        }
-            
+        }         
     });
 }
 

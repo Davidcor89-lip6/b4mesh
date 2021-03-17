@@ -44,28 +44,44 @@ node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short po
 
 }
 
-/*
+std::string node::GetGroupId()
+{
+    return groupId;
+}
+
 void node::setGroupId (std::vector<std::string> new_listnodes){
 
     std::string groupstring;
-    for (auto &ip : new_listnodes){
+    std::vector<std::string> tmplist = std::vector<std::string> ();
+   
+    // Add myself to the list of nodes
+    tmplist.push_back(GetIp());
+    for (auto &ip : new_listnodes)
+    {
+        tmplist.push_back(ip);
+    }
+    // sort the list so every node have the same order 
+    std::sort (tmplist.begin(), tmplist.end());
+ 
+    std::cout << " List of nodes: " << std::endl;
+    for (auto &ip :tmplist){
+        std::cout << ip << std::endl;
+        // Creating the string from which the groupId will be calculate
         groupstring += ip;
     }
     groupId = hashing(groupstring); 
-
+    std::cout << " Group Id is: " << groupId << std::endl;
 }
-*/
+
 
 // ************** Recurrent Task **************************************
 void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/) 
 {
-    bool findNode = false;
 	std::cout << "Status Dbus" << std::endl; 
 
     previousListAddr = currentListAddr;
     currentListAddr = consensus_.getNodeList();
-
-//    setGroupId(currentListAddr);
+    bool findNode = false;
 
     std::cout << "leader " << consensus_.getLeader() << std::endl;
 
@@ -96,7 +112,7 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
                         findNode = true;
                     }
                 }
-                if (findNode){
+                if (!findNode){
                     std::cout << "Decrementing merge before removing a node that could't connect " << endl;
                     merge-=2;
                 }
@@ -108,14 +124,17 @@ void node::timer_pollDbus_fct (const boost::system::error_code& /*e*/)
     
     if (merge > 0)
     {
+        b4mesh_->setCreateBlock(false);
         std::cout << RED << "Start merge waiting (" << merge << ")" << RESET << std::endl;
         timer_merging.expires_from_now(std::chrono::seconds(MERGE_TIMING));
         timer_merging.async_wait(boost::bind(&node::merge_launcher_fct, this, boost::asio::placeholders::error));
     }
 
+    setGroupId(currentListAddr);
+
     timer_pollDbus.expires_from_now(std::chrono::seconds(POLLING_DBUS));
 	timer_pollDbus.async_wait(boost::bind(&node::timer_pollDbus_fct, this, boost::asio::placeholders::error));
-
+    
 }
 
 void node::merge_launcher_fct (const boost::system::error_code& /*e*/) 
@@ -222,7 +241,6 @@ void node::handle_accept(session* new_session, bool block, const boost::system::
             boost::bind(&node::handle_accept, this, new_session, false,
             boost::asio::placeholders::error));
         }
-
     }
     else
     {

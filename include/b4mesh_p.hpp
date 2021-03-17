@@ -247,6 +247,8 @@ class B4Mesh
          */
         void updateMissingList(std::vector<std::string> unknown_p, std::string ip);
 
+        void setCreateBlock(bool cb);
+
     private:
         /**
          * Getting performances
@@ -330,6 +332,9 @@ class B4Mesh
         // other recurrent call
         void timer_recurrentTask_fct (const boost::system::error_code& /*e*/);
         boost::asio::steady_timer timer_recurrentTask;
+
+        void timer_childless_fct (const boost::system::error_code& /*e*/);
+        boost::asio::steady_timer timer_childless;
 
 };
 

@@ -44,7 +44,9 @@ public:
     std::vector<std::string> GetpreviousListAddr(void) { return previousListAddr; }
     std::vector<pair<int, std::string>> GetnewNodes(void) { return new_nodes; }
     void ClearnewNodes(void) { new_nodes.clear(); }
-
+    void setGroupId (std::vector<std::string> new_listnodes);
+    std::string GetGroupId(void);
+    
 private:
     void create_client(std::string addr);
 
@@ -59,6 +61,7 @@ public:
 
 private:
     std::string my_IP;
+    std::string groupId;
     short port_;
     std::vector<std::string> currentListAddr; 
     std::vector<std::string> previousListAddr; 

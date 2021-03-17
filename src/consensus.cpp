@@ -124,10 +124,11 @@ std::string consensus::GetIPFromId(int id)
     std::string r("-1");
     return r;
 }
-
+/*
 std::string consensus::GetGroupId()
 {
     std::string g = std::to_string(GetIdFromIP(leader_)); // group id is the id of the leader
     return g;
 }
+*/
 
