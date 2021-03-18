@@ -80,7 +80,6 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
     try
     {
       ApplicationPacket p(packet, packet.size());
-      //DEBUG << "message " << p << std::endl;
 
       // ------------ TRANSACTION PACKET ------------------ 
       if (p.GetService() == ApplicationPacket::TRANSACTION){
@@ -90,6 +89,7 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
       }
       // ------------ BLOCK PACKET ------------------
       else if (p.GetService() == ApplicationPacket::BLOCK){
+          DEBUG << GREEN << "BLOCK PACKET" << std::endl;
           Block b(p.GetPayload());
           DEBUG << GREEN << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << RESET << std::endl;
           BlockTreatment(b);
@@ -1065,9 +1065,9 @@ void B4Mesh::GenerateBlocks(){
 
 	lastBlock = getSeconds();
 
-	BlockTreatment(block);
 	DEBUG << " Block size is:   " << block.GetSize() <<  std::endl;
 	SendBlockToConsensus(block);
+  BlockTreatment(block);
 
 }
 

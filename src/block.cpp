@@ -43,33 +43,45 @@ Block::Block(const Block &b){
 }
 
 Block::Block(const string &serie){
-  const block_t *p = (block_t*) serie.data();
+  try 
+  {
+    std::cout << "toto" << std::endl;
+    const block_t *p = (block_t*) serie.data();
+    std::cout << "toto1" << std::endl;
+    hash = string(p->hash, HASH_SIZE);
+    index = p->index;
+    leader = p->leader;
+    groupId = string(p->groupId, HASH_SIZE);
+    timestamp = p->timestamp;
+    size = p->size;
 
-  hash = string(p->hash, HASH_SIZE);
-  index = p->index;
-  leader = p->leader;
-  groupId = string(p->groupId, HASH_SIZE);
-  timestamp = p->timestamp;
-  size = p->size;
-
-  int tx_count = p->tx_count;
-  int parents_count = p->parents_count;
-
-  const char *p_parents = (const char*) p + sizeof(block_t);
-  for(int i=0; i<parents_count*HASH_SIZE; i += HASH_SIZE)
-    parents.push_back(string(p_parents+i, HASH_SIZE));
-
-  const char *p_transactions = p_parents + parents_count * HASH_SIZE;
-  int transactions_offset = 0;
-  int remaining_bytes = serie.size() - (p_transactions - (const char*)p);
-  for (int i=0; i<tx_count; ++i){
-    Transaction t(string(p_transactions+transactions_offset, remaining_bytes));
-    transactions.push_back(t);
-    transactions_offset += t.GetSize();
-    remaining_bytes -= t.GetSize();
+    int tx_count = p->tx_count;
+    int parents_count = p->parents_count;
+    std::cout << "toto2" << std::endl;
+    const char *p_parents = (const char*) p + sizeof(block_t);
+    std::cout << "toto3" << std::endl;
+    for(int i=0; i<parents_count*HASH_SIZE; i += HASH_SIZE){
+      parents.push_back(string(p_parents+i, HASH_SIZE));
+    }
+    std::cout << "toto4" << std::endl;
+    const char *p_transactions = p_parents + parents_count * HASH_SIZE;
+    int transactions_offset = 0;
+    int remaining_bytes = serie.size() - (p_transactions - (const char*)p);
+    std::cout << "toto5" << std::endl;
+    for (int i=0; i<tx_count; ++i){
+      Transaction t(string(p_transactions+transactions_offset, remaining_bytes));
+      transactions.push_back(t);
+      transactions_offset += t.GetSize();
+      remaining_bytes -= t.GetSize();
+    }
+    std::cout << "toto6" << std::endl;
+    size = CalculateSize();
   }
-
-  size = CalculateSize();
+  catch (const std::exception& e)
+  {
+    std::cout << "Block error in constructor" << std::endl;
+    throw e;
+  }
 }
 
 Block::~Block(){
