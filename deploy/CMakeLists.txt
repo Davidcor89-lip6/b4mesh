@@ -17,7 +17,10 @@ install(
 
 ## Configuration files generation
 # forward variables to child process :
-set(live_visualizer_install_dir "NOT_DEFINED" CACHE PATH "live_visualizer : install dir path")
+if (NOT DEFINED live_visualizer_install_dir)
+    message(ERROR "b4mesh/live_visualiser did not export live_visualizer_install_dir variable")
+endif()
+
 install(CODE "set(live_visualizer_install_dir \"${live_visualizer_install_dir}\")")
 set(live_visualizer_filestream_path "/tmp/blockgraph" CACHE PATH "live_visualizer : filestream path")
 install(CODE "set(live_visualizer_filestream_path \"${live_visualizer_filestream_path}\")")

@@ -139,3 +139,56 @@ Each node is under the format :
 {"node":{"groupId":217,"hash":2681597,"parent":[7144646]}}
 {"node":{"groupId":26,"hash":7377976,"parent":[2681597,8515655]}}
 ```
+
+### Configuration, installation, deployement
+
+CMake top-level script handle configuration, install, and deployement of `live visualisation`.
+
+**NB** : Such script handles nginx configuration, deploying into `/etc/nginx/qolyester.d` path.
+
+| Argument | Mandatory ? | Default value |
+| -------- | ----------- | ----------- |
+| live_visualizer_filestream_path | No | /tmp/blockgraph                         | 
+| live_visualizer_install_dir     | No | CMAKE_INSTALL_PREFIX + /live_visualizer | 
+
+**NB** : `live_visualizer_filestream_path` MUST match [cpp source files](https://github.com/Davidcor89-lip6/b4mesh/blob/f84d289ab3cfeddc0a9ae3d50ce554bc3f3c2c59/include/configs.hpp#L35), which is :
+
+```cpp
+#   define LIVEBLOCK_FILE "/tmp/blockgraph"
+```
+
+```bash
+mkdir tmp && cd tmp;
+cmake                                                           \
+        -DCMAKE_INSTALL_PREFIX=./INSTALL_DIR                    \
+        -Dlive_visualizer_filestream_path=./LV_FileStreamPath   \
+        -Dlive_visualizer_install_dir=LV_installDir             \
+        ..
+cmake --install .
+```
+
+In the snippet above, by forcing `CMAKE_INSTALL_PREFIX`, deployement results in the following files :
+
+```log
+-- Install configuration: "Release"
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/live_visualizer.html
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/style.css
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/favicon.ico
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/json_to_dot.js
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/poll_worker_task.js
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/string_hash.js
+-- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/view_operations.js
+-- Up-to-date: /etc/nginx/qolyester.d/add_transaction.conf
+-- live_visualizer_filestream_path set to : C:/Dev/b4mesh_main/TMP_BUILD/LV_FileStreamPath
+-- live_visualizer_refresh_rate set to : 3000
+```
+
+but also generates :
+
+```log
+/etc/nginx/qolyester.d/http_live_visualizer.conf
+C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/configuration.js
+```
+
+See `b4mesh/live_visualiser/README.md` for more details about live_visualiser installation.
