@@ -1,24 +1,22 @@
-message(STATUS "deploy b4mesh ...")
-
-# /add_transactions
-install(
-    FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/add_transaction.conf
-    DESTINATION /etc/nginx/qolyester.d
-)
 
 # http live_visualizer configuration
 # - /blockgraph_live_visualizer/view
 # - /blockgraph_live_visualizer/get_nodes
 
-set(live_visualizer_install_dir "NOT_DEFINED" CACHE PATH "live_visualizer : install dir path")
-if (live_visualizer_install_dir STREQUAL "NOT_DEFINED")
-    message(ERROR "[deploy.cmake] live_visualizer_install_dir is not defined")
+if (NOT DEFINED live_visualizer_install_dir)
+    message(ERROR "live_visualizer_install_dir is not defined")
+endif()
+if (NOT DEFINED live_visualizer_filestream_path)
+    message(ERROR "live_visualizer_filestream_path is not defined")
+endif()
+if (NOT DEFINED live_visualizer_refresh_rate)
+    message(ERROR "live_visualizer_refresh_rate is not defined")
 endif()
 
 # see https://github.com/Davidcor89-lip6/b4mesh/blob/f84d289ab3cfeddc0a9ae3d50ce554bc3f3c2c59/include/configs.hpp#L35
 #   define LIVEBLOCK_FILE "/tmp/blockgraph"
-set(live_visualizer_filestream_path "/tmp/blockgraph" CACHE PATH "live_visualizer : filestream path")
+
+message(STATUS "live_visualizer_filestream_path set to : ${live_visualizer_filestream_path}")
 file (
     WRITE /etc/nginx/qolyester.d/http_live_visualizer.conf
     CONTENT
@@ -31,7 +29,7 @@ file (
             alias ${live_visualizer_filestream_path}; #b4mesh node endpoint\n
         }"
 )
-set(live_visualizer_refresh_rate 3000 CACHE STRING "live_visualizer : refresh rate")
+message(STATUS "live_visualizer_refresh_rate set to : ${live_visualizer_refresh_rate}")
 file (
     WRITE ${live_visualizer_install_dir}/configuration.js
     CONTENT
