@@ -8,6 +8,43 @@ Green's NGinx server might serve `live_visualizer.html` on a `/visualization` en
 
 UI features are detailed [here](./UI_README.md)
 
+## Deployement
+
+A CMake script is provide in order to handle - *most of* - the deployement process.  
+It might be use independently, or as part of a top-level project.
+
+Default behavior will append `live_visualiser` to [CMAKE_INSTALL_PREFIX](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html#variable:CMAKE_INSTALL_PREFIX) variable, in order to avoid path collisions with an hypothetical top-level project.  
+Such behavior can be override by setting `live_visualizer_install_dir` variable.
+
+```bash
+cd /path/to/b4mesh/live_visualizer;
+mkdir cmake_build && cd cmake_build;
+```
+
+- Default :
+
+    ```bash
+    cmake ..;
+    ```
+- Using install prefix :
+
+    ```bash
+    cmake -DCMAKE_INSTALL_PREFIX=/path/to/installation/dir ..;
+    ```
+- Overriding install destination (target only)
+
+    ```bash
+    cmake -Dlive_visualizer_install_dir=/path/to/installation/dir ..;
+    ```
+
+Then simply install :
+
+```bash
+cmake --install .;
+```
+
+NB : This will install everything **but** the configuration *(see `b4mesh/deploy/`)*.
+
 ## Configuration
 
 The web-worker which polls datas to render, defined in `scripts/poll_worker_tasks.js`, use `configuration.js` as configuration file.  
