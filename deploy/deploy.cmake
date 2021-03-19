@@ -29,12 +29,3 @@ file (
             alias ${live_visualizer_filestream_path}; #b4mesh node endpoint\n
         }"
 )
-message(STATUS "live_visualizer_refresh_rate set to : ${live_visualizer_refresh_rate}")
-file (
-    WRITE ${live_visualizer_install_dir}/configuration.js
-    CONTENT
-        "const configuration = {\n
-            blockgraph_as_dot_API_accesspoint: \"${live_visualizer_filestream_path}\",\n
-            refresh_rate_ms: ${live_visualizer_refresh_rate}\n
-        }"
-)

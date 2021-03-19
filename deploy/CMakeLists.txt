@@ -1,7 +1,15 @@
 project(b4mesh_deploy)
 cmake_minimum_required(VERSION 3.12)
 
+include(${CMAKE_SOURCE_DIR}/cmake_modules/get_nodes_filestream_path.cmake)
+
 message(STATUS "b4mesh::deploy ...")
+# todo : target b4mesh::deploy, depends on b4mesh::deploy::live_visualiser
+
+get_node_filestream_path()
+message(STATUS "node filestream detected on : [${node_filestream_path}]")
+
+return()
 
 if (NOT EXISTS /etc/nginx/qolyester.d/)
     message(STATUS "Creating destination directory /etc/nginx/qolyester.d/")
@@ -18,7 +26,7 @@ install(
 ## Configuration files generation
 # forward variables to child process :
 if (NOT DEFINED live_visualizer_install_dir)
-    message(ERROR "b4mesh/live_visualiser did not export live_visualizer_install_dir variable")
+    message(FATAL_ERROR  "b4mesh/live_visualiser did not export live_visualizer_install_dir variable")
 endif()
 
 install(CODE "set(live_visualizer_install_dir \"${live_visualizer_install_dir}\")")
