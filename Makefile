@@ -76,11 +76,5 @@ clean_glue_files:
 
 build_glue_files: ${GLUE_FILES}
 
-patch-nginx: 
-	sshpass -p 'b4meshroot' scp patch/nginx.patch default@${IP}:/var/persistent-data/b4mesh
-	sshpass -p 'b4meshroot' ssh default@${IP} sudo -S rwdo patch -N -p0 -i /var/persistent-data/b4mesh/nginx.patch
-	sshpass -p 'b4meshroot' ssh default@${IP} sudo -S nginx -s reload
-
-
 .PHONY: clean all send1 sendall clean_glue_files build_glue_files recoverResult1 recoverResultAll
 

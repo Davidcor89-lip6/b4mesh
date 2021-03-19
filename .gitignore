@@ -5,6 +5,7 @@ Results/*
 
 # generated files
 live_visualizer/configuration.js
+live_visualizer/nginx/http_live_visualizer.conf
 
 # MSVC
 .vscode

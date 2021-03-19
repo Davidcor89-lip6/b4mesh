@@ -101,7 +101,11 @@ You can visualize manualy using :
 
 ## Nginx configuration
 
-### manually
+### Automatically
+
+See `#Configuration, installation, deployement` section below
+
+### Manually ***(deprecated)***
 >$ sudo rwdo -s
 >$ vi /etc/nginx/conf.d/qolyester-http.conf 
 
@@ -123,12 +127,6 @@ server {
 
 >$ sudo nginx -s reload
 
-### by makefile
-
->$ make patch-nginx IP=10.181.172.130
-
-sudo password has to be typed two times. (b4meshroot)
-
 ## live visualisation
 
 In the file "/tmp/blockgraph", you can find a live feed of the blockgraph under a json format.
@@ -142,27 +140,24 @@ Each node is under the format :
 
 ### Configuration, installation, deployement
 
-CMake top-level script handle configuration, install, and deployement of `live visualisation`.
+CMake's top-level script handle **configuration**, **install**, and **deployement** - *on remote machines* - of b4mesh's `live visualisation` component.
 
-**NB** : Such script handles nginx configuration, deploying into `/etc/nginx/qolyester.d` path.
+**NB** : Such script also handles nginx endpoints configuration, deploying into `/etc/nginx/qolyester.d` path.
 
-| Argument | Mandatory ? | Default value |
-| -------- | ----------- | ----------- |
-| live_visualizer_filestream_path | No | /tmp/blockgraph                         | 
-| live_visualizer_install_dir     | No | CMAKE_INSTALL_PREFIX + /live_visualizer | 
+> Deployement is handle by `install-time` instruction.  
+> *Thus, during `cmake --install` command invocation*
 
-**NB** : `live_visualizer_filestream_path` MUST match [cpp source files](https://github.com/Davidcor89-lip6/b4mesh/blob/f84d289ab3cfeddc0a9ae3d50ce554bc3f3c2c59/include/configs.hpp#L35), which is :
+| Argument | type |  Mandatory ? | Default value |
+| -------- | ---- | ------------ | ------------- |
+| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | YES | NONE |
+| live_visualizer_install_dir  | STRING/PATH | No | /var/persistent-data/b4mesh/live_visualizer | 
+| live_visualizer_refresh_rate | INTEGER<br>*(in milliseconds)* | NO | 3000 |
 
-```cpp
-#   define LIVEBLOCK_FILE "/tmp/blockgraph"
-```
 
 ```bash
-mkdir tmp && cd tmp;
-cmake                                                           \
-        -DCMAKE_INSTALL_PREFIX=./INSTALL_DIR                    \
-        -Dlive_visualizer_filestream_path=./LV_FileStreamPath   \
-        -Dlive_visualizer_install_dir=LV_installDir             \
+mkdir build && cd build;
+cmake   --target=b4mesh_live_visualizer \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         ..
 cmake --install .
 ```
@@ -170,25 +165,17 @@ cmake --install .
 In the snippet above, by forcing `CMAKE_INSTALL_PREFIX`, deployement results in the following files :
 
 ```log
--- Install configuration: "Release"
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/live_visualizer.html
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/style.css
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/favicon.ico
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/json_to_dot.js
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/poll_worker_task.js
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/string_hash.js
--- Installing: C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/scripts/view_operations.js
--- Up-to-date: /etc/nginx/qolyester.d/add_transaction.conf
--- live_visualizer_filestream_path set to : C:/Dev/b4mesh_main/TMP_BUILD/LV_FileStreamPath
--- live_visualizer_refresh_rate set to : 3000
+-- Remote machines IPs set to :
+-- - 10.181.178.217
+-- - 10.181.172.130
+-- - 10.154.134.26
+-- - 10.154.134.170
+-- - 10.181.178.210
+-- b4mesh::live_visualizer ...
+--  - b4mesh::live_visualizer : refresh rate set to : 3000
+--  - b4mesh::live_visualizer : nodes filestream detected on : [/tmp/blockgraph]
+--  - b4mesh::live_visualizer : (remote) install dir set to : /var/persistent-data/b4mesh/live_visualizer
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Dev/b4mesh_main/build
 ```
-
-but also generates :
-
-```log
-/etc/nginx/qolyester.d/http_live_visualizer.conf
-C:/Dev/b4mesh_main/TMP_BUILD/INSTALL_DIR/live_visualizer/configuration.js
-```
-
-See `b4mesh/live_visualiser/README.md` for more details about live_visualiser installation.

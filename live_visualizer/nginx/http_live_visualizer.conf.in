@@ -1,0 +1,8 @@
+location /blockgraph_live_visualizer/view {
+    default_type "text/html";
+    alias @live_visualizer_install_dir@/live_visualizer.html;
+}
+
+location /blockgraph_live_visualizer/get_nodes {
+    alias @live_visualizer_filestream_path@; #b4mesh node endpoint
+}
