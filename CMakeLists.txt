@@ -5,4 +5,4 @@ cmake_minimum_required(VERSION 3.12)
 #           This project currently does not support CMake, please see `cmake-integration` branche
 
 add_subdirectory(live_visualizer)
-add_subdirectory(deploy)
+#add_subdirectory(deploy)

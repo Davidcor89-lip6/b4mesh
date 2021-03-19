@@ -1,11 +1,8 @@
 project(b4mesh_live_visualizer)
 cmake_minimum_required(VERSION 3.12)
 
-# include(${CMAKE_SOURCE_DIR}/cmake_modules/get_nodes_filestream_path.cmake)
-# include(${CMAKE_SOURCE_DIR}/cmake_modules/send_to_remote_machines.cmake)
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/get_nodes_filestream_path.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/remote_deploy.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake_modules/get_nodes_filestream_path.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)
 
 message(STATUS "b4mesh::live_visualizer ...")
 
@@ -26,15 +23,9 @@ get_nodes_filestream_path() # generate `nodes_filestream_path`
 message(STATUS "nodes filestream detected on : [${nodes_filestream_path}]")
 set(live_visualizer_filestream_path ${nodes_filestream_path})
 
-# or configure() ?
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/configuration.js)
-file (
-    WRITE ${CMAKE_CURRENT_SOURCE_DIR}/configuration.js
-    CONTENT
-        "const configuration = {\n
-            blockgraph_as_dot_API_accesspoint: \"${nodes_filestream_path}\",\n
-            refresh_rate_ms: ${live_visualizer_refresh_rate}\n
-        }"
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/configuration.js.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/configuration.js
 )
 
 install(CODE "MESSAGE(\"Deploying b4mesh::live_visualizer...\")")

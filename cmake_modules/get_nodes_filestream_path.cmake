@@ -11,8 +11,8 @@ function (get_nodes_filestream_path)
     string(REGEX REPLACE ${filestream_path_regex}
        "\\1" result
        "${result}")
-    if (result MATCHES "")
-        message(FATAL "get_nodes_filestream_path : Cannot find LIVEBLOCK_FILE compile-time constant in ${target_file}")
+    if (result STREQUAL "")
+        message(FATAL_ERROR "get_nodes_filestream_path : Cannot find LIVEBLOCK_FILE compile-time constant in ${target_file}")
     endif()
     set (nodes_filestream_path ${result} PARENT_SCOPE)
 endfunction()

@@ -3,6 +3,9 @@ build/*
 build_local/*
 Results/*
 
+# generated files
+live_visualizer/configuration.js
+
 # MSVC
 .vscode
 *.vs
