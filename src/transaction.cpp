@@ -29,16 +29,32 @@ Transaction::Transaction (const Transaction &tx){
 }
 
 Transaction::Transaction(const string &serie){
-  const char *p = serie.data();
-  transaction_t* p_header = (transaction_t*)p;
-
-  hash = string(p_header->hash, HASH_SIZE);
-  size = p_header->size;
-  timestamp = p_header->timestamp;
-  int payload_size = size - sizeof(transaction_t);
-  payload = string(p+sizeof(transaction_t), payload_size);
-
+  try
+  {
+    std::cout << " Tata1" << std::endl;
+    const char *p = serie.data();
+    std::cout << " Tata2" << std::endl;
+    transaction_t* p_header = (transaction_t*)p;
+    std::cout << " Tata3" << std::endl;
+    hash = string(p_header->hash, HASH_SIZE);
+    std::cout << " Tata4" << std::endl;
+    size = p_header->size;
+    std::cout << " Tata5" << std::endl;
+    timestamp = p_header->timestamp;
+    std::cout << " Tata6" << std::endl;
+    int payload_size = size - sizeof(transaction_t);
+    std::cout << " Tata7" << std::endl;
+    payload = string(p+sizeof(transaction_t), payload_size);
+    std::cout << " Tata8" << std::endl;
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+    std::cout << "Transaction error in constructor" << std::endl;
+    throw e;
+  }
 }
+
 Transaction::~Transaction (){
 
 }

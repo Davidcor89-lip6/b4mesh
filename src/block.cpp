@@ -79,6 +79,7 @@ Block::Block(const string &serie){
   }
   catch (const std::exception& e)
   {
+    std::cerr << e.what() << '\n';
     std::cout << "Block error in constructor" << std::endl;
     throw e;
   }
