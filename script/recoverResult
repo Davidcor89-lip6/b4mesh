@@ -8,4 +8,5 @@ do
     echo $addr
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/blockgraph* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/mempool* Results
+    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/performances* Results
 done
