@@ -18,7 +18,7 @@ See top-level README.md, `live visualisation` section
 
 Note about `live_visualizer_refresh_rate` parameter :
 
-As this represents the data-polling frequency, the value must be chosoe carefully.  
+As this represents the data-polling frequency, the value must be choose carefully.  
 In order to get a refresh rate lower then 1500 ms, you'd be willing to also lower both D3 animations delay and duration, in order to avoid any blinking.
 
 ## Input datas

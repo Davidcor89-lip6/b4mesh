@@ -91,3 +91,63 @@ function (send_to_remote_machines)
     endforeach()
 
 endfunction()
+
+function(remote_root_move_file)
+
+    set(options VERBOSE)
+    set(oneValueArgs DESTINATION_IP DESTINATION_PATH SOURCE_PATH SSHPASS_USER SSH_USER ROOT_PASSWORD)
+    set(multiValueArgs)
+    cmake_parse_arguments(REMOTE_ROOT__MOVE_FILE
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
+
+    if (NOT DEFINED REMOTE_ROOT__MOVE_FILE_DESTINATION_IP)
+        message(FATAL_ERROR  "remote_root_move_file : missing mandatory argument `DESTINATION_IP`")
+    endif()
+    if (NOT DEFINED REMOTE_ROOT__MOVE_FILE_DESTINATION_PATH)
+        message(FATAL_ERROR  "remote_root_move_file : missing mandatory argument `DESTINATION_PATH`")
+    endif()
+    if (NOT DEFINED REMOTE_ROOT__MOVE_FILE_SOURCE_PATH)
+        message(FATAL_ERROR  "remote_root_move_file : missing mandatory argument `SOURCE_PATH`")
+    endif()
+    if (NOT DEFINED REMOTE_ROOT__MOVE_FILE_SSH_USER)
+        message(FATAL_ERROR "remote_root_move_file : missing or invalid mandatory argument `SSH_USER`")
+    endif()
+    if (NOT DEFINED REMOTE_ROOT__MOVE_FILE_ROOT_PASSWORD)
+        message(FATAL_ERROR "remote_root_move_file : missing or invalid mandatory argument `ROOT_PASSWORD`")
+    endif()
+
+    if (DEFINED REMOTE_ROOT__MOVE_FILE_SSHPASS_USER)
+        set(command_prefix "sshpass -p '${REMOTE_ROOT__MOVE_FILE_SSHPASS_USER}'")
+    else()
+        set(command_prefix "")
+    endif()
+
+    set(move_file_command
+        "${command_prefix} \
+        ssh ${REMOTE_ROOT__MOVE_FILE_SSH_USER}@${REMOTE_ROOT__MOVE_FILE_DESTINATION_IP} \
+        \"echo '${REMOTE_ROOT__MOVE_FILE_ROOT_PASSWORD}' | su - root rwdo cp ${REMOTE_ROOT__MOVE_FILE_SOURCE_PATH} ${REMOTE_ROOT__MOVE_FILE_DESTINATION_PATH}\""
+    )
+    if (DEFINED REMOTE_ROOT__MOVE_FILE_VERBOSE)
+        message(STATUS "remote_root_move_file :\n"
+            " - command : ${move_file_command}")
+    endif()
+    execute_process(COMMAND
+        bash "-c" "${move_file_command}"
+        COMMAND_ERROR_IS_FATAL ANY
+        RESULT_VARIABLE     result
+        ERROR_VARIABLE      error
+        #ECHO_OUTPUT_VARIABLE
+        #ECHO_ERROR_VARIABLE
+    )
+    if (NOT (result STREQUAL "0"))
+        message(FATAL_ERROR " remote_root_move_file :\n"
+            " - error : ${error}"
+            " - return : ${result}"
+        )
+    endif()
+
+endfunction()

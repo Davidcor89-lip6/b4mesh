@@ -31,18 +31,34 @@ configure_file(
 
 ### Deployement at install-time
 # nginx
+# [Note] :  As the FS-tree /etc/ is read-only, we need to first store datas into /tmp,
+#           and only then move it to /etc/nginx/qolyester.d/
 install(CODE "MESSAGE(\"Deploying b4mesh::live_visualizer (nginx endpoints)...\")")
 install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "send_to_remote_machines(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
-                    /etc/nginx/qolyester.d/
+                    /tmp
                 FILES
                     ${CMAKE_CURRENT_SOURCE_DIR}/nginx/http_live_visualizer.conf
                 SSHPASS_USER    b4meshroot
                 SSH_USER        default
             )"
 )
+foreach(IP IN LISTS remote_machines_IP)
+    install(CODE "remote_root_move_file(
+        DESTINATION_IP      ${IP} 
+        SOURCE_PATH         /tmp/http_live_visualizer.conf
+        DESTINATION_PATH    /etc/nginx/qolyester.d/
+        SSHPASS_USER        b4meshroot
+        SSH_USER            default
+        ROOT_PASSWORD       b4meshroot
+    )")
+endforeach()
+
+# sshpass -p 'b4meshroot' scp /home/david/Documents/b4mesh/nginx/add_transaction.conf default@10.181.178.217:/tmp
+# sshpass -p 'b4meshroot' ssh default@10.181.178.217
+#   "echo b4meshroot | su - root rwdo cp /tmp/add_transaction.conf /etc/nginx/qolyester.d/"
 
 # sources
 set(live_visualizer_install_dir "/var/persistent-data/b4mesh/live_visualizer" CACHE STRING "live_visualizer : install directory (remote)")
