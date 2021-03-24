@@ -24,9 +24,9 @@ install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "send_to_remote_machines(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
-                    /etc/nginx/qolyester.d/
+                    /etc/nginx/qolyester.d
                 FILES
-                    ${CMAKE_SOURCE_DIR}/deploy/nginx/add_transaction.conf
+                    ${CMAKE_SOURCE_DIR}/nginx/add_transaction.conf
                 SSHPASS_USER    b4meshroot
                 SSH_USER        default
             )"

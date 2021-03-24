@@ -58,8 +58,8 @@ function (send_to_remote_machines)
                 COMMAND_ERROR_IS_FATAL ANY
                 RESULT_VARIABLE     result
                 ERROR_VARIABLE      error
-                ECHO_OUTPUT_VARIABLE
-                ECHO_ERROR_VARIABLE
+                #ECHO_OUTPUT_VARIABLE
+                #ECHO_ERROR_VARIABLE
             )
             if (NOT (result STREQUAL "0"))
                 message(FATAL_ERROR " send_to_remote_machines :\n"
@@ -78,8 +78,8 @@ function (send_to_remote_machines)
                 COMMAND_ERROR_IS_FATAL ANY
                 RESULT_VARIABLE     result
                 ERROR_VARIABLE      error
-                ECHO_OUTPUT_VARIABLE
-                ECHO_ERROR_VARIABLE
+                #ECHO_OUTPUT_VARIABLE
+                #ECHO_ERROR_VARIABLE
             )
             if (NOT (result STREQUAL "0"))
                 message(FATAL_ERROR " send_to_remote_machines :\n"
