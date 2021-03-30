@@ -74,7 +74,7 @@ install(CODE "send_to_remote_machines(
                 PATH
                     ${live_visualizer_install_dir}
                 FILES
-                    ${CMAKE_CURRENT_SOURCE_DIR}/live_visualizer.html
+                    ${CMAKE_CURRENT_SOURCE_DIR}/index.html
                     ${CMAKE_CURRENT_SOURCE_DIR}/style.css
                     ${CMAKE_CURRENT_SOURCE_DIR}/favicon.ico
                     ${CMAKE_CURRENT_SOURCE_DIR}/configuration.js

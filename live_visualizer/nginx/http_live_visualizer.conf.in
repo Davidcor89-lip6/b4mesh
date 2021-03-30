@@ -1,6 +1,6 @@
 location /blockgraph_live_visualizer/view {
     default_type "text/html";
-    alias @live_visualizer_install_dir@/live_visualizer.html;
+    alias @live_visualizer_install_dir@; # nginx append /index.html by default
 }
 
 location /blockgraph_live_visualizer/get_nodes {
