@@ -11,6 +11,10 @@ message(STATUS "b4mesh::live_visualizer ...")
 set(live_visualizer_refresh_rate 3000 CACHE STRING "live_visualizer : refresh rate")
 message(STATUS " - b4mesh::live_visualizer : refresh rate set to : ${live_visualizer_refresh_rate}")
 
+# argument : live_visualizer_install_dir
+set(live_visualizer_install_dir "/var/persistent-data/b4mesh/live_visualizer" CACHE STRING "live_visualizer : install directory (remote)")
+message(STATUS " - b4mesh::live_visualizer : (remote) install dir set to : ${live_visualizer_install_dir}")
+
 # argument : nodes_filestream_path
 get_nodes_filestream_path() # generate `nodes_filestream_path`
 message(STATUS " - b4mesh::live_visualizer : nodes filestream detected on : [${nodes_filestream_path}]")
@@ -64,9 +68,6 @@ endforeach()
 # echo 'b4meshroot' | su - root rwdo cp /tmp/add_transaction.conf /etc/nginx/qolyester.d/
 
 # sources
-set(live_visualizer_install_dir "/var/persistent-data/b4mesh/live_visualizer" CACHE STRING "live_visualizer : install directory (remote)")
-message(STATUS " - b4mesh::live_visualizer : (remote) install dir set to : ${live_visualizer_install_dir}")
-
 install(CODE "MESSAGE(\"Deploying b4mesh::live_visualizer (sources)...\")")
 install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "send_to_remote_machines(
