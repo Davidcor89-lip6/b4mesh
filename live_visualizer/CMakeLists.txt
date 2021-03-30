@@ -60,6 +60,9 @@ endforeach()
 # sshpass -p 'b4meshroot' ssh default@10.181.178.217
 #   "echo b4meshroot | su - root rwdo cp /tmp/add_transaction.conf /etc/nginx/qolyester.d/"
 
+# sshpass -p 'b4meshroot' ssh default@10.181.178.217
+# echo 'b4meshroot' | su - root rwdo cp /tmp/add_transaction.conf /etc/nginx/qolyester.d/
+
 # sources
 set(live_visualizer_install_dir "/var/persistent-data/b4mesh/live_visualizer" CACHE STRING "live_visualizer : install directory (remote)")
 message(STATUS " - b4mesh::live_visualizer : (remote) install dir set to : ${live_visualizer_install_dir}")
