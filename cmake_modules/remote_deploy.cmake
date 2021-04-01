@@ -129,7 +129,7 @@ function(remote_root_move_file)
     set(move_file_command
         "${command_prefix} \
         ssh ${REMOTE_ROOT__MOVE_FILE_SSH_USER}@${REMOTE_ROOT__MOVE_FILE_DESTINATION_IP} \
-        \"echo '${REMOTE_ROOT__MOVE_FILE_ROOT_PASSWORD}' | su - root rwdo cp ${REMOTE_ROOT__MOVE_FILE_SOURCE_PATH} ${REMOTE_ROOT__MOVE_FILE_DESTINATION_PATH}\""
+        \"echo '${REMOTE_ROOT__MOVE_FILE_ROOT_PASSWORD}' | su - root rwdo install -m 644 ${REMOTE_ROOT__MOVE_FILE_SOURCE_PATH} ${REMOTE_ROOT__MOVE_FILE_DESTINATION_PATH}\""
     )
     if (DEFINED REMOTE_ROOT__MOVE_FILE_VERBOSE)
         message(STATUS "remote_root_move_file :\n"
