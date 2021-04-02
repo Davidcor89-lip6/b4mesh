@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 
-function (get_nodes_filestream_path)
+function (get_nodes_filestream_path SOURCES_PATH)
+    if (NOT DEFINED SOURCES_PATH)
+        message(FATAL_ERROR "get_nodes_filestream_path : `SOURCES_PATH` is a mandatory argument")
+    endif()
+
     set(filestream_path_regex ".*LIVEBLOCK_FILE\ *\=?\ *.*\"(.+)\"")
-    set(target_file ${CMAKE_SOURCE_DIR}/include/configs.hpp)
+    set(target_file ${SOURCES_PATH}/include/configs.hpp)
     file(STRINGS
         ${target_file}
         result

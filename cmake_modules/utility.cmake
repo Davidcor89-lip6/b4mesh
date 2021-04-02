@@ -10,8 +10,8 @@ function (unquote_string input_string result)
 
     string(SUBSTRING ${input_string} 0 1 first_char)
     if (${first_char} STREQUAL "\"")
-        string(SUBSTRING ${input_string} 1 ${input_string_length} input_string)
         math(EXPR input_string_length "${input_string_length} - 1")
+        string(SUBSTRING ${input_string} 1 ${input_string_length} input_string)
     endif()
 
     math(EXPR input_string_length "${input_string_length} - 1")

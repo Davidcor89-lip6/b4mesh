@@ -1,5 +1,62 @@
 cmake_minimum_required(VERSION 3.12)
 
+function (initialize_remote_FS)
+
+    set(options VERBOSE)
+    set(oneValueArgs PATH SSHPASS_USER SSH_USER)
+    set(multiValueArgs DESTINATIONS)
+    cmake_parse_arguments(INITIALIZE_REMOTE_FS
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
+
+    if (NOT DEFINED INITIALIZE_REMOTE_FS_PATH)
+        message(FATAL_ERROR  "initialize_remote_FS : missing mandatory argument `PATH`")
+    endif()
+
+    if (DEFINED INITIALIZE_REMOTE_FS_SSHPASS_USER)
+        set(command_prefix "sshpass -p '${INITIALIZE_REMOTE_FS_SSHPASS_USER}'")
+    else()
+        set(command_prefix "")
+    endif()
+
+    if (NOT DEFINED INITIALIZE_REMOTE_FS_SSH_USER)
+        message(FATAL_ERROR "initialize_remote_FS : missing or invalid mandatory argument `SSH_USER`")
+    endif()
+    
+    foreach(destination IN LISTS INITIALIZE_REMOTE_FS_DESTINATIONS)
+
+        if (INITIALIZE_REMOTE_FS_VERBOSE)
+            message(STATUS "initialize_remote_FS : destination : ${destination}")
+        endif()
+
+        set(remote_command
+            "${command_prefix}  \
+            ssh ${SEND_TO_REMOTE_MACHINES_SSH_USER}@${destination} \"   \
+                (mkdir -p ${INITIALIZE_REMOTE_FS_PATH} || true) &&      \
+                chgrp -R www-data ${INITIALIZE_REMOTE_FS_PATH} &&       \
+                chmod -R g+rX ${INITIALIZE_REMOTE_FS_PATH}              \
+            \"")
+        if (DEFINED INITIALIZE_REMOTE_FS_VERBOSE)
+            message(STATUS "initialize_remote_FS : command : ${remote_command}")
+        endif()
+
+        execute_process(COMMAND
+            bash "-c" "${remote_command}"
+            COMMAND_ERROR_IS_FATAL ANY
+            RESULT_VARIABLE     result
+            ERROR_VARIABLE      error
+        )
+        if (NOT (result STREQUAL "0"))
+            message(FATAL_ERROR " initialize_remote_FS :\n"
+                " - error : ${error}"
+                " - return : ${result}"
+            )
+        endif()
+endfunction()
+
 function (send_to_remote_machines)
 #  file_or_directory remote_path
 

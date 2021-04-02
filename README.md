@@ -147,30 +147,90 @@ CMake's top-level script handle **configuration**, **install**, and **deployemen
 > Deployement is handle by `install-time` instruction.  
 > *Thus, during `cmake --install` command invocation*
 
+**NB** : Please not that `live_visualizer` target can be either standalone, or part of b4mesh top-level CMake script.
+
 | Argument | type |  Mandatory ? | Default value |
 | -------- | ---- | ------------ | ------------- |
-| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | YES | NONE |
-| live_visualizer_install_dir  | STRING/PATH | No | /var/persistent-data/b4mesh/live_visualizer | 
-| live_visualizer_refresh_rate | INTEGER<br>*(in milliseconds)* | NO | 3000 |
+| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | Yes | None |
+| remote_install_dir           | PATH | No | None |
+| live_visualizer_install_dir  | PATH | Yes if standalone | Only if not standalone :<br>`${remote_install_dir}`/live_visualizer |
+| live_visualizer_refresh_rate | INTEGER<br>*(in milliseconds)* | No | 3000 |
 
+#### Standalone usage
+
+Even if `b4mesh::live_visualizer` depends on several elements from b4mesh top-level projects,  
+it might be use in standalone.
+
+Theses dependencies are :
+
+- b4mesh/cmake_modules
+- b4mesh/include/configs.hpp
 
 ```bash
+# Assuming PWD is b4mesh sources's dir
 mkdir build && cd build;
-cmake   --target=b4mesh_live_visualizer \
+cmake   --target=b4mesh_live_visualizer \ # force standalone
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
         ..
 cmake --install .
 ```
 
-In the snippet above, by forcing `CMAKE_INSTALL_PREFIX`, deployement results in the following files :
+Which is equivalent to :
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
+        ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
+cmake --install .
+```
+
+Alternatively, as mentioned in the arguments table hereabove,  
+the user can substitute `live_visualizer_install_dir` parameter by `remote_install_dir`,  
+which will result in `live_visualizer_install_dir` set to `${remote_install_dir}/live_visualizer`
+
+Thus, previous command samples are equivalent to :
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dremote_install_dir:PATH=\"/var/persistent-data/b4mesh\" \ # remote_install_dir here, not explicit live_visualizer_install_dir
+        ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
+cmake --install .
+```
+
+#### As part of top-level b4mesh CMake script
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dremote_install_dir:PATH=\"/var/persistent-data/b4mesh\"
+        ..
+cmake --install .
+```
+
+Note that because we deploy remotely, standard CMake argument `CMAKE_INSTALL_PREFIX` has no real meaning here.  
+We substitute it with `remote_install_dir` to set the remote installation path.
+
+**NB** : *Note the escaping character sequence using `\"`, which prevent CMake from resolving localy the path.*
+
+In the snippet above deployement results in the following files :
 
 ```log
--- Remote machines IPs set to :
+-- b4mesh : Remote machines IPs set to :
 -- - 10.181.178.217
 -- - 10.181.172.130
 -- - 10.154.134.26
 -- - 10.154.134.170
 -- - 10.181.178.210
+-- b4mesh : remote_install_dir set to : "/var/persistent-data/b4mesh"
 -- b4mesh::live_visualizer ...
 --  - b4mesh::live_visualizer : refresh rate set to : 3000
 --  - b4mesh::live_visualizer : nodes filestream detected on : [/tmp/blockgraph]
