@@ -28,6 +28,7 @@ include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)
 
 ## remote FS initialization
 install(CODE "MESSAGE(\"Initializing remote directories...\")")
+install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "initialize_remote_FS(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
@@ -40,7 +41,6 @@ install(CODE "initialize_remote_FS(
 ## nginx
 # - /add_transaction
 install(CODE "MESSAGE(\"Deploying b4mesh (nginx endpoints)...\")")
-install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "send_to_remote_machines(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
