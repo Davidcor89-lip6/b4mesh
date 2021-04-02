@@ -1,10 +1,19 @@
 project(b4mesh_live_visualizer)
 cmake_minimum_required(VERSION 3.12)
 
-include(${CMAKE_SOURCE_DIR}/cmake_modules/get_nodes_filestream_path.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/get_nodes_filestream_path.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/remote_deploy.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/utility.cmake)
 
 message(STATUS "b4mesh::live_visualizer ...")
+
+# argument : remote_machines_IP (can be set by top-level script)
+if (NOT DEFINED remote_machines_IP)
+    set(remote_machines_IP "NOT_DEFINED" CACHE PATH "deployement : list of ;-separated remotes IP")
+    if (remote_machines_IP MATCHES "NOT_DEFINED")
+        message(FATAL_ERROR "`remote_machines_IP` is a mandatory parameter")
+    endif()
+endif()
 
 ### live_visualizer/configuration.js
 # argument : live_visualizer_refresh_rate
@@ -12,11 +21,22 @@ set(live_visualizer_refresh_rate 3000 CACHE STRING "live_visualizer : refresh ra
 message(STATUS " - b4mesh::live_visualizer : refresh rate set to : ${live_visualizer_refresh_rate}")
 
 # argument : live_visualizer_install_dir
-set(live_visualizer_install_dir "/var/persistent-data/b4mesh/live_visualizer" CACHE STRING "live_visualizer : install directory (remote)")
+if (NOT DEFINED remote_install_dir) # (can be set by top-level script)
+    set(live_visualizer_install_dir "NOT_DEFINED" CACHE STRING "live_visualizer : install directory (remote)")
+    if (live_visualizer_install_dir STREQUAL "NOT_DEFINED")
+        message(FATAL_ERROR " `live_visualizer_install_dir` is a mandatory parameter"
+                            " (only if `remote_install_dir` is not set by top-level script)")
+    endif()
+else()
+    unquote_string(${remote_install_dir} remote_install_dir)
+    set(live_visualizer_install_dir "${remote_install_dir}/live_visualizer" CACHE STRING "live_visualizer : install directory (remote)")
+    string(REPLACE "\"" "" live_visualizer_install_dir "${live_visualizer_install_dir}") # because `unquote` append before set
+endif()
+unquote_string(${live_visualizer_install_dir} live_visualizer_install_dir)
 message(STATUS " - b4mesh::live_visualizer : (remote) install dir set to : ${live_visualizer_install_dir}")
 
 # argument : nodes_filestream_path
-get_nodes_filestream_path() # generate `nodes_filestream_path`
+get_nodes_filestream_path(${CMAKE_CURRENT_SOURCE_DIR}/..) # generate `nodes_filestream_path`
 message(STATUS " - b4mesh::live_visualizer : nodes filestream detected on : [${nodes_filestream_path}]")
 set(live_visualizer_filestream_path ${nodes_filestream_path})
 
