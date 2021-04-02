@@ -34,7 +34,7 @@ function (initialize_remote_FS)
 
         set(remote_command
             "${command_prefix}  \
-            ssh ${SEND_TO_REMOTE_MACHINES_SSH_USER}@${destination} \"   \
+            ssh ${INITIALIZE_REMOTE_FS_SSH_USER}@${destination} \"   \
                 (mkdir -p ${INITIALIZE_REMOTE_FS_PATH} || true) &&      \
                 chgrp -R www-data ${INITIALIZE_REMOTE_FS_PATH} &&       \
                 chmod -R g+rX ${INITIALIZE_REMOTE_FS_PATH}              \
@@ -55,6 +55,7 @@ function (initialize_remote_FS)
                 " - return : ${result}"
             )
         endif()
+    endforeach()
 endfunction()
 
 function (send_to_remote_machines)
