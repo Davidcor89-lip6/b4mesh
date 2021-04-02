@@ -105,3 +105,16 @@ install(CODE "send_to_remote_machines(
                 SSH_USER        default
             )"
 )
+
+# todo : test with David
+## remote FS initialization
+install(CODE "MESSAGE(\"Fixing remote directories ACLs for NGinx ...\")")
+install(CODE "initialize_remote_FS(
+                DESTINATIONS \"${remote_machines_IP}\"
+                PATH
+                    ${remote_install_dir}
+                SSHPASS_USER    b4meshroot
+                SSH_USER        default
+                ROOT_PASSWORD   b4meshroot
+            )"
+)

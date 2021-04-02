@@ -34,11 +34,12 @@ function (initialize_remote_FS)
 
         set(remote_command
             "${command_prefix}  \
-            ssh ${INITIALIZE_REMOTE_FS_SSH_USER}@${destination} \"              \
-                echo '${INITIALIZE_REMOTE_FS_ROOT_PASSWORD}' | su - root rwdo   \
-                    (mkdir -p ${INITIALIZE_REMOTE_FS_PATH} || true) &&          \
-                    chgrp -R www-data ${INITIALIZE_REMOTE_FS_PATH} &&           \
-                    chmod -R g+rX ${INITIALIZE_REMOTE_FS_PATH}                  \
+            ssh ${INITIALIZE_REMOTE_FS_SSH_USER}@${destination} \"          \
+                    (mkdir -p ${INITIALIZE_REMOTE_FS_PATH} || true) &&      \
+                    echo '${INITIALIZE_REMOTE_FS_ROOT_PASSWORD}' | sudo -S  \
+                        chgrp -R www-data ${INITIALIZE_REMOTE_FS_PATH} &&   \
+                    echo '${INITIALIZE_REMOTE_FS_ROOT_PASSWORD}' | sudo -S  \
+                        chmod -R g+rX ${INITIALIZE_REMOTE_FS_PATH}          \
             \"")
         if (DEFINED INITIALIZE_REMOTE_FS_VERBOSE)
             message(STATUS "initialize_remote_FS : command : ${remote_command}")
@@ -188,7 +189,7 @@ function(remote_root_move_file)
     set(move_file_command
         "${command_prefix} \
         ssh ${REMOTE_ROOT__MOVE_FILE_SSH_USER}@${REMOTE_ROOT__MOVE_FILE_DESTINATION_IP} \
-        \"echo '${REMOTE_ROOT__MOVE_FILE_ROOT_PASSWORD}' | su - root rwdo install -m 644 ${REMOTE_ROOT__MOVE_FILE_SOURCE_PATH} ${REMOTE_ROOT__MOVE_FILE_DESTINATION_PATH}\""
+        \"echo '${REMOTE_ROOT__MOVE_FILE_ROOT_PASSWORD}' | sudo -S rwdo install -m 644 ${REMOTE_ROOT__MOVE_FILE_SOURCE_PATH} ${REMOTE_ROOT__MOVE_FILE_DESTINATION_PATH}\""
     )
     if (DEFINED REMOTE_ROOT__MOVE_FILE_VERBOSE)
         message(STATUS "remote_root_move_file :\n"

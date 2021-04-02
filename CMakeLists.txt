@@ -27,17 +27,17 @@ message(STATUS "${PROJECT_NAME} : remote_install_dir set to : ${remote_install_d
 include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)
 
 ## remote FS initialization
-install(CODE "MESSAGE(\"Initializing remote directories...\")")
-install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
-install(CODE "initialize_remote_FS(
-                DESTINATIONS \"${remote_machines_IP}\"
-                PATH
-                    ${remote_install_dir}
-                SSHPASS_USER    b4meshroot
-                SSH_USER        default
-                ROOT_PASSWORD   b4meshroot
-            )"
-)
+# install(CODE "MESSAGE(\"Initializing remote directories...\")")
+# install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
+# install(CODE "initialize_remote_FS(
+#                 DESTINATIONS \"${remote_machines_IP}\"
+#                 PATH
+#                     ${remote_install_dir}
+#                 SSHPASS_USER    b4meshroot
+#                 SSH_USER        default
+#                 ROOT_PASSWORD   b4meshroot
+#             )"
+# )
 
 ## nginx
 # - /add_transaction
