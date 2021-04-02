@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 function (initialize_remote_FS)
 
     set(options VERBOSE)
-    set(oneValueArgs PATH SSHPASS_USER SSH_USER)
+    set(oneValueArgs PATH SSHPASS_USER SSH_USER ROOT_PASSWORD)
     set(multiValueArgs DESTINATIONS)
     cmake_parse_arguments(INITIALIZE_REMOTE_FS
         "${options}"
@@ -34,10 +34,11 @@ function (initialize_remote_FS)
 
         set(remote_command
             "${command_prefix}  \
-            ssh ${INITIALIZE_REMOTE_FS_SSH_USER}@${destination} \"   \
-                (mkdir -p ${INITIALIZE_REMOTE_FS_PATH} || true) &&      \
-                chgrp -R www-data ${INITIALIZE_REMOTE_FS_PATH} &&       \
-                chmod -R g+rX ${INITIALIZE_REMOTE_FS_PATH}              \
+            ssh ${INITIALIZE_REMOTE_FS_SSH_USER}@${destination} \"              \
+                echo '${INITIALIZE_REMOTE_FS_ROOT_PASSWORD}' | su - root rwdo   \
+                    (mkdir -p ${INITIALIZE_REMOTE_FS_PATH} || true) &&          \
+                    chgrp -R www-data ${INITIALIZE_REMOTE_FS_PATH} &&           \
+                    chmod -R g+rX ${INITIALIZE_REMOTE_FS_PATH}                  \
             \"")
         if (DEFINED INITIALIZE_REMOTE_FS_VERBOSE)
             message(STATUS "initialize_remote_FS : command : ${remote_command}")

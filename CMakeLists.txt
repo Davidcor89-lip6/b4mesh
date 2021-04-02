@@ -35,6 +35,7 @@ install(CODE "initialize_remote_FS(
                     ${remote_install_dir}
                 SSHPASS_USER    b4meshroot
                 SSH_USER        default
+                ROOT_PASSWORD   b4meshroot
             )"
 )
 
