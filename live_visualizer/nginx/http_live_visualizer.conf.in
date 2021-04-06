@@ -7,6 +7,10 @@ location /blockgraph_live_visualizer/get_nodes {
     alias @live_visualizer_filestream_path@; #b4mesh node endpoint
 }
 
+# Javascript scripts :
 location /scripts/ {
     alias @live_visualizer_install_dir@/scripts/;
+}
+location /configuration.js {
+    alias @live_visualizer_install_dir@/configuration.js;
 }
