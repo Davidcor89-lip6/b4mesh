@@ -3,6 +3,6 @@
 
 const configuration = {
     // blockgraph_as_dot_API_accesspoint: "@live_visualizer_filestream_path@",    // tests : "http://127.0.0.1:8000/tests/datas/tmp/TestDatas.json",
-    blockgraph_as_dot_API_accesspoint: /blockgraph_live_visualizer/get_nodes,
+    blockgraph_as_dot_API_accesspoint: "/blockgraph_live_visualizer/get_nodes",
     refresh_rate_ms: @live_visualizer_refresh_rate@                         // tests : 3000
 }
