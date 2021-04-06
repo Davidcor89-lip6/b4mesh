@@ -243,7 +243,7 @@ function(remote_restart_nginx)
     set(restart_nginx_command
         "${command_prefix} \
         ssh ${REMOTE_RESTART_NGINX_SSH_USER}@${REMOTE_RESTART_NGINX_DESTINATION_IP} \
-        \"echo '${REMOTE_RESTART_NGINX_ROOT_PASSWORD}' | sudo nginx -s reload\""
+        \"echo '${REMOTE_RESTART_NGINX_ROOT_PASSWORD}' | sudo -S nginx -s reload\""
     )
     if (DEFINED REMOTE_RESTART_NGINX_VERBOSE)
         message(STATUS "remote_restart_nginx :\n"
