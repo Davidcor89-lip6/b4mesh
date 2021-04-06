@@ -80,13 +80,6 @@ foreach(IP IN LISTS remote_machines_IP)
     )")
 endforeach()
 
-# sshpass -p 'b4meshroot' scp /home/david/Documents/b4mesh/nginx/add_transaction.conf default@10.181.178.217:/tmp
-# sshpass -p 'b4meshroot' ssh default@10.181.178.217
-#   "echo b4meshroot | su - root rwdo cp /tmp/add_transaction.conf /etc/nginx/qolyester.d/"
-
-# sshpass -p 'b4meshroot' ssh default@10.181.178.217
-# echo 'b4meshroot' | su - root rwdo cp /tmp/add_transaction.conf /etc/nginx/qolyester.d/
-
 # sources
 install(CODE "MESSAGE(\"Deploying b4mesh::live_visualizer (sources)...\")")
 install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
@@ -106,7 +99,6 @@ install(CODE "send_to_remote_machines(
             )"
 )
 
-# todo : test with David
 ## remote FS initialization
 install(CODE "MESSAGE(\"Fixing remote directories ACLs for NGinx ...\")")
 install(CODE "initialize_remote_FS(
@@ -118,3 +110,13 @@ install(CODE "initialize_remote_FS(
                 ROOT_PASSWORD   b4meshroot
             )"
 )
+
+## remote restart nginx
+foreach(IP IN LISTS remote_machines_IP)
+    install(CODE "remote_restart_nginx(
+        DESTINATION_IP      ${IP} 
+        SSHPASS_USER        b4meshroot
+        SSH_USER            default
+        ROOT_PASSWORD       b4meshroot
+    )")
+endforeach()

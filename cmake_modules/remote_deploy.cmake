@@ -211,3 +211,55 @@ function(remote_root_move_file)
     endif()
 
 endfunction()
+
+function(remote_restart_nginx)
+
+    set(options VERBOSE)
+    set(oneValueArgs DESTINATION_IP SSHPASS_USER SSH_USER ROOT_PASSWORD)
+    set(multiValueArgs)
+    cmake_parse_arguments(REMOTE_RESTART_NGINX
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
+
+    if (NOT DEFINED REMOTE_RESTART_NGINX_DESTINATION_IP)
+        message(FATAL_ERROR  "remote_restart_nginx : missing mandatory argument `DESTINATION_IP`")
+    endif()
+    if (NOT DEFINED REMOTE_RESTART_NGINX_SSH_USER)
+        message(FATAL_ERROR "remote_restart_nginx : missing or invalid mandatory argument `SSH_USER`")
+    endif()
+    if (NOT DEFINED REMOTE_RESTART_NGINX_ROOT_PASSWORD)
+        message(FATAL_ERROR "remote_restart_nginx : missing or invalid mandatory argument `ROOT_PASSWORD`")
+    endif()
+
+    if (DEFINED REMOTE_RESTART_NGINX_SSHPASS_USER)
+        set(command_prefix "sshpass -p '${REMOTE_RESTART_NGINX_SSHPASS_USER}'")
+    else()
+        set(command_prefix "")
+    endif()
+
+    set(restart_nginx_command
+        "${command_prefix} \
+        ssh ${REMOTE_RESTART_NGINX_SSH_USER}@${REMOTE_RESTART_NGINX_DESTINATION_IP} \
+        \"echo '${REMOTE_RESTART_NGINX_ROOT_PASSWORD}' | sudo nginx -s reload\""
+    )
+    if (DEFINED REMOTE_RESTART_NGINX_VERBOSE)
+        message(STATUS "remote_restart_nginx :\n"
+            " - command : ${restart_nginx_command}")
+    endif()
+    execute_process(COMMAND
+        bash "-c" "${restart_nginx_command}"
+        COMMAND_ERROR_IS_FATAL ANY
+        RESULT_VARIABLE     result
+        ERROR_VARIABLE      error
+    )
+    if (NOT (result STREQUAL "0"))
+        message(FATAL_ERROR " remote_restart_nginx :\n"
+            " - error : ${error}"
+            " - return : ${result}"
+        )
+    endif()
+
+endfunction()
