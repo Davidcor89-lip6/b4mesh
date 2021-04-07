@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <string.h>
-
 #include "utils.hpp"
 
 using namespace std;
@@ -16,6 +15,7 @@ class Transaction{
     static const int HASH_SIZE = 20;
 
   public:
+    //typedef of a transaction
     typedef struct transaction_t{
       double    timestamp;
       int       size;
@@ -44,15 +44,26 @@ class Transaction{
     double GetTimestamp (void);
     void SetTimestamp (double timestamp);
 
-
     bool operator==(const Transaction &tx);
     friend std::ostream& operator<< (std::ostream &out, const Transaction &tx);
     Transaction& operator=(const Transaction &tx2);
 
   public:
+    /**
+     * Serialize the transaction into an array of bits 
+     */
     string Serialize();
+    /**
+     * Calculate and return the total size of the transaction
+     */
     int CalculateSize();
+    /**
+     * Calculate and return the total size of the transaction header 
+     */
     int CalculateHeaderSize();
+    /**
+     * Calculate and return the hash of the transaction
+     */
     string CalculateHash();
 
   public:
@@ -60,9 +71,9 @@ class Transaction{
 
   private:
 
-    string    hash;           // Identifier of a Tx
+    string    hash;           // Hash of the transaction (also an identifier)
     int       size;           // Size of the transaction
-    double    timestamp;   // Time when a transaction is created
+    double    timestamp;      // Time when a transaction is created
     string    payload;        // data of the transaction
 };
 

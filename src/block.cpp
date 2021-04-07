@@ -1,5 +1,7 @@
+/*
+  This class implements the definition of a "block" as a data structure holding several transactions.
+*/
 #include "block.hpp"
-
 
 Block::Block(){
   hash = string(HASH_SIZE, 0);
@@ -18,16 +20,15 @@ Block::Block(string hash, int index, int leader, string groupId,
              vector<string> parents, double timestamp,
              vector<Transaction> transactions){
 
-  this->hash =                 hash + string(HASH_SIZE - hash.size(), '1');
-  this->index =                index;
-  this->leader =               leader;
-  this->groupId = groupId + string(HASH_SIZE - groupId.size(), '0');
-  this->parents =              parents;
-  this->timestamp =            timestamp;
-  this->transactions =         transactions;
+  this->hash =            hash + string(HASH_SIZE - hash.size(), '1');
+  this->index =           index;
+  this->leader =          leader;
+  this->groupId =         groupId + string(HASH_SIZE - groupId.size(), '0');
+  this->parents =         parents;
+  this->timestamp =       timestamp;
+  this->transactions =    transactions;
 
   size = CalculateSize();
-
 }
 
 Block::Block(const Block &b){
@@ -42,6 +43,7 @@ Block::Block(const Block &b){
   size =                 b.size;
 }
 
+// Block deserialization
 Block::Block(const string &serie){
   try 
   {
@@ -55,13 +57,18 @@ Block::Block(const string &serie){
     int tx_count = p->tx_count;
     int parents_count = p->parents_count;
     const char *p_parents = (const char*) p + sizeof(block_t);
-    for(int i=0; i<parents_count*HASH_SIZE; i += HASH_SIZE){
+
+    for (int i=0; i<parents_count*HASH_SIZE; i += HASH_SIZE)
+    {
       parents.push_back(string(p_parents+i, HASH_SIZE));
     }
+
     const char *p_transactions = p_parents + parents_count * HASH_SIZE;
     int transactions_offset = 0;
     int remaining_bytes = serie.size() - (p_transactions - (const char*)p);
-    for (int i=0; i<tx_count; ++i){
+
+    for (int i=0; i<tx_count; ++i)
+    {
       Transaction t(string(p_transactions+transactions_offset, remaining_bytes));
       transactions.push_back(t);
       transactions_offset += t.GetSize();
@@ -72,14 +79,15 @@ Block::Block(const string &serie){
   catch (const std::exception& e)
   {
     std::cerr << e.what() << '\n';
-    std::cout << "Block error in constructor" << std::endl;
+    std::cout << "Error in the deserialization of the block" << std::endl;
     throw e;
   }
 }
 
 Block::~Block(){
-
 }
+
+// Getters, Setters and operator
 
 string Block::GetHash() const{
   return hash;
@@ -157,6 +165,8 @@ void Block::SetSize(int size){
   this->size = size;
   CalculateHash();
 }
+
+// Other functions
 
 bool Block::IsParent(Block &block){
   for (string p_hash : block.GetParents()){

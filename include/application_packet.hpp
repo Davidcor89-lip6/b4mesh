@@ -49,15 +49,15 @@ class ApplicationPacket{
     int HeaderSize();
 
     /**
-     * Serialize the packet into an array of byte (here a string is more
+     * Serialize the packet into an array of bits (here a string is more
      * convenient)
      */
      string Serialize();
 
   private:
-    char service; // Service identifier of the packet (PBFT, RAFT, BLOCKCHAIN, ...)
+    char service; // Service identifier of the packet (RAFT, BLOCKGRAPH, BLOCK, ...)
     int size; // Size of the whole packet (including header)
-    string payload; // Payload of the packet (contains an application message
+    string payload; // Payload of the packet (contains an application message)
 
 };
 

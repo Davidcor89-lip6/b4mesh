@@ -3,7 +3,6 @@
 ApplicationPacket::ApplicationPacket(){
   service = NONE;
   payload = "";
-
   size = CalculateSize();
 }
 
@@ -13,9 +12,8 @@ ApplicationPacket::ApplicationPacket(char service, string payload){
   size = CalculateSize();
 }
 
-
-ApplicationPacket::ApplicationPacket(char service, int payload_size, const uint8_t*
-    payload){
+ApplicationPacket::ApplicationPacket(char service, int payload_size, 
+                                     const uint8_t* payload){
   this->service = service;
   this->payload = string((const char*) payload, payload_size);
   size = CalculateSize();
@@ -27,11 +25,11 @@ ApplicationPacket::ApplicationPacket(ApplicationPacket &p){
   size = p.size;
 }
 
+// Packet deserialization
 ApplicationPacket::ApplicationPacket(string &serie){
   packet_hdr_serie *hdr = (packet_hdr_serie*) serie.data();
   service = hdr->service;
   size = hdr->size;
-
   const char* packet_payload = serie.data() + HeaderSize();
   payload = string(packet_payload, size-HeaderSize());
 }
@@ -87,7 +85,6 @@ void ApplicationPacket::SetPayload(string payload){
 string ApplicationPacket::GetPayload(){
   return payload;
 }
-
 
 string ApplicationPacket::Serialize(){
   string ret(HeaderSize(), 0);

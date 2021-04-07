@@ -1,3 +1,8 @@
+/*
+  The class transaction implements the definition of a transaction 
+  which is sent to all nodes belonging to the same group as the node creating it.
+*/
+
 #include "transaction.hpp"
 
 Transaction::Transaction(){
@@ -28,6 +33,7 @@ Transaction::Transaction (const Transaction &tx){
   timestamp = tx.timestamp;
 }
 
+// Transaction deserialization
 Transaction::Transaction(const string &serie){
   try
   {
@@ -42,13 +48,12 @@ Transaction::Transaction(const string &serie){
   catch(const std::exception& e)
   {
     std::cerr << e.what() << '\n';
-    std::cout << "Transaction error in constructor" << std::endl;
+    std::cout << "Error in the deserialization of a transaction" << std::endl;
     throw e;
   }
 }
 
 Transaction::~Transaction (){
-
 }
 
 string Transaction::GetHash (){
@@ -108,7 +113,6 @@ string Transaction::Serialize(){
 
   ret = ret + payload;
   return ret;
-
 }
 
 bool Transaction::operator== (const Transaction &tx){
@@ -117,7 +121,7 @@ bool Transaction::operator== (const Transaction &tx){
 
 ostream& operator<< (std::ostream &out, const Transaction &tx){
   out << "Transaction(" << dump(tx.hash.data(), 10) << "," << tx.timestamp << "," << tx.size << ","
-    << dump(tx.payload.data(), 10) << ")";
+      << dump(tx.payload.data(), 10) << ")";
   return out;
 }
 
@@ -125,6 +129,7 @@ int Transaction::CalculateSize(){
   size = CalculateHeaderSize() + payload.size();
   return size;
 }
+
 int Transaction::CalculateHeaderSize(){
   return HASH_SIZE + sizeof(size) + sizeof(timestamp);
 }
@@ -132,6 +137,7 @@ int Transaction::CalculateHeaderSize(){
 string Transaction::CalculateHash(){
   hash = string(HASH_SIZE, 0);
   string serie = Serialize();
+  // the hashing function is found in utils.cpp
   hash = hashing(serie, HASH_SIZE);
   return hash;
 }

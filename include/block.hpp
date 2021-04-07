@@ -13,16 +13,16 @@ class Block{
     static const int HASH_SIZE = 32;
 
   public:
-    // Typedef
+    // Typedef of a block
     typedef struct block_t{
-      double              timestamp;  // time of creation of a block
-      int                 size;  // size of block expresed in bytes
-      int                 index; // aka block height
-      int                 leader; // Id of the leader of the group
+      double              timestamp;  
+      int                 size;  
+      int                 index; 
+      int                 leader; 
       int                 parents_count;
       int                 tx_count;
-      char                groupId[HASH_SIZE]; // Id of the group that validated the block  //[HASH_SIZE]
-      char                hash[HASH_SIZE]; // hash of the current block  /[HASH_SIZE]
+      char                groupId[HASH_SIZE];   
+      char                hash[HASH_SIZE];     
     } block_t;
 
 
@@ -62,18 +62,18 @@ class Block{
     int GetSize (void);
     void SetSize (int size);
 
-    int GetTxsCount();
-
     bool operator==(const Block &b);
     friend std::ostream& operator<< (std::ostream &out, const Block &block);
     Block& operator= (const Block &block2);
 
 
   public:
+    // Other functions
+
     /**
-    * Checks if the block given in the argument is part of the group
+    * Returns the number of transactions in a block.
     */
-    bool IsPartOfGroup(const string groupId);
+    int GetTxsCount();
 
     /**
     * Checks if it is the parent of the block given in the argument
@@ -86,9 +86,14 @@ class Block{
     bool IsChild (Block &block);
 
     /**
+    * Checks if the block given in the argument is part of the group
+    */
+    bool IsPartOfGroup(const string groupId);
+
+    /**
     * Checks if the block is a merge block
     */
-    bool IsMergeBlock (Block &block); //
+    bool IsMergeBlock (); 
 
     /**
      * check if the block merges branches identified by parents' hashes in
@@ -123,14 +128,14 @@ class Block{
 
   private:
 
-    string              hash;
-    int                 index;
-    int                 leader;
-    string              groupId;
+    string              hash;              // hash of the block (also an identifier)
+    int                 size;              // size of block expresed in bytes
+    int                 index;             // Is the relative possition of a block. A.k.a block hight
+    int                 leader;            // Id of the leader that created the block
+    double              timestamp;         // time of creation of a block
+    string              groupId;           // Id of the group that validated the block  (Is a Hash)
     vector<string>      parents;
-    double              timestamp;
     vector<Transaction> transactions;
-    int                 size;
 };
 
 #endif
