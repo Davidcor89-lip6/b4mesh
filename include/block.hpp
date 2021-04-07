@@ -71,11 +71,6 @@ class Block{
     // Other functions
 
     /**
-    * Returns the number of transactions in a block.
-    */
-    int GetTxsCount();
-
-    /**
     * Checks if it is the parent of the block given in the argument
     */
     bool IsParent (Block &block);
@@ -89,6 +84,11 @@ class Block{
     * Checks if the block given in the argument is part of the group
     */
     bool IsPartOfGroup(const string groupId);
+
+    /**
+    * Returns the number of transactions in a block.
+    */
+    int GetTxsCount();
 
     /**
     * Checks if the block is a merge block
@@ -134,8 +134,8 @@ class Block{
     int                 leader;            // Id of the leader that created the block
     double              timestamp;         // time of creation of a block
     string              groupId;           // Id of the group that validated the block  (Is a Hash)
-    vector<string>      parents;
-    vector<Transaction> transactions;
+    vector<string>      parents;           // List of parents of the block
+    vector<Transaction> transactions;      // Listo of transactions of the block
 };
 
 #endif

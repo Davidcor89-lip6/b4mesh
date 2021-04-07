@@ -2,6 +2,9 @@
 
 Blockgraph::Blockgraph ()
 {
+  txsCount = 0;
+  txsSize = 0;
+
   Block genesisBlock("0", 0, 0, "0", vector<string> (), 0.0, vector<Transaction> ());
   AddBlock(genesisBlock);
 }
@@ -22,7 +25,7 @@ int Blockgraph::GetByteSize () {
   }
   return size;
 }
-
+/*
 int Blockgraph::GetTxsCount (){
     int totalTx = 0;
 
@@ -31,7 +34,13 @@ int Blockgraph::GetTxsCount (){
     }
     return totalTx;
 }
+*/
 
+int Blockgraph::GetTxsCount (){
+  return txsCount;
+}
+
+/*
 int Blockgraph::GetTxsByteSize (){
   int totalBytes = 0;
 
@@ -39,6 +48,11 @@ int Blockgraph::GetTxsByteSize (){
     totalBytes += b.second.CalculeTxsSize();
   }
   return totalBytes;
+}
+*/
+
+int Blockgraph::GetTxsByteSize (){
+  return txsSize;
 }
 
 int Blockgraph::GetBlocksCount () const{
@@ -74,6 +88,8 @@ void Blockgraph::AddBlock  (Block& newBlock){
     bool present = HasBlock(newBlock);
     if (!present){
       blocks.insert({newBlock.GetHash(), newBlock});
+      txsCount += newBlock.GetTxsCount();
+      txsSize += newBlock.CalculeTxsSize();
     }
     // If block already present in Blockgraph -> reject the block
 }
@@ -173,6 +189,48 @@ bool Blockgraph::IsChildless(Block &block){
     }
   }
   return true;
+}
+
+bool Blockgraph::IsTxInBG(Transaction &t){
+  for (auto& b : blocks){
+    for (auto& tx : b.second.GetTransactions()){
+      if (tx.GetHash() == t.GetHash()){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+int Blockgraph::CountRepTxInBlockGraph (Transaction &t){
+  int count = 0;
+  for (auto& b : blocks){
+    for (auto& tx : b.second.GetTransactions()){
+      if (tx.GetHash() == t.GetHash()){
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+int Blockgraph::ComputeTransactionRepetition (){
+  std::map<std::string, int> mem;
+  int count = 0;
+  for (auto& b : blocks){
+    for (auto& tx : b.second.GetTransactions()){
+      int res = CountRepTxInBlockGraph(tx);
+      if (res > 1){
+        auto it = mem.find(tx.GetHash());
+        if (it == mem.end()){
+          std::cout << stoi(tx.GetHash()) << " : " << res << std::endl;
+          count++;
+          mem[tx.GetHash()] = res;
+        }
+      }
+    }
+  }
+  return count;
 }
 
 float Blockgraph::MeanTxPerBlock(){

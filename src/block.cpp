@@ -166,56 +166,6 @@ void Block::SetSize(int size){
   CalculateHash();
 }
 
-// Other functions
-
-bool Block::IsParent(Block &block){
-  for (string p_hash : block.GetParents()){
-    if(GetHash() == p_hash)
-      return true;
-  }
-  return false;
-}
-
-bool Block::IsChild(Block &block) {
-  return block.IsParent(*this);
-}
-
-bool Block::IsPartOfGroup(string groupId) {
-  if(GetGroupId() == this->groupId)
-    return true;
-  else
-    return false;
-}
-
-bool Block::IsMergeBlock(Block &block) {
-  if(block.GetParents().size() > 1)
-    return true;
-  else
-    return false;
-}
-
-bool Block::IsMergeBlock (vector<string> parents) {
-
-  for (auto &p : parents){
-    bool found = false;
-    for (auto &my_p : this->parents)
-      if (p == my_p){
-        found = true;
-        break;
-      }
-    if (!found) return false;
-  }
-  return true;
-}
-
-string Block::CalculateHash(){
-  hash = string(HASH_SIZE, 0);
-  string serie = Serialize();
-  hash = hashing(serie, HASH_SIZE);
-  return hash;
-
-}
-
 Block& Block::operator= (const Block &b){
   hash =                 b.hash;
   index =                b.index;
@@ -280,8 +230,58 @@ string Block::Serialize(){
   return ret;
 }
 
+// Other functions
+
+bool Block::IsParent(Block &block){
+  for (string p_hash : block.GetParents()){
+    if(GetHash() == p_hash)
+      return true;
+  }
+  return false;
+}
+
+bool Block::IsChild(Block &block) {
+  return block.IsParent(*this);
+}
+
+bool Block::IsPartOfGroup(string groupId) {
+  if(GetGroupId() == this->groupId)
+    return true;
+  else
+    return false;
+}
+
 int Block::GetTxsCount(){
   return transactions.size();
+}
+
+bool Block::IsMergeBlock() {
+  if(GetParents().size() > 1)
+    return true;
+  else
+    return false;
+}
+
+bool Block::IsMergeBlock (vector<string> parents) {
+
+  for (auto &p : parents){
+    bool found = false;
+    for (auto &my_p : this->parents)
+      if (p == my_p){
+        found = true;
+        break;
+      }
+    if (!found) return false;
+  }
+  return true;
+}
+
+string Block::CalculateHash(){
+  hash = string(HASH_SIZE, 0);
+  string serie = Serialize();
+  // the hashing function can be found in utils
+  hash = hashing(serie, HASH_SIZE);
+  return hash;
 }
 
 int Block::CalculateSize(){

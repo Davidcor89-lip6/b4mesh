@@ -74,6 +74,11 @@ void B4Mesh::timer_recurrentTask_fct (const boost::system::error_code& /*e*/)
 
 
 //  ************* PACKET RELATED METHODS ********************************
+int B4Mesh::ExtractMessageType(const string& msg_payload){
+  int ret = *((int*)msg_payload.data());
+  return ret;
+}
+
 void B4Mesh::ReceivePacket(std::string packet, std::string ip)
 {
     DEBUG << "ReceivePacket: size " << packet.size() << " from " << ip << std::endl; 
@@ -98,7 +103,7 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
       else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
           string req_block = p.GetPayload();
           DEBUG << BLUE << " REQUEST_BLOCK: looking for block: " << req_block << RESET << std::endl;
-          SendParentBlock(req_block, ip);
+          SendBlockto(req_block, ip);
       }
 		  /* ------------ CHANGE_TOPO PACKET ------------------ */
       else if (p.GetService() == ApplicationPacket::CHANGE_TOPO){
@@ -154,7 +159,6 @@ void B4Mesh::GenerateTransactions(){
     DEBUG << " -> Next Transaction in : " << interval << "ms" <<std::endl;
     timer_generateT.expires_from_now(std::chrono::milliseconds(interval));
     timer_generateT.async_wait(boost::bind(&B4Mesh::timer_generateT_fct, this, boost::asio::placeholders::error));
-
 }
 
 void B4Mesh::RegisterTransaction(std::string payload){
@@ -175,26 +179,18 @@ void B4Mesh::SendTransaction(Transaction t){
     node_->BroadcastPacket(packet, false);
 }
 
-int B4Mesh::ExtractMessageType(const string& msg_payload){
-  int ret = *((int*)msg_payload.data());
-  return ret;
-}
-
 //  ******* TRANSACTION RELATED METHODS **************** */
 void B4Mesh::TransactionsTreatment(Transaction t)
 {
     if (!IsTxInMempool(t)){
         DEBUG << "Transaction not in mempool. " << std::endl;
-        if (!IsTxInBlockGraph(t)){
+        if (!blockgraph.IsTxInBG(t)){
             DEBUG << "Transaction not in Blockgraph. " << std::endl;
             if (IsSpaceInMempool()){
                 DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
                 pending_transactions[t.GetHash()] = t;
-
-				// trace purpose
-				pending_transactions_time[t.GetHash()] = getSeconds();
-
-                //DumpMempool();
+			        	// trace purpose
+				        pending_transactions_time[t.GetHash()] = getSeconds();
             } else { // No space in mempool.
                 DEBUG << "Transaction's Mempool is full" << std::endl;
                 DEBUG << "Dumping transaction..." << std::endl;
@@ -228,18 +224,6 @@ bool B4Mesh::IsTxInMempool (Transaction t)
     }
 }
 
-bool B4Mesh::IsTxInBlockGraph (Transaction t)
-{
-    for (const auto bkg : blockgraph.GetBlocks()){
-        for (auto& t2 : bkg.second.GetTransactions()){
-            if(t2.GetHash() == t.GetHash()){
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 bool B4Mesh::IsSpaceInMempool (){
 
   if (pending_transactions.size() < sizemempool){
@@ -263,9 +247,8 @@ void B4Mesh::DumpMempool (void)
 void B4Mesh::BlockTreatment(Block b){
 
   DEBUG << " BlockTreatment: Block made by leader: " << b.GetLeader() << " with hash " << b.GetHash().data() << std::endl;
-
-  // Checking if the block is already in BLOCKGRAPH
-  if (!blockgraph.HasBlock(b)){
+  // Checking if the block is already in the blockgraph
+  if (!blockgraph.HasBlock(b.GetHash())){
     DEBUG << " BlockTreatment: This block "<< b.GetHash().data() << " is not in the blockgraph " << std::endl;
     // Check if the block is a missing block
     if (IsBlockInMissingList(b.GetHash())){
@@ -276,7 +259,7 @@ void B4Mesh::BlockTreatment(Block b){
     // Check if the block is already in the waiting list
     if (!IsBlockInWaitingList(b.GetHash())){
       // Check if the block is a merge block.
-      if (IsBlockMerge(b.GetParents())){
+      if (b.IsMergeBlock()){
         DEBUG << " BlockTreatment: Block "<< b.GetHash().data() << " is a merge block" << std::endl;
         DEBUG << "Starting synchronization process..." << std::endl;
         SyncNode(b.GetTransactions());
@@ -332,12 +315,9 @@ void B4Mesh::SyncNode(vector<Transaction> transactions){
 
   for (auto &tx : transactions){
     string tmp = tx.GetPayload();
-    //DEBUG << "tx is: " << tmp << std::endl;
     n = tmp.find(" ");
     int idnode = stoi(tmp.substr(0, n));
-    //DEBUG << "idnode is: " << idnode << std::endl;
     std::string hash = tmp.substr(n+1);
-    //DEBUG << "hashtx is: " << hash << std::endl;
 
     it = find(myChildless.begin(), myChildless.end(), hash);
     if (it == myChildless.end()){
@@ -466,17 +446,6 @@ bool B4Mesh::IsBlockInMissingList(string b_hash){
     }
   }
   return false;
-}
-
-
-bool B4Mesh::IsBlockMerge(vector<string> parents){
-
-  if(parents.size() > 1 ){
-    return true;
-  }
-  else {
-    return false;
-  }
 }
 
 void B4Mesh::EraseMissingBlock(string b_hash){
@@ -688,22 +657,20 @@ void B4Mesh::Ask4MissingBlocks()
 	visuMemPool << pending_transactions.size() << " " << (float)(pending_transactions.size())/(float)(SIZE_MEMPOOL) << "%" << std::endl;
 }
 
-void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
-
+void B4Mesh::SendBlockto(string hash_p, std::string destAddr){
 
   if (blockgraph.HasBlock(hash_p)){
-	Block block;
-    DEBUG << " SendParentBlock: Block " << hash_p << " founded!" << std::endl;
-    block = blockgraph.GetBlock(hash_p);
+    DEBUG << " SendBlockto: Block " << hash_p << " founded!" << std::endl;
+    Block block = blockgraph.GetBlock(hash_p);
 
-	DEBUG << " SendParentBlock: Sending block to node: " << destAddr << std::endl;
+	  DEBUG << " SendBlockto: Sending block to node: " << destAddr << std::endl;
   	ApplicationPacket packet(ApplicationPacket::BLOCK, block.Serialize());
   	node_->SendPacket(destAddr, packet, true);
   }
     // Case when block is not present...
     // is very unlikely since we already check that this node has this block.
   else {
-    DEBUG << " SendParentBlock: Block " << hash_p << " not founded!" << std::endl;
+    DEBUG << " SendBlockto: Block " << hash_p << " not founded!" << std::endl;
     return;
   }
 
@@ -711,6 +678,7 @@ void B4Mesh::SendParentBlock(string hash_p, std::string destAddr){
 
 //*************CHANGE_TOPO METHODS***********************************
 void B4Mesh::StartMerge(){
+  // Only leader execute this function
 
   recover_branch.clear();
 
@@ -721,11 +689,12 @@ void B4Mesh::StartMerge(){
   DEBUG << " StartMerge: Leader node: " << node_->consensus_.GetId()
         << " starting the leader synchronization process..." << std::endl;
 
-//  createBlock = false;
   Ask4ChildlessBlocks();
 }
 
 void B4Mesh::Ask4ChildlessBlocks(){
+  // Only leader execute this function
+
   DEBUG << YELLOW << " Ask4ChildlessBlocks: In leader synch process "<< std::endl;
   childlessblock_req_hdr_t ch_req;
   ch_req.msg_type = CHILDLESSBLOCK_REQ;
@@ -756,9 +725,9 @@ void B4Mesh::timer_childless_fct(const boost::system::error_code& /*e*/)
 }
 
 void B4Mesh::SendChildlessBlocks(std::string destAddr){
+
   std::vector<string> myChildless = blockgraph.GetChildlessBlockList();
   std::string serie_hashes = "";
-
 
   for (auto &cb : myChildless){
     string tmp_str = cb;
@@ -780,6 +749,7 @@ void B4Mesh::SendChildlessBlocks(std::string destAddr){
 
 void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string senderAddr){
   // Only executed by the leader
+
   std::int32_t idSender = node_->consensus_.GetIdFromIP(senderAddr);
   std::string deserie = msg_payload;
   std::string tmp_hash = "";
@@ -788,7 +758,7 @@ void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string
 
   deserie = deserie.substr(sizeof(childlessblock_rep_hdr_t), deserie.size());
 
-  //deserialisation
+  //deserialisation of the msg_payload
   while ( deserie.size() > 0){
     tmp_hash = deserie.substr(0, 32);
     sender_childless.push_back(tmp_hash);
@@ -956,7 +926,6 @@ bool B4Mesh::TestPendingTxs(){
 			return false;
 		}
 	}
-
 	DEBUG << YELLOW << " TestPendingTxs: Not allow to create a block so fast"<< std::endl;
     return false;
 }
@@ -1073,7 +1042,9 @@ void B4Mesh::GenerateBlocks(){
 
 void B4Mesh::SendBlockToConsensus(Block b)
 {
-	// Using c4m to publish the block
+  // If a consensus protocol is used to replicate blocks in all nodes
+  // Here the block shall be delegated to the consensus protocol.
+  // Since consensusd protocol only elects a leader, we only send the block to all nodes.
 	DEBUG << GREEN << " SendBlockToConsensus:   " << b.GetHash() << RESET << std::endl;
 	DEBUG << "sending b "<< b << std::endl;
 	string serie = b.Serialize();
@@ -1108,41 +1079,6 @@ int B4Mesh::SizeMempoolBytes(void){
     ret += t.second.GetSize();
     }
     return ret;
-}
-
-int B4Mesh::CountTxInBlockGraph (Transaction t)
-{
-	int count = 0;
-    for (const auto bkg : blockgraph.GetBlocks()){
-        for (auto& t2 : bkg.second.GetTransactions()){
-            if(t2.GetHash() == t.GetHash()){
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
-int B4Mesh::ComputeTransactionRepetition(void)
-{
-	int count = 0;
-	std::map<std::string,int> mem;
-	for (const auto bkg : blockgraph.GetBlocks()){
-		for (auto& t : bkg.second.GetTransactions()){
-			int res = CountTxInBlockGraph(t);
-			if ( res > 1){
-				auto it = mem.find(t.GetHash());
-				if (it == mem.end())
-				{
-					std::cout << stoi(t.GetHash()) << " : " << res << std::endl;
-					count++;
-					mem[t.GetHash()] = res;
-				}
-				
-			}
-		}
-	}
-	return count;
 }
 
 void B4Mesh::GenerateResults()
@@ -1180,7 +1116,7 @@ void B4Mesh::GenerateResults()
   std::cout << "B4Mesh: Transactions lost due to mempool space: " << lostTrans << std::endl;
   std::cout << "B4Mesh: Number of droped transactions (already in blockgraph or in mempool):  " << numDumpingTxs << std::endl;
 	std::cout << "B4Mesh: Transactions with multiple occurance in the blockgraph: "  << std::endl;
-	int TxRep = ComputeTransactionRepetition();
+	int TxRep = blockgraph.ComputeTransactionRepetition();
 	std::cout << TxRep << std::endl;
 
 
@@ -1210,9 +1146,9 @@ void B4Mesh::GenerateResults()
   output_file << "B4mesh: Total number of transactions in the blockgraph: " << blockgraph.GetTxsCount() << std::endl;
   output_file << "B4Mesh: Number of transactions generated by this node: " << numTxsG << std::endl;
   output_file << "B4mesh: Number of committed transactions per seconds: " << (float)(blockgraph.GetTxsCount())/getSeconds() << std::endl;
-  output_file << "B4Mesh: Size of all transactions in the blockgraph (bytes): " << blockgraph.GetTxsByteSize() << std::endl;
+  output_file << "B4Mesh: Size of all transactions in the blockgraph : " << blockgraph.GetTxsByteSize() / 1000 <<  "kB" << std::endl;
   output_file << "B4Mesh: Mean number of transactions per block: " << blockgraph.MeanTxPerBlock() << std::endl;
-  output_file << "B4Mesh: Mean time that a transaction spend in the mempool: " << total_pendingTxTime / count_pendingTx << "s" << std::endl;
+  output_file << "B4Mesh: Mean time that a transaction spendS in the mempool: " << total_pendingTxTime / count_pendingTx << "s" << std::endl;
   output_file << "B4Mesh: Number of remaining transactions in the mempool: " << pending_transactions.size() << std::endl;
   output_file << "B4Mesh: Number of re transaction: " << numRTxsG << std::endl;
   output_file << "B4Mesh: Transactions lost due to mempool space: " << lostTrans << std::endl;
