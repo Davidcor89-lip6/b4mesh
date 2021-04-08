@@ -14,6 +14,7 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -334,6 +335,14 @@ class B4Mesh
         double total_pendingTxTime; //  The accumulated time that transactions spends in the mempool
         double total_waitingBlockTime;  //  The accumulated time that blocks spend in the waiting list
         double total_missingBlockTime;  //  The accumulated time that block hashes spends in the missing block list
+        std::chrono::duration<double, std::milli> total_process_block_t;
+        std::chrono::duration<double, std::milli> total_process_tx_t;
+        std::chrono::duration<double, std::milli> total_treatment_block_t;
+        std::chrono::duration<double, std::milli> total_treatment_tx_t;
+        std::vector<double> block_creation_time;
+        std::vector<double> tx_creation_time;
+        std::vector<double> block_treatment_time;
+        std::vector<double> tx_treatment_time;
         std::map<std::string, double> pending_transactions_time;  // time when a transaction enter the mempool
         std::map<std::string, double> waiting_list_time; // time when a blocks enter the waiting list
         std::map<std::string, double> missing_list_time; // time when a blocks enter the missing list

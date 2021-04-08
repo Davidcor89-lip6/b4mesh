@@ -43,6 +43,8 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   count_pendingTx = 0;
   blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
 
+
+
   //recurrent task
   timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
@@ -90,14 +92,27 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
       if (p.GetService() == ApplicationPacket::TRANSACTION){
           Transaction t(p.GetPayload());
           DEBUG << BOLDCYAN << " Received a new transaction packet : " << t << " from " <<  ip << " with hash " << t.GetHash() << RESET << std::endl;
+
+          auto t1 = std::chrono::high_resolution_clock::now();
           TransactionsTreatment(t);
+          auto t2 = std::chrono::high_resolution_clock::now();
+          std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+          tx_treatment_time.push_back(time_treatment.count());
+          total_treatment_tx_t += time_treatment;
       }
       // ------------ BLOCK PACKET ------------------
       else if (p.GetService() == ApplicationPacket::BLOCK){
           DEBUG << GREEN << "BLOCK PACKET" << std::endl;
           Block b(p.GetPayload());
           DEBUG << GREEN << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << RESET << std::endl;
+        
+          auto t1 = std::chrono::high_resolution_clock::now();
           BlockTreatment(b);
+          auto t2 = std::chrono::high_resolution_clock::now();
+          std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+          block_treatment_time.push_back(time_treatment.count());
+          total_treatment_block_t += time_treatment;
+
       }
       // ------------ REQUEST_BLOCK PACKET ------------------ 
       else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
@@ -146,7 +161,7 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
 
 // ************** GENERATION DES TRANSACTIONS *****************************
 void B4Mesh::GenerateTransactions(){
-
+      
     numTxsG += 1;
 
     /* Génération des variable aleatoires pour definir la taille de la transaction */
@@ -209,7 +224,13 @@ void B4Mesh::TransactionsTreatment(Transaction t)
     {
       if (TestPendingTxs() == true && createBlock == true)
       {
+        auto t1 = std::chrono::high_resolution_clock::now();
         GenerateBlocks();
+        auto t2 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> process_block_time = t2 - t1;
+        DEBUG << "Process block time is: " << process_block_time.count() << "ms" << std::endl;
+        block_creation_time.push_back(process_block_time.count());
+        total_process_block_t += process_block_time;
       }
     }
 }
@@ -718,7 +739,15 @@ void B4Mesh::timer_childless_fct(const boost::system::error_code& /*e*/)
     {
       mergeBlock = true;
       DEBUG << CYAN << "Timer_childless has expired. Creating merge block" << std::endl;
+
+      auto t1 = std::chrono::high_resolution_clock::now();
       GenerateBlocks();
+      auto t2 = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double, std::milli> process_block_time = t2 - t1;
+      DEBUG << "Process block time is: " << process_block_time.count() << "ms" << std::endl;
+      block_creation_time.push_back(process_block_time.count());
+      total_process_block_t += process_block_time;
+
       createBlock = true;
     	node_->ClearnewNodes();
     }
@@ -864,7 +893,16 @@ void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string
     mergeBlock = true;
     DEBUG << "A merge block can be created now." << std::endl;
     createBlock = true;
+    // for traces purpose
+
+    auto t1 = std::chrono::high_resolution_clock::now();
     GenerateBlocks();
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> process_block_time = t2 - t1;
+    DEBUG << "Process block time is: " << process_block_time.count() << "ms" << std::endl;
+    block_creation_time.push_back(process_block_time.count());
+    total_process_block_t += process_block_time;
+  
   	node_->ClearnewNodes();
   }
 }
@@ -958,6 +996,8 @@ vector<Transaction> B4Mesh::SelectTransactions(){
 
 
 void B4Mesh::GenerateBlocks(){
+  // Only leader execute this function
+  
   std::vector<string> myChildless = blockgraph.GetChildlessBlockList();
   std::vector<std::string> p_block = vector <string> ();
   
@@ -1036,8 +1076,6 @@ void B4Mesh::GenerateBlocks(){
 
 	DEBUG << " Block size is:   " << block.GetSize() <<  std::endl;
 	SendBlockToConsensus(block);
-  BlockTreatment(block);
-
 }
 
 void B4Mesh::SendBlockToConsensus(Block b)
@@ -1049,8 +1087,15 @@ void B4Mesh::SendBlockToConsensus(Block b)
 	DEBUG << "sending b "<< b << std::endl;
 	string serie = b.Serialize();
 	ApplicationPacket packet(ApplicationPacket::BLOCK, serie);
-	
 	node_->BroadcastPacket(packet, true);
+
+  auto t1 = std::chrono::high_resolution_clock::now();
+  BlockTreatment(b);
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  block_treatment_time.push_back(time_treatment.count());
+  total_treatment_block_t += time_treatment;
+
 }
 
 
@@ -1126,6 +1171,9 @@ void B4Mesh::GenerateResults()
   sprintf(filename, "performances-%d.txt", node_->consensus_.GetId());
   output_file.open(filename, ios::out);
   output_file << " Execution time : " << getSeconds() << "s" << std::endl;
+  output_file << " Mean block creation time : " << total_process_block_t.count() / (blockgraph.GetBlocksCount()-1) << "ms" << std::endl;
+  output_file << " Mean block treatment time : " << total_treatment_block_t.count() / (blockgraph.GetBlocksCount()-1) << "ms" << std::endl;
+  output_file << " Mean tx treatment time : " << total_treatment_tx_t.count() / blockgraph.GetTxsCount() << "ms" << std::endl;
   output_file << " Size of the blockgraph : " << blockgraph.GetByteSize() / 1000 << "Kb" << std::endl;
   output_file << " Packets lost due to messaging pb: " << lostPacket << std::endl;
   output_file << "************** BLOCK RELATED PERFORMANCES **************" << std::endl;
@@ -1179,8 +1227,44 @@ void B4Mesh::GenerateResults()
     }
 	output_file2.close();
 
+  // ---Block creation processing time. ----
+	ofstream output_file3;
+	char filename3[50];
+	sprintf(filename3, "block_creation_time-%d.txt", node_->consensus_.GetId());
+	output_file3.open(filename3, ios::out);
+	output_file3 << "#block_creation_time" << " " << "with: " << SIZE_BLOCK << std::endl;
+	for(auto &it : block_creation_time)
+    {
+      output_file3 << it << std::endl; 
+    }
+	output_file3.close();
+
+  // ---Block treatment processing time. ----
+	ofstream output_file4;
+	char filename4[50];
+	sprintf(filename4, "block_treatment_time-%d.txt", node_->consensus_.GetId());
+	output_file4.open(filename4, ios::out);
+	output_file4 << "#block_treatment_time" << " " << "with: " << SIZE_BLOCK << std::endl;
+	for(auto &it : block_treatment_time)
+    {
+      output_file4 << it << std::endl; 
+    }
+	output_file4.close();
+
+  // ---Transaction treatment processing time. ----
+	ofstream output_file5;
+	char filename5[50];
+	sprintf(filename5, "tx_treatment_time-%d.txt", node_->consensus_.GetId());
+	output_file5.open(filename5, ios::out);
+	output_file5 << "#tx_treatment_time" << std::endl;
+	for(auto &it : tx_treatment_time)
+    {
+      output_file5 << it << std::endl; 
+    }
+	output_file5.close();
+
 	// close live file
-    visuBlock.close();
+  visuBlock.close();
 	visuMemPool.close();
     
 }
