@@ -3,6 +3,8 @@ importScripts('./string_hash.js')
 
 var myRequest = new Request(configuration.blockgraph_as_dot_API_accesspoint);
 fetchDatas = function() {
+    try
+    {
     fetch(myRequest, {cache: "reload"}) // always force cache
         .then(function(reponse) {
             return reponse.text();
@@ -19,6 +21,11 @@ fetchDatas = function() {
             this.cache = data_hashCode;
             self.postMessage(data);
         })
+    }
+    catch (error)
+    {
+        console.error('[poll_worker::setInterval] error : ' + error)
+    }
 }
 setInterval(() => {
     fetchDatas();
