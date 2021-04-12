@@ -92,27 +92,14 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
       if (p.GetService() == ApplicationPacket::TRANSACTION){
           Transaction t(p.GetPayload());
           DEBUG << BOLDCYAN << " Received a new transaction packet : " << t << " from " <<  ip << " with hash " << t.GetHash() << RESET << std::endl;
-
-          auto t1 = std::chrono::high_resolution_clock::now();
           TransactionsTreatment(t);
-          auto t2 = std::chrono::high_resolution_clock::now();
-          std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-          tx_treatment_time.push_back(time_treatment.count());
-          total_treatment_tx_t += time_treatment;
       }
       // ------------ BLOCK PACKET ------------------
       else if (p.GetService() == ApplicationPacket::BLOCK){
           DEBUG << GREEN << "BLOCK PACKET" << std::endl;
           Block b(p.GetPayload());
           DEBUG << GREEN << "Received a new block : " << b << " from " << ip << " with hash " << b.GetHash() << RESET << std::endl;
-        
-          auto t1 = std::chrono::high_resolution_clock::now();
           BlockTreatment(b);
-          auto t2 = std::chrono::high_resolution_clock::now();
-          std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-          block_treatment_time.push_back(time_treatment.count());
-          total_treatment_block_t += time_treatment;
-
       }
       // ------------ REQUEST_BLOCK PACKET ------------------ 
       else if (p.GetService() == ApplicationPacket::REQUEST_BLOCK){
@@ -161,7 +148,9 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
 
 // ************** GENERATION DES TRANSACTIONS *****************************
 void B4Mesh::GenerateTransactions(){
-      
+
+
+    
     numTxsG += 1;
 
     /* Génération des variable aleatoires pour definir la taille de la transaction */
@@ -197,40 +186,42 @@ void B4Mesh::SendTransaction(Transaction t){
 //  ******* TRANSACTION RELATED METHODS **************** */
 void B4Mesh::TransactionsTreatment(Transaction t)
 {
+  auto t1 = std::chrono::high_resolution_clock::now();
     if (!IsTxInMempool(t)){
-        DEBUG << "Transaction not in mempool. " << std::endl;
+    //    DEBUG << "Transaction not in mempool. " << std::endl;
         if (!blockgraph.IsTxInBG(t)){
-            DEBUG << "Transaction not in Blockgraph. " << std::endl;
+      //      DEBUG << "Transaction not in Blockgraph. " << std::endl;
             if (IsSpaceInMempool()){
-                DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
+        //        DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
                 pending_transactions[t.GetHash()] = t;
 			        	// trace purpose
 				        pending_transactions_time[t.GetHash()] = getSeconds();
             } else { // No space in mempool.
-                DEBUG << "Transaction's Mempool is full" << std::endl;
-                DEBUG << "Dumping transaction..." << std::endl;
+           //     DEBUG << "Transaction's Mempool is full" << std::endl;
+           //     DEBUG << "Dumping transaction..." << std::endl;
                 lostTrans++;
             }
         } else { // Transaction already in blockgraph
-            DEBUG << "Transaction already present in Blockgraph\n Dumping transaction ...  " << std::endl;
+        //    DEBUG << "Transaction already present in Blockgraph\n Dumping transaction ...  " << std::endl;
             numDumpingTxs++;
         }
     } else { // Transaction already in mempool
-        DEBUG << "Transaction already present in Memepool\n Dumping transaction ... " << std::endl;
+      //  DEBUG << "Transaction already present in Memepool\n Dumping transaction ... " << std::endl;
         numDumpingTxs++;
     }
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+    tx_treatment_time.push_back(time_treatment.count());
+    total_treatment_tx_t += time_treatment;
+
     // If leader and enough transactions in mempool. Then create block.
     if(node_->consensus_.AmILeader() == true)
     {
       if (TestPendingTxs() == true && createBlock == true)
       {
-        auto t1 = std::chrono::high_resolution_clock::now();
+        
         GenerateBlocks();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> process_block_time = t2 - t1;
-        DEBUG << "Process block time is: " << process_block_time.count() << "ms" << std::endl;
-        block_creation_time.push_back(process_block_time.count());
-        total_process_block_t += process_block_time;
       }
     }
 }
@@ -267,22 +258,24 @@ void B4Mesh::DumpMempool (void)
 // ****** BLOCK RELATED METHODS *********************
 void B4Mesh::BlockTreatment(Block b){
 
-  DEBUG << " BlockTreatment: Block made by leader: " << b.GetLeader() << " with hash " << b.GetHash().data() << std::endl;
+   auto t1 = std::chrono::high_resolution_clock::now();
+         
+ // DEBUG << " BlockTreatment: Block made by leader: " << b.GetLeader() << " with hash " << b.GetHash().data() << std::endl;
   // Checking if the block is already in the blockgraph
   if (!blockgraph.HasBlock(b.GetHash())){
-    DEBUG << " BlockTreatment: This block "<< b.GetHash().data() << " is not in the blockgraph " << std::endl;
+  //  DEBUG << " BlockTreatment: This block "<< b.GetHash().data() << " is not in the blockgraph " << std::endl;
     // Check if the block is a missing block
     if (IsBlockInMissingList(b.GetHash())){
       // If block is in missing list we erase it hash from the list
-      DEBUG << " BlockTreatment: This block is a missing block" << std::endl;
+    //  DEBUG << " BlockTreatment: This block is a missing block" << std::endl;
       EraseMissingBlock(b.GetHash());
     }
     // Check if the block is already in the waiting list
     if (!IsBlockInWaitingList(b.GetHash())){
       // Check if the block is a merge block.
       if (b.IsMergeBlock()){
-        DEBUG << " BlockTreatment: Block "<< b.GetHash().data() << " is a merge block" << std::endl;
-        DEBUG << "Starting synchronization process..." << std::endl;
+      //  DEBUG << " BlockTreatment: Block "<< b.GetHash().data() << " is a merge block" << std::endl;
+      //  DEBUG << "Starting synchronization process..." << std::endl;
         SyncNode(b.GetTransactions());
         AddBlockToBlockgraph(b);
       } else {
@@ -292,23 +285,23 @@ void B4Mesh::BlockTreatment(Block b){
         std::vector<std::string> unknown_parents = GetParentsNotInBG(b.GetParents());
         if (unknown_parents.size() > 0){
           // One or more parents of this block not in the BG
-          DEBUG << " BlockTreatment: Some of the parents of this block are not in the local BG" << std::endl;
+        //  DEBUG << " BlockTreatment: Some of the parents of this block are not in the local BG" << std::endl;
           // Checking that the parents of this block are in the Waiting List:
           unknown_parents = GetParentsNotInWL(unknown_parents);
           if (unknown_parents.size() > 0){
-            DEBUG << " BlockTreatment: Some of the parents of this block are not in the Waiting List" << std::endl;
+          //  DEBUG << " BlockTreatment: Some of the parents of this block are not in the Waiting List" << std::endl;
             // adding unknown parents to the list of missing blocks
             UpdateMissingList(unknown_parents, ip);
           }
           // Adding the block to the waiting list since parents aren't in BG yet
-          DEBUG << " BlockTreatment: Adding new block: " << b.GetHash().data() << " to waiting_list: " << std::endl;
+        //  DEBUG << " BlockTreatment: Adding new block: " << b.GetHash().data() << " to waiting_list: " << std::endl;
           waiting_list[b.GetHash()] = b;
           // Trace purpose
           waiting_list_time[b.GetHash()] = getSeconds();
         } else {
           // All ancestors are known by the local node
           // Adding block to blockgraph
-          DEBUG << "BlockTreatment: All parents are present in local BG" << std::endl;
+        //  DEBUG << "BlockTreatment: All parents are present in local BG" << std::endl;
           AddBlockToBlockgraph(b);
           // Update the waiting list.
           if (waiting_list.size() > 0){
@@ -318,14 +311,19 @@ void B4Mesh::BlockTreatment(Block b){
       }
     } else {
       // The block is already present in waiting list
-      DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in waiting list\n  Dumping block..." << std::endl;
+    //  DEBUG << " BlockTreatment: Block " << b.GetHash() << " already present in waiting list\n  Dumping block..." << std::endl;
       numDumpingBlock++;
     }
   } else {
     // The block is already present in the local blockgraph
-    DEBUG << " BlockTreatment: Block " << b.GetHash().data() << " already present in blockgraph\n  Dumping block..." << std::endl;
+  //  DEBUG << " BlockTreatment: Block " << b.GetHash().data() << " already present in blockgraph\n  Dumping block..." << std::endl;
     numDumpingBlock++;
   }
+
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  block_treatment_time.push_back(time_treatment.count());
+  total_treatment_block_t += time_treatment;
 }
 
 void B4Mesh::SyncNode(vector<Transaction> transactions){
@@ -664,12 +662,12 @@ void B4Mesh::Ask4MissingBlocks()
 	{
 		for(auto &mem_i: pending_transactions)
 		{
-			Transaction t = mem_i.second;
-			if ( t.GetTimestamp() + T_RETRANS < getSeconds() )
+		//	Transaction t = mem_i.second;
+			if ( mem_i.second.GetTimestamp() + T_RETRANS < getSeconds() )
 			{
 				DEBUG << YELLOW << "--> Retransmission transation" << RESET << std::endl;
 				numRTxsG ++;
-				SendTransaction(t);
+				SendTransaction(mem_i.second);
 			}
 		}
 	}
@@ -740,13 +738,7 @@ void B4Mesh::timer_childless_fct(const boost::system::error_code& /*e*/)
       mergeBlock = true;
       DEBUG << CYAN << "Timer_childless has expired. Creating merge block" << std::endl;
 
-      auto t1 = std::chrono::high_resolution_clock::now();
       GenerateBlocks();
-      auto t2 = std::chrono::high_resolution_clock::now();
-      std::chrono::duration<double, std::milli> process_block_time = t2 - t1;
-      DEBUG << "Process block time is: " << process_block_time.count() << "ms" << std::endl;
-      block_creation_time.push_back(process_block_time.count());
-      total_process_block_t += process_block_time;
 
       createBlock = true;
     	node_->ClearnewNodes();
@@ -893,15 +885,8 @@ void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string
     mergeBlock = true;
     DEBUG << "A merge block can be created now." << std::endl;
     createBlock = true;
-    // for traces purpose
 
-    auto t1 = std::chrono::high_resolution_clock::now();
     GenerateBlocks();
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> process_block_time = t2 - t1;
-    DEBUG << "Process block time is: " << process_block_time.count() << "ms" << std::endl;
-    block_creation_time.push_back(process_block_time.count());
-    total_process_block_t += process_block_time;
   
   	node_->ClearnewNodes();
   }
@@ -981,7 +966,6 @@ vector<Transaction> B4Mesh::SelectTransactions(){
       }
       else {
         if (t.second.GetTimestamp() < min_ts.second){
-          DEBUG << "Transaction: " << t.first << " with time stamp: " << t.second.GetTimestamp() << std::endl;
           min_ts = make_pair(t.first, t.second.GetTimestamp());
         } else {
           continue;
@@ -996,6 +980,7 @@ vector<Transaction> B4Mesh::SelectTransactions(){
 
 
 void B4Mesh::GenerateBlocks(){
+   auto t1 = std::chrono::high_resolution_clock::now();
   // Only leader execute this function
   
   std::vector<string> myChildless = blockgraph.GetChildlessBlockList();
@@ -1005,7 +990,7 @@ void B4Mesh::GenerateBlocks(){
 	Block block;
 	block.SetLeader(node_->consensus_.GetId());
 	block.SetGroupId(node_->GetGroupId());
-  DEBUG << " GenerateBlock: Block's groupId is: " << node_->GetGroupId() << std::endl;
+ // DEBUG << " GenerateBlock: Block's groupId is: " << node_->GetGroupId() << std::endl;
 	// Getting Parents of the futur Block
 	for (auto& parent : myChildless){
 		p_block.push_back(parent);
@@ -1013,12 +998,12 @@ void B4Mesh::GenerateBlocks(){
 	// If the block to create is a merge block
 	if (mergeBlock || p_block.size() > 1 ){
 		std::vector<Transaction> transactions = std::vector<Transaction> ();
-    DEBUG << " GenerateBlock: Creation of a merge block" << std::endl;
-		DEBUG << " GenerateBlock: Merge block transactions are: " << std::endl;
+   // DEBUG << " GenerateBlock: Creation of a merge block" << std::endl;
+	//	DEBUG << " GenerateBlock: Merge block transactions are: " << std::endl;
 		for (auto hash : p_block){
       Transaction t;
       string payload = to_string(node_->consensus_.GetId()) + " " + hash;
-      DEBUG << payload << endl;
+   //   DEBUG << payload << endl;
       t.SetPayload(payload);
       t.SetTimestamp(getSeconds());
       transactions.push_back(t);
@@ -1027,7 +1012,7 @@ void B4Mesh::GenerateBlocks(){
 		for (auto &node : recover_branch){
 			Transaction t;
 			std::string payload = to_string(node.first) + " " + node.second;
-			DEBUG << payload << std::endl;
+	//		DEBUG << payload << std::endl;
 			t.SetPayload(payload);
 			t.SetTimestamp(getSeconds());
 			transactions.push_back(t);
@@ -1058,9 +1043,9 @@ void B4Mesh::GenerateBlocks(){
 			//  pending_transactions.erase(t.GetHash()); //Not in case of POC
 	}
 
-  DEBUG << " GenerateBlock: Parents of new block are: " << std::endl;
+ // DEBUG << " GenerateBlock: Parents of new block are: " << std::endl;
   for (auto &p : p_block){
-    DEBUG << " GenerateBlock: Block: " << p << std::endl;
+  //  DEBUG << " GenerateBlock: Block: " << p << std::endl;
   }
 
 	block.SetParents(p_block);
@@ -1074,8 +1059,15 @@ void B4Mesh::GenerateBlocks(){
 
 	lastBlock = getSeconds();
 
-	DEBUG << " Block size is:   " << block.GetSize() <<  std::endl;
+//	DEBUG << " Block size is:   " << block.GetSize() <<  std::endl;
 	SendBlockToConsensus(block);
+ 
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  block_creation_time.push_back(time_treatment.count());
+  total_treatment_block_t += time_treatment;
+
+  BlockTreatment(block);
 }
 
 void B4Mesh::SendBlockToConsensus(Block b)
@@ -1088,14 +1080,6 @@ void B4Mesh::SendBlockToConsensus(Block b)
 	string serie = b.Serialize();
 	ApplicationPacket packet(ApplicationPacket::BLOCK, serie);
 	node_->BroadcastPacket(packet, true);
-
-  auto t1 = std::chrono::high_resolution_clock::now();
-  BlockTreatment(b);
-  auto t2 = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-  block_treatment_time.push_back(time_treatment.count());
-  total_treatment_block_t += time_treatment;
-
 }
 
 
