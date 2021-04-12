@@ -101,7 +101,11 @@ You can visualize manualy using :
 
 ## Nginx configuration
 
-### manually
+### Automatically
+
+See `#Configuration, installation, deployement` section below
+
+### Manually ***(deprecated)***
 >$ sudo rwdo -s
 >$ vi /etc/nginx/conf.d/qolyester-http.conf 
 
@@ -123,12 +127,6 @@ server {
 
 >$ sudo nginx -s reload
 
-### by makefile
-
->$ make patch-nginx IP=10.181.172.130
-
-sudo password has to be typed two times. (b4meshroot)
-
 ## live visualisation
 
 In the file "/tmp/blockgraph", you can find a live feed of the blockgraph under a json format.
@@ -138,4 +136,106 @@ Each node is under the format :
 {"node":{"groupId":217,"hash":7144646,"parent":[9288542]}}
 {"node":{"groupId":217,"hash":2681597,"parent":[7144646]}}
 {"node":{"groupId":26,"hash":7377976,"parent":[2681597,8515655]}}
+```
+
+### Configuration, installation, deployement
+
+CMake's top-level script handle **configuration**, **install**, and **deployement** - *on remote machines* - of b4mesh's `live visualisation` component.
+
+**NB** : Such script also handles nginx endpoints configuration, deploying into `/etc/nginx/qolyester.d` path.
+
+> Deployement is handle by `install-time` instruction.  
+> *Thus, during `cmake --install` command invocation*
+
+**NB** : Please not that `live_visualizer` target can be either standalone, or part of b4mesh top-level CMake script.
+
+| Argument | type |  Mandatory ? | Default value |
+| -------- | ---- | ------------ | ------------- |
+| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | Yes | None |
+| remote_install_dir           | PATH | No | None |
+| live_visualizer_install_dir  | PATH | Yes if standalone | Only if not standalone :<br>`${remote_install_dir}`/live_visualizer |
+| live_visualizer_refresh_rate | INTEGER<br>*(in milliseconds)* | No | 3000 |
+
+#### Standalone usage
+
+Even if `b4mesh::live_visualizer` depends on several elements from b4mesh top-level projects,  
+it might be use in standalone.
+
+Theses dependencies are :
+
+- b4mesh/cmake_modules
+- b4mesh/include/configs.hpp
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   --target=b4mesh_live_visualizer \ # force standalone
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
+        ..
+cmake --install .
+```
+
+Which is equivalent to :
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
+        ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
+cmake --install .
+```
+
+Alternatively, as mentioned in the arguments table hereabove,  
+the user can substitute `live_visualizer_install_dir` parameter by `remote_install_dir`,  
+which will result in `live_visualizer_install_dir` set to `${remote_install_dir}/live_visualizer`
+
+Thus, previous command samples are equivalent to :
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dremote_install_dir:PATH=\"/var/persistent-data/b4mesh\" \ # remote_install_dir here, not explicit live_visualizer_install_dir
+        ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
+cmake --install .
+```
+
+#### As part of top-level b4mesh CMake script
+
+```bash
+# Assuming PWD is b4mesh sources's dir
+mkdir build && cd build;
+cmake   \
+        -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+        -Dremote_install_dir:PATH=\"/var/persistent-data/b4mesh\"
+        ..
+cmake --install .
+```
+
+Note that because we deploy remotely, standard CMake argument `CMAKE_INSTALL_PREFIX` has no real meaning here.  
+We substitute it with `remote_install_dir` to set the remote installation path.
+
+**NB** : *Note the escaping character sequence using `\"`, which prevent CMake from resolving localy the path.*
+
+In the snippet above deployement results in the following files :
+
+```log
+-- b4mesh : Remote machines IPs set to :
+-- - 10.181.178.217
+-- - 10.181.172.130
+-- - 10.154.134.26
+-- - 10.154.134.170
+-- - 10.181.178.210
+-- b4mesh : remote_install_dir set to : "/var/persistent-data/b4mesh"
+-- b4mesh::live_visualizer ...
+--  - b4mesh::live_visualizer : refresh rate set to : 3000
+--  - b4mesh::live_visualizer : nodes filestream detected on : [/tmp/blockgraph]
+--  - b4mesh::live_visualizer : (remote) install dir set to : /var/persistent-data/b4mesh/live_visualizer
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Dev/b4mesh_main/build
 ```
