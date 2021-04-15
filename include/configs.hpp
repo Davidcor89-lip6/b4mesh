@@ -23,6 +23,7 @@
 
 // Blockgraph
 #define SIZE_BLOCK 120        // 120
+#define MIN_SIZE_BLOCK 80
 #define SIZE_MEMPOOL 1000
 
 // Retransmit transaction timing

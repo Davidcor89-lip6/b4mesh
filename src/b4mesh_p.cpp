@@ -27,8 +27,6 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	lastBlock = 0;
 
   /* Variables for the blockchain performances */
-  blocktxsSize = SIZE_BLOCK; // Number of txs in mempool to creat a block.
-  sizemempool = SIZE_MEMPOOL; //Limit size of the mempool in num of txs
   numTxsG = 0;  //Num of txs generated
 	numRTxsG = 0;
   lostTrans = 0;
@@ -238,7 +236,7 @@ bool B4Mesh::IsTxInMempool (Transaction t)
 
 bool B4Mesh::IsSpaceInMempool (){
 
-  if (pending_transactions.size() < sizemempool){
+  if (pending_transactions.size() < SIZE_MEMPOOL){
     return true;
   }
   else {
@@ -940,7 +938,7 @@ bool B4Mesh::TestPendingTxs(){
     // Only leader execute this function
 
 	if (getSeconds() - lastBlock > SAFETIME){
-		if (pending_transactions.size() > blocktxsSize){
+		if (pending_transactions.size() > MIN_SIZE_BLOCK){
 			DEBUG << YELLOW << " TestPendingTxs: Enough txs to create a block." << std::endl;
 			return true;
 		}
@@ -958,7 +956,7 @@ vector<Transaction> B4Mesh::SelectTransactions(){
 
   vector<Transaction> transactions;
 
-  while(transactions.size() < blocktxsSize - 1){
+  while(transactions.size() < SIZE_BLOCK- 1){
     pair<string, double> min_ts = make_pair("0", 9999999);
     for(auto &t : pending_transactions){
       if(find(transactions.begin(), transactions.end(), t.second) != transactions.end()){
@@ -972,8 +970,12 @@ vector<Transaction> B4Mesh::SelectTransactions(){
         }
       }
     }
-    DEBUG << "Getting tx: " << min_ts.first << " with Timestamp: " << min_ts.second << std::endl;
-    transactions.push_back(pending_transactions[min_ts.first]);
+    if (min_ts.first != "0"){
+       DEBUG << "Getting tx: " << min_ts.first << " with Timestamp: " << min_ts.second << std::endl;
+       transactions.push_back(pending_transactions[min_ts.first]);
+    } else {
+      break;
+    }  
   }
   return transactions;
 }

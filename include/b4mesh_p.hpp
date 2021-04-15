@@ -298,13 +298,11 @@ class B4Mesh
 
     public:
         /* Traces for B4Mesh App */
-        unsigned int sizemempool;
         std::vector <std::pair<int, std::pair <int, int>>> blockgraph_file;
 
     private:
         // Private member variables of blockgraph protocol
 
-        unsigned int blocktxsSize;  //  The critiria of num of txs in mempool to create a block
         bool mergeBlock;            //  When mergeBlock is true, GenerateBlock functions creates a merge block 
         bool createBlock;           //  When createBlock is false, a block can't be created.  (Merge Procedure)
         double lastBlock;           //  The time of the creation of the last block
