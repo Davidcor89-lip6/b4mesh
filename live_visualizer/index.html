@@ -1,0 +1,257 @@
+<!doctype html>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+    <title>Blockgraph live visualizer</title>
+    <head>
+        <link rel="icon" href="favicon.ico" />
+        <link rel="stylesheet" href="style.css">
+        <script src="//d3js.org/d3.v5.min.js"></script>
+        <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+        <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
+        <script src="scripts/json_to_dot.js"></script>
+        <script src="scripts/string_hash.js"></script>
+        <script src="scripts/view_operations.js"></script>
+    </head>
+    <body>
+        <h1 style="width: 100%;">
+            Blockgraph live visualizer <img src="favicon.ico" />
+        </h1>
+        <div class="bar_container">
+            <!-- Toolbar  -->
+            <div class="toolbar">
+                <div class="toolbar_element">
+                    <span class="information_label">Orientation</span>
+                    <select id=graph_orientations style="background-color: lightgray;">
+                        <option value="BT" selected>   bottom-up</option>
+                        <option value="TD">            top-down</option>
+                        <option value="LR">            left-right</option>
+                        <option value="RL">            right-left</option>
+                    </select>
+                </div>
+                <button class="toolbar_element" type="button" id="reset_zoom_button" style="background-color: lightgray;">
+                    Reset zoom
+                </button>
+                <div class="toolbar_element">
+                    <span class="information_label">Automate camera ?</span>
+                    <input type="checkbox" id="automate_camera" checked style="background-color: lightgray;">
+                </div>
+            </div>
+            <!-- Graph informations -->
+            <div class="informations">
+                <div class="toolbar_element">
+                    <span class="information_label">Nodes counts</span>
+                    <span class="information_value" id=view_nodes_count></span>
+                </div>
+                <div class="toolbar_element">
+                    <span class="information_label">Clusters counts</span>
+                    <span class="information_value" id=view_clusters_count></span>
+                </div>
+            </div>
+        </div>
+        <!-- Graph -->
+        <div id="graph-container" class="graph_container"></div>
+
+        <script type="text/javascript">
+
+            // [todo] Rendering stability
+            //  https://gist.github.com/magjac/28a70231e2c9dddb84b3b20f450a215f
+            //  - cache dot graph
+            //  - call renderDot(cache) instead of render()
+            //  - add events renderDot(cache).on("end", funct(){})
+
+            // options management
+            var graph_option_html_references = {
+                orientation_node : document.getElementById("graph_orientations")
+            };
+
+            const graphContainer = d3.select("#graph-container");
+            var rendering = graphContainer
+                .graphviz()
+                .transition(function () {
+                    return d3.transition("main")
+                        .ease(d3.easeLinear)
+                        .delay(40)
+                        .duration(750);
+                })
+                .width(graphContainer.node().clientWidth)
+                .height(graphContainer.node().clientHeight)
+                //.zoom(true)
+                .fit(true)
+                ;
+
+            var update_views = function(){
+                document.getElementById("view_nodes_count").innerHTML = d3.select(".graph").selectAll(".node").nodes().length;
+                document.getElementById("view_clusters_count").innerHTML = d3.select(".graph").selectAll(".cluster").nodes().length
+            };
+
+            let freshest_node_type = class {
+                hash = null;
+                get node() {
+                    var node_hash = this.hash;
+                    var value = d3.selectAll('.node').nodes().filter(
+                        function(d, i){
+                            return d3.select(d).select('title').node().textContent == node_hash;
+                        }
+                    );
+                    return value.length == 0 ? null : value[0];
+                }
+                center_node() {
+                    // no rendering here, only centering
+                    if (freshest_node.node == null)
+                        return;
+                    center_element(freshest_node.node);
+                    // rendering.render();
+                }
+            };
+            freshest_node = new freshest_node_type();
+
+            var render_graph = function(datas) {
+
+                const is_camera_automated = document.getElementById('automate_camera').checked;
+
+                rendering
+                    .renderDot(datas)
+                    .on("end", function(){
+                        update_views();
+                        if (is_camera_automated)
+                        {
+                            freshest_node.center_node();
+                            //rendering.render();
+                        }
+                        d3.selectAll(".node").on("click", function(){
+                            console.log('Focusing node : ' + d3.select(this).selectAll('title').text());
+                            center_element(this);
+                            rendering.render();
+                        });
+                        d3.selectAll(".node").on("dblclick", function(){
+                            console.log('Focusing node : ' + d3.select(this).selectAll('title').text());
+                            center_and_zoom_element(this);
+                            rendering.render();
+                        });
+                        // d3.selectAll('.cluster').on("mouseenter", function() {
+                        //     var this_polygon = d3.select(this).select('polygon').node();
+                        //     this_polygon.style.strokeWidth = 3;
+                        //     this_polygon.style.stroke = "darkslateblue";
+                        // });
+                        // d3.selectAll('.cluster').on("mouseleave", function() {
+                        //     var this_polygon = d3.select(this).select('polygon').node();
+                        //     this_polygon.style.strokeWidth = 1;
+                        //     this_polygon.style.stroke = "black";
+                        // });
+                    });
+            }
+
+            var datas_as_dot = null;
+            var draw_fetched_datas = function(datas_as_json)
+            {
+                try
+                {
+                    var options = {
+                        orientation : graph_option_html_references.orientation_node.selectedOptions[0].value
+                    };
+                    datas_as_dot = json_to_dot(datas_as_json, options);
+                    // console.log("json_to_dot : [\n" + datas_as_dot + "\n]")
+                }
+                catch (error) {
+                    console.error('[draw_fetched_datas] Error : graph rendering failed : ' + error)
+                    throw(error);
+                }
+
+                try {
+                    if (document.hidden)
+                    {   // Check if rendering is useless ...
+                        console.log('[draw_fetched_datas] Tab is not focused, canceling datas update ...')
+                        return; // do not update if the tab is inactive
+                    }
+                    render_graph(datas_as_dot);
+                }
+                catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
+
+                try
+                {   // refresh `freshest_node` value
+                    var lines = datas_as_json.split('\n');
+                    const regex = /\"hash\"\:(\d+)\,/;
+                    if (lines.length == 0)
+                        return;
+                    var freshest_node_hash = null;
+                    if (lines[lines.length - 1].length == 0 && lines.length > 1)
+                        freshest_node_hash = lines[lines.length - 2].match(regex)[1];
+                    else freshest_node_hash = lines[lines.length - 1].match(regex)[1];
+
+                    freshest_node.hash = freshest_node_hash;
+                }
+                catch (error)
+                {
+                    console.log("Cannot update freshest_node_hash, datas seems to be invalid");
+                }
+            }
+
+            if (!window.Worker)
+                throw('[poll_worker] Error : Browser does not support workers');
+            var worker = function(){
+                // fix Chrome security error (Firefox allow local files, not Chrome)
+                const poll_worker_task_URL = function() {
+                    var url = new URL(window.location.href);
+                    url.search = "";
+                    url.pathname = "scripts/poll_worker_task.js";
+                    return url;
+                }();
+                return new Worker(poll_worker_task_URL.toString());
+            }();
+
+            // events
+            worker.onmessage = function(event) {
+                // console.log("worker.onmessage ... [\n" + event.data + "\n]")
+                draw_fetched_datas(event.data);
+                // todo : auto-focus on last element
+            };
+            worker.onerror = function(event){
+                console.log("[error](polling) worker error : " + event.message);
+            };
+            document.onvisibilitychange = function() {
+                if (document.hidden || datas_as_dot == null)
+                    return;
+                render_graph(datas_as_dot); // force rendering on tab selection
+            };
+            window.onerror = function myErrorHandler(msg, url, lineNumber) {
+                //alert("Error : " + msg);
+                return false;
+            }
+            window.onresize = function() {
+                console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
+                if (rendering.data() === null)
+                    return; // not initialized yet
+                rendering
+                    .width(graphContainer.node().clientWidth)
+                    .height(graphContainer.node().clientHeight)
+                    .fit(true)
+                    .render();
+            };
+            graph_option_html_references.orientation_node.onchange = function(){
+
+                if (rendering.data() === null ||
+                    datas_as_dot === null)
+                    return; // not initialized yet
+
+                // temporary worker.onmessage event disable
+                worker._onmessage = worker.onmessage;
+                worker.onmessage = function(event){};
+
+                const regex = /rankdir=\w\w\;/g;
+                datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir=' + graph_option_html_references.orientation_node.selectedOptions[0].value + ';');
+                rendering.resetZoom(d3.transition().duration(1000));
+                render_graph(datas_as_dot);
+
+                worker.onmessage = worker._onmessage;
+                worker._onmessage = null;
+            };
+            document.getElementById('reset_zoom_button').onclick  = function(event){
+                if (d3 === null || rendering === null)
+                    return;
+                rendering.resetZoom(d3.transition().duration(1000));
+            };
+        </script>
+    </body>
+</html>

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+List_node="130 26 217 170 210"
+
+rm *.txt *.png
+make -C ../ recoverResultAll
+for id in $List_node;
+do
+	echo ${id}
+	../script/txt2Png_time blockgraph-${id}.txt res-${id}_time.png
+	../script/txt2Png blockgraph-${id}.txt res-${id}.png
+done
+eog res-217.png &

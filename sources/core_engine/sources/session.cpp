@@ -12,11 +12,7 @@ void session::start_reading()
     destIP_ = socket_.remote_endpoint().address().to_string();
     boost::asio::async_read_until(socket_,
         response_,
-<<<<<<< Updated upstream
-        "\r\n",
-=======
         "end",
->>>>>>> Stashed changes
         boost::bind(&session::handle_read, this,
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
@@ -28,11 +24,6 @@ void session::handle_read(const boost::system::error_code& error,
     if (!error)
     {    
         std::string s((std::istreambuf_iterator<char>(&response_)), std::istreambuf_iterator<char>());
-<<<<<<< Updated upstream
-        // remove end marker
-        s.erase(s.end()-2, s.end());
-        b4mesh_->ReceivePacket(s, destIP_);
-=======
         
         std::string sEnd ("end");
         std::size_t found = s.find(sEnd);
@@ -51,7 +42,6 @@ void session::handle_read(const boost::system::error_code& error,
         {
             saveStr = s;
         }
->>>>>>> Stashed changes
 
         //restart reading
         start_reading();
@@ -79,11 +69,8 @@ void session::handle_write(const boost::system::error_code& error)
     }
     else
     {
-<<<<<<< Updated upstream
-=======
         std::cout << "Error with the session " << error << std::endl;
         socket_.close();
->>>>>>> Stashed changes
         delete this;
     }
 }
@@ -99,8 +86,4 @@ void session::closeSocket(void){
             std::cerr << e.what() << '\n';
         }
     });
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes

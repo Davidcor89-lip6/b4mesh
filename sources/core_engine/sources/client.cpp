@@ -5,11 +5,8 @@ client::client(node* parent, boost::asio::io_context& io_context, std::string de
       io_context_(io_context),
       socket_(io_context),
       resolver_(io_context),
-<<<<<<< Updated upstream
-=======
       strand_(io_context),
       outbox_(),
->>>>>>> Stashed changes
       destIP_(destIP),
       m_timer(io_context, std::chrono::steady_clock::now() + std::chrono::seconds(2)),
       forBlock(block)
@@ -35,15 +32,7 @@ void client::do_connect()
             socket_.close();
             m_timer.expires_from_now(std::chrono::seconds(2));
             m_timer.async_wait(boost::bind(&client::on_ready_to_reconnect, this, boost::asio::placeholders::error));
-<<<<<<< Updated upstream
-            //m_timer.async_wait(std::bind(&client::on_ready_to_reconnect, this, std::placeholders::_1));
-            /* pt->expires_at(pt->expires_at() + boost::posix_time::seconds(1)); 
-            pt->async_wait(boost::bind(callback_func, boost::asio::placeholders::error, pt, pcont)); */
-        }
-            
-=======
         }         
->>>>>>> Stashed changes
     });
 }
 
@@ -55,11 +44,7 @@ boost::asio::async_read(socket_, boost::asio::buffer(data_, max_length),
     {
         if (!ec)
         {
-<<<<<<< Updated upstream
-            std::cout << "read from client " << data_ << std::endl;
-=======
             std::cout << "read from client :" << data_ << std::endl;
->>>>>>> Stashed changes
             do_read();
         }
         else
@@ -82,8 +67,6 @@ void client::closeSocket(void){
         }
     });
 }
-<<<<<<< Updated upstream
-=======
 
 void client::write_message(const std::string& message)
 {
@@ -139,4 +122,3 @@ void client::writeHandler(const boost::system::error_code& error, const size_t b
         this->write();
     }
 }
->>>>>>> Stashed changes

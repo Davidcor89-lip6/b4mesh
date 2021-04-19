@@ -112,10 +112,7 @@ std::string consensus::GetIPFromId(int id)
     {
         return mIP_;
     }
-<<<<<<< Updated upstream
-=======
     getNodeList();
->>>>>>> Stashed changes
     for (auto it = listAddr.begin(); it != listAddr.end(); ++it)
     {
         if ( id == GetIdFromIP(*it) )
@@ -127,18 +124,11 @@ std::string consensus::GetIPFromId(int id)
     std::string r("-1");
     return r;
 }
-<<<<<<< Updated upstream
-
-=======
 /*
->>>>>>> Stashed changes
 std::string consensus::GetGroupId()
 {
     std::string g = std::to_string(GetIdFromIP(leader_)); // group id is the id of the leader
     return g;
 }
-<<<<<<< Updated upstream
-=======
 */
->>>>>>> Stashed changes
 

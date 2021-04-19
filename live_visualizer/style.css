@@ -1,0 +1,82 @@
+body {
+  height: 90%;
+  margin: 0;
+  padding: 2em;
+}
+html {
+  height: 90%;
+}
+.graph_container {
+  width: 100%;
+  height: 100%;
+  margin:auto;
+  border: 1px solid black;
+}
+/* Rendering elements */
+/* svg {
+  overflow: hidden;
+  margin: 1em;
+} */
+.node rect {
+  stroke: #333;
+  stroke-width: 2.5px;
+  fill: white;
+}
+.edgeLabel rect {
+  fill: white;
+}
+.edgePath {
+  stroke: #333;
+  stroke-width: 1.5px;
+  fill: none;
+}
+
+/* toolbar */
+.bar_container {
+  width: 100%;
+  margin:auto;
+  display: grid;
+  border: 1px solid black;
+  display: flex;
+}
+
+.toolbar {
+  width: 50%;
+  height:inherit;
+  align-content: flex-start;
+  justify-content: flex-start;
+  /* margin:auto; */
+  display: grid;
+  border: 1px solid black;
+  background-color: lightslategray;
+  display: flex;
+}
+.toolbar_element {
+  align-content: center;
+  margin: 2px;
+  border: 1px solid darkslateblue;
+  display: grid;
+  width:max-content;
+  height:auto;
+  background-color: white;
+  border-radius: 5px;
+  padding: 5px;
+}
+.informations {
+  width: 50%;
+  /* margin:auto; */
+  display: grid;
+  border: 1px solid black;
+  background-color: lightslategray;
+  display: flex;
+  align-content: flex-end;
+  justify-content: flex-end;
+}
+.information_value {
+  align-content: center;
+  align-content: center;
+  justify-content: center;
+}
+.information_label {
+  font-weight: bold;
+}

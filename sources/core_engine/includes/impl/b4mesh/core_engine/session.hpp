@@ -36,13 +36,7 @@ private:
     boost::asio::io_context& io_context_;
     tcp::socket socket_;
     boost::asio::streambuf response_;
-<<<<<<< Updated upstream
-};
-
-#endif //B4MESH_SESSION
-=======
     std::string saveStr;
 };
 
 #endif //B4MESH_SESSION
->>>>>>> Stashed changes

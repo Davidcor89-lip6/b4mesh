@@ -73,8 +73,4 @@ private:
 };
 
 
-<<<<<<< Updated upstream
 #endif //B4MESH_CLIENT
-=======
-#endif //B4MESH_CLIENT
->>>>>>> Stashed changes

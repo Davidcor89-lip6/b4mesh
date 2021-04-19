@@ -30,8 +30,7 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": []
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     },
     {
       "name": "Linux-GCC-Debug-WithGreenSDK",
@@ -43,7 +42,6 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_arm" ],
-      "variables": [],
       "remoteMachineName": "${defaultRemoteMachineName}",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
@@ -53,7 +51,19 @@
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "cmakeToolchain": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake"
+      "cmakeToolchain": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake",
+      "variables": [
+        {
+          "name": "remote_machines_IP",
+          "type": "STRING",
+          "value": "10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210"
+        },
+        {
+          "name": "remote_install_dir",
+          "type": "PATH",
+          "value": "/var/persistent-data/b4mesh"
+        }
+      ]
     },
     {
       "name": "Linux-GCC-Debug_target_greensoftsdk",
