@@ -24,7 +24,11 @@ class B4Mesh;
 class node
 {
 public:
+<<<<<<< Updated upstream
     node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP);
+=======
+    node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP, bool geneTrans);
+>>>>>>> Stashed changes
     
     void addClientToList(std::string IP, client * c, bool block);
     void removeClientFromList(std::string IP);
@@ -37,9 +41,22 @@ public:
 
     std::string GetIp(void);
     void GenerateResults (void);
+<<<<<<< Updated upstream
 
 private:
     void SendOnNetwork(tcp::socket& socket, std::string string);
+=======
+    void RegisterTransaction (std::string payload);
+
+    std::vector<std::string> GetcurrentListAddr(void) { return currentListAddr; }
+    std::vector<std::string> GetpreviousListAddr(void) { return previousListAddr; }
+    std::vector<pair<int, std::string>> GetnewNodes(void) { return new_nodes; }
+    void ClearnewNodes(void) { new_nodes.clear(); }
+    void setGroupId (std::vector<std::string> new_listnodes);
+    std::string GetGroupId(void);
+    
+private:
+>>>>>>> Stashed changes
     void create_client(std::string addr);
 
 private:
@@ -53,8 +70,16 @@ public:
 
 private:
     std::string my_IP;
+<<<<<<< Updated upstream
     short port_;
     std::vector<std::string> startListAddr; 
+=======
+    std::string groupId;
+    short port_;
+    std::vector<std::string> currentListAddr; 
+    std::vector<std::string> previousListAddr; 
+    std::vector<pair<int, std::string>> new_nodes;
+>>>>>>> Stashed changes
     std::map<std::string, session*> listSession;
     std::map<std::string, client*> listClient;
     std::map<std::string, session*> listSessionB;
@@ -71,5 +96,10 @@ private:
 
 };
 
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 #endif //B4MESH_NODE
 

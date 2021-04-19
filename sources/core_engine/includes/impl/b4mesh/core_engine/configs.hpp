@@ -1,12 +1,17 @@
 #ifndef B4MESH_CONFIGS
 #define B4MESH_CONFIGS
 
+<<<<<<< Updated upstream
 // default port
+=======
+// Default port
+>>>>>>> Stashed changes
 #define DEFAULT_PORT 5000
 
 // Dbus
 #define POLLING_DBUS 5
 
+<<<<<<< Updated upstream
 // merge
 #define MERGE_TIMING 5
 
@@ -33,6 +38,40 @@
 #define DEBUG std::cout << getSeconds() << " : "
 
 // the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
+=======
+// Merge
+#define MERGE_TIMING 5
+
+// Payload size
+#define PAYLOAD_MIN 300
+#define PAYLOAD_MAX 600
+
+// Transaction generation
+#define WAIT_FOR_FIRST_TRANSACTION 5 // wait a bit that everyone is started
+#define LAMBDA_DIST 0.9 // = 1/mean
+
+// B4mesh recurrent task (Ask4missingblock)
+#define RECCURENT_TIMER 10
+
+// Blockgraph
+#define SIZE_BLOCK 120        // 120
+#define SIZE_MEMPOOL 1000
+
+// Retransmit transaction timing
+#define T_RETRANS 60
+
+// Limit in seconds for the block creation
+#define SAFETIME 5
+
+// Trace option
+#define LIVEBLOCK_FILE "/tmp/blockgraph"
+#define LIVEMEMPOOL_FILE "./live_mempool.txt"
+
+// Only in b4mesh class
+#define DEBUG std::cout << getSeconds() << " : "
+
+// The following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
+>>>>>>> Stashed changes
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"      /* Black */
 #define RED     "\033[31m"      /* Red */

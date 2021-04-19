@@ -1,6 +1,9 @@
 #ifndef APPLICATION_PACKET_H
 #define APPLICATION_PACKET_H
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 #include <iostream>
 #include <string>
 
@@ -24,7 +27,11 @@ class ApplicationPacket{
     ApplicationPacket(char service, int size, const uint8_t* payload);
     ApplicationPacket(ApplicationPacket &p);
     ApplicationPacket(string &serie);
+<<<<<<< Updated upstream
     ApplicationPacket(string &serie, size_t p_size);
+=======
+    ApplicationPacket(string &serie, int p_size);
+>>>>>>> Stashed changes
     ~ApplicationPacket();
 
   public:
@@ -50,15 +57,25 @@ class ApplicationPacket{
     int HeaderSize();
 
     /**
+<<<<<<< Updated upstream
      * Serialize the packet into an array of byte (here a string is more
+=======
+     * Serialize the packet into an array of bits (here a string is more
+>>>>>>> Stashed changes
      * convenient)
      */
      string Serialize();
 
   private:
+<<<<<<< Updated upstream
     char service; // Service identifier of the packet (PBFT, RAFT, BLOCKCHAIN, ...)
     int size; // Size of the whole packet (including header)
     string payload; // Payload of the packet (contains an application message
+=======
+    char service; // Service identifier of the packet (RAFT, BLOCKGRAPH, BLOCK, ...)
+    int size; // Size of the whole packet (including header)
+    string payload; // Payload of the packet (contains an application message)
+>>>>>>> Stashed changes
 
 };
 

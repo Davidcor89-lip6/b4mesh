@@ -2,6 +2,10 @@
 #define B4MESH_CLIENT
 
 #include <iostream>
+<<<<<<< Updated upstream
+=======
+#include <deque>
+>>>>>>> Stashed changes
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -20,11 +24,22 @@ public:
 
 	void closeSocket(void);
 
+<<<<<<< Updated upstream
+=======
+	void write_message(const std::string& message);
+
+>>>>>>> Stashed changes
 private:
 
 	void do_connect();
 	void on_ready_to_reconnect(const boost::system::error_code &error) { do_connect();}
 	void do_read();
+<<<<<<< Updated upstream
+=======
+	void writeImpl(const std::string& message);
+	void write();
+	void writeHandler(const boost::system::error_code& error,const size_t bytesTransferred);
+>>>>>>> Stashed changes
 	
 	//parent
 	node * parent_;
@@ -32,6 +47,11 @@ private:
 	boost::asio::io_context& io_context_;
     tcp::socket socket_;
 	tcp::resolver resolver_;
+<<<<<<< Updated upstream
+=======
+	boost::asio::io_service::strand strand_;
+    std::deque<std::string> outbox_;
+>>>>>>> Stashed changes
 	std::string destIP_;
     tcp::resolver::results_type endpoints;
 	boost::asio::steady_timer m_timer;
@@ -45,4 +65,8 @@ private:
 
 
 
+<<<<<<< Updated upstream
 #endif //B4MESH_CLIENT
+=======
+#endif //B4MESH_CLIENT
+>>>>>>> Stashed changes

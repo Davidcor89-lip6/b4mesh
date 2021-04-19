@@ -2,6 +2,12 @@
 
 Blockgraph::Blockgraph ()
 {
+<<<<<<< Updated upstream
+=======
+  txsCount = 0;
+  txsSize = 0;
+
+>>>>>>> Stashed changes
   Block genesisBlock("0", 0, 0, "0", vector<string> (), 0.0, vector<Transaction> ());
   AddBlock(genesisBlock);
 }
@@ -22,7 +28,11 @@ int Blockgraph::GetByteSize () {
   }
   return size;
 }
+<<<<<<< Updated upstream
 
+=======
+/*
+>>>>>>> Stashed changes
 int Blockgraph::GetTxsCount (){
     int totalTx = 0;
 
@@ -31,7 +41,17 @@ int Blockgraph::GetTxsCount (){
     }
     return totalTx;
 }
+<<<<<<< Updated upstream
 
+=======
+*/
+
+int Blockgraph::GetTxsCount (){
+  return txsCount;
+}
+
+/*
+>>>>>>> Stashed changes
 int Blockgraph::GetTxsByteSize (){
   int totalBytes = 0;
 
@@ -40,6 +60,14 @@ int Blockgraph::GetTxsByteSize (){
   }
   return totalBytes;
 }
+<<<<<<< Updated upstream
+=======
+*/
+
+int Blockgraph::GetTxsByteSize (){
+  return txsSize;
+}
+>>>>>>> Stashed changes
 
 int Blockgraph::GetBlocksCount () const{
   return blocks.size();
@@ -74,6 +102,11 @@ void Blockgraph::AddBlock  (Block& newBlock){
     bool present = HasBlock(newBlock);
     if (!present){
       blocks.insert({newBlock.GetHash(), newBlock});
+<<<<<<< Updated upstream
+=======
+      txsCount += newBlock.GetTxsCount();
+      txsSize += newBlock.CalculeTxsSize();
+>>>>>>> Stashed changes
     }
     // If block already present in Blockgraph -> reject the block
 }
@@ -143,6 +176,28 @@ vector<Block> Blockgraph::GetChildlessBlocks (){
 }
 
 
+<<<<<<< Updated upstream
+=======
+vector<string> Blockgraph::GetChildlessBlockList (){
+  vector<string> ret = vector<string> ();
+  set<string> childless;
+
+  for (auto& b : blocks)
+    childless.insert(b.first);
+
+  for (auto& b : blocks){
+    for (auto& p : b.second.GetParents())
+        childless.erase(p);
+  }
+
+  for (auto &e : childless){
+    ret.push_back(e);
+  }
+
+return ret;
+}
+
+>>>>>>> Stashed changes
 
 bool Blockgraph::IsChildless(Block &block){
 
@@ -156,6 +211,51 @@ bool Blockgraph::IsChildless(Block &block){
   return true;
 }
 
+<<<<<<< Updated upstream
+=======
+bool Blockgraph::IsTxInBG(Transaction &t){
+  for (auto& b : blocks){
+    for (auto& tx : b.second.GetTransactions()){
+      if (tx.GetHash() == t.GetHash()){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+int Blockgraph::CountRepTxInBlockGraph (Transaction &t){
+  int count = 0;
+  for (auto& b : blocks){
+    for (auto& tx : b.second.GetTransactions()){
+      if (tx.GetHash() == t.GetHash()){
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+int Blockgraph::ComputeTransactionRepetition (){
+  std::map<std::string, int> mem;
+  int count = 0;
+  for (auto& b : blocks){
+    for (auto& tx : b.second.GetTransactions()){
+      int res = CountRepTxInBlockGraph(tx);
+      if (res > 1){
+        auto it = mem.find(tx.GetHash());
+        if (it == mem.end()){
+          std::cout << stoi(tx.GetHash()) << " : " << res << std::endl;
+          count++;
+          mem[tx.GetHash()] = res;
+        }
+      }
+    }
+  }
+  return count;
+}
+
+>>>>>>> Stashed changes
 float Blockgraph::MeanTxPerBlock(){
   int txsInBlock = 0;
   for (auto& b : blocks){

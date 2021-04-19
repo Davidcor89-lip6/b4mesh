@@ -3,7 +3,10 @@
 ApplicationPacket::ApplicationPacket(){
   service = NONE;
   payload = "";
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   size = CalculateSize();
 }
 
@@ -13,9 +16,14 @@ ApplicationPacket::ApplicationPacket(char service, string payload){
   size = CalculateSize();
 }
 
+<<<<<<< Updated upstream
 
 ApplicationPacket::ApplicationPacket(char service, int payload_size, const uint8_t*
     payload){
+=======
+ApplicationPacket::ApplicationPacket(char service, int payload_size, 
+                                     const uint8_t* payload){
+>>>>>>> Stashed changes
   this->service = service;
   this->payload = string((const char*) payload, payload_size);
   size = CalculateSize();
@@ -27,16 +35,27 @@ ApplicationPacket::ApplicationPacket(ApplicationPacket &p){
   size = p.size;
 }
 
+<<<<<<< Updated upstream
+=======
+// Packet deserialization
+>>>>>>> Stashed changes
 ApplicationPacket::ApplicationPacket(string &serie){
   packet_hdr_serie *hdr = (packet_hdr_serie*) serie.data();
   service = hdr->service;
   size = hdr->size;
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   const char* packet_payload = serie.data() + HeaderSize();
   payload = string(packet_payload, size-HeaderSize());
 }
 
+<<<<<<< Updated upstream
 ApplicationPacket::ApplicationPacket(string &serie, size_t p_size ){
+=======
+ApplicationPacket::ApplicationPacket(string &serie, int p_size ){
+>>>>>>> Stashed changes
   packet_hdr_serie *hdr = (packet_hdr_serie*) serie.data();
   service = hdr->service;
   size = hdr->size;
@@ -88,7 +107,10 @@ string ApplicationPacket::GetPayload(){
   return payload;
 }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 string ApplicationPacket::Serialize(){
   string ret(HeaderSize(), 0);
   packet_hdr_serie* p = (packet_hdr_serie*) ret.data();

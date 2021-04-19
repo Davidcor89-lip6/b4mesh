@@ -5,6 +5,11 @@ client::client(node* parent, boost::asio::io_context& io_context, std::string de
       io_context_(io_context),
       socket_(io_context),
       resolver_(io_context),
+<<<<<<< Updated upstream
+=======
+      strand_(io_context),
+      outbox_(),
+>>>>>>> Stashed changes
       destIP_(destIP),
       m_timer(io_context, std::chrono::steady_clock::now() + std::chrono::seconds(2)),
       forBlock(block)
@@ -30,11 +35,15 @@ void client::do_connect()
             socket_.close();
             m_timer.expires_from_now(std::chrono::seconds(2));
             m_timer.async_wait(boost::bind(&client::on_ready_to_reconnect, this, boost::asio::placeholders::error));
+<<<<<<< Updated upstream
             //m_timer.async_wait(std::bind(&client::on_ready_to_reconnect, this, std::placeholders::_1));
             /* pt->expires_at(pt->expires_at() + boost::posix_time::seconds(1)); 
             pt->async_wait(boost::bind(callback_func, boost::asio::placeholders::error, pt, pcont)); */
         }
             
+=======
+        }         
+>>>>>>> Stashed changes
     });
 }
 
@@ -46,7 +55,11 @@ boost::asio::async_read(socket_, boost::asio::buffer(data_, max_length),
     {
         if (!ec)
         {
+<<<<<<< Updated upstream
             std::cout << "read from client " << data_ << std::endl;
+=======
+            std::cout << "read from client :" << data_ << std::endl;
+>>>>>>> Stashed changes
             do_read();
         }
         else
@@ -69,3 +82,61 @@ void client::closeSocket(void){
         }
     });
 }
+<<<<<<< Updated upstream
+=======
+
+void client::write_message(const std::string& message)
+{
+    strand_.post(
+        boost::bind(
+            &client::writeImpl,
+            this,
+            message
+            )
+        );
+}
+
+
+void client::writeImpl(const std::string& message)
+{
+    outbox_.push_back( message );
+    if ( outbox_.size() > 1 ) {
+        // outstanding async_write
+        return;
+    }
+
+    this->write();
+}
+
+void client::write()
+{
+    const std::string& message = outbox_[0] + std::string("end");
+    boost::asio::async_write(
+            socket_,
+            boost::asio::buffer( message.c_str(), message.size() ),
+            strand_.wrap(
+                boost::bind(
+                    &client::writeHandler,
+                    this,
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred
+                    )
+                )
+            );
+}
+
+void client::writeHandler(const boost::system::error_code& error, const size_t bytesTransferred)
+{
+    outbox_.pop_front();
+
+    if ( error ) {
+        std::cerr << "could not write: " << boost::system::system_error(error).what() << std::endl;
+        return;
+    }
+
+    if ( !outbox_.empty() ) {
+        // more messages to send
+        this->write();
+    }
+}
+>>>>>>> Stashed changes
