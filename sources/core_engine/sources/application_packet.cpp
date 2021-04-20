@@ -34,7 +34,7 @@ ApplicationPacket::ApplicationPacket(string &serie){
   payload = string(packet_payload, size-HeaderSize());
 }
 
-ApplicationPacket::ApplicationPacket(string &serie, int p_size ){
+ApplicationPacket::ApplicationPacket(string &serie, std::size_t p_size ){
   packet_hdr_serie *hdr = (packet_hdr_serie*) serie.data();
   service = hdr->service;
   size = hdr->size;

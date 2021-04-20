@@ -3,8 +3,6 @@
 #include <b4mesh/core_engine/b4mesh_p.hpp>
 #include <b4mesh/core_engine/configs.hpp>
 
-
-
 node::node(boost::asio::io_context& io_context, DBus::Connection& conn, short port, std::string myIP, bool geneTrans)
     : io_context_(io_context),
       acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),

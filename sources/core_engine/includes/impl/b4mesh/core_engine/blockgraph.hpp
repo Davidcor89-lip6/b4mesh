@@ -7,8 +7,7 @@
 #include <vector>
 #include <map>
 #include <b4mesh/core_engine/block.hpp>
-
-#include <b4mesh/core_engine/transaction.hpp"
+#include <b4mesh/core_engine/transaction.hpp>
 
 using namespace std;
 
