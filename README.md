@@ -158,12 +158,139 @@ If you are using Microsoft Visual Studio :
 - Press F7 or Build > Build all
 - *Wait quite a long time ...*
 
-Possible output :
+Possible output (cache generation) :
+
+```log
+1> Copie des fichiers sur la machine distante.
+1> Début de la copie des fichiers sur la machine distante.
+1> [rsync] rsync -t --delete --delete-excluded -v -r --exclude=.vs --exclude=.git --exclude=out -8  "." rsync://root@localhost:63484/-root-.vs-b4mesh-04888722-7ab6-435b-947b-dca7becdfea8-src
+1> [rsync] sending incremental file list
+1> [rsync] ./
+1> [rsync] CMakeSettings.json
+1> [rsync] README.md
+1> [rsync] deleting live_visualizer/configuration.js
+1> [rsync] cmake_modules/
+1> [rsync] doc/build/
+1> [rsync] doc/build/dependencies_diagram.dot
+1> [rsync] doc/build/dependencies_diagram.dot.Boostrandom
+1> [rsync] doc/build/dependencies_diagram.dot.Boostrandom.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.Boostsystem
+1> [rsync] doc/build/dependencies_diagram.dot.Boostsystem.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.DBusCXX
+1> [rsync] doc/build/dependencies_diagram.dot.DBusCXX.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.INTERFACE
+1> [rsync] doc/build/dependencies_diagram.dot.INTERFACE.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.ThreadsThreads
+1> [rsync] doc/build/dependencies_diagram.dot.ThreadsThreads.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_binary
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_binary.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_coreEngine
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_coreEngine.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_core_engine__generated
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_core_engine__generated.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_utils
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_utils.dependers
+1> [rsync] doc/build/dependencies_diagram.png
+1> [rsync] live_visualizer/
+1> [rsync] live_visualizer/nginx/
+1> [rsync] live_visualizer/nginx/http_live_visualizer.conf
+1> [rsync] 
+1> [rsync] sent 18,099 bytes  received 1,962 bytes  5,731.71 bytes/sec
+1> [rsync] total size is 9,995,493  speedup is 498.25
+1> Fin de la copie des fichiers (durée calendaire 00h:00m:03s:751ms).
+1> La génération de CMake a démarré pour la configuration : 'Linux-GCC-Debug-WithGreenSDK'.
+1> Exécutable cmake trouvé sur /root/.vs/cmake/bin/cmake.
+1> /root/.vs/cmake/bin/cmake -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="$HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug-WithGreenSDK" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="$HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake" -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" -Dremote_install_dir:PATH="/var/persistent-data/b4mesh"  "/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/CMakeLists.txt";
+1> [CMake] -- [b4mesh] Loading modules [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/cmake/modules] ...
+1> [CMake] -- The CXX compiler identification is GNU 9.3.0
+1> [CMake] -- Detecting CXX compiler ABI info
+1> [CMake] -- Detecting CXX compiler ABI info - done
+1> [CMake] -- Check for working CXX compiler: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/arm-buildroot-linux-uclibcgnueabi-g++ - skipped
+1> [CMake] -- Detecting CXX compile features
+1> [CMake] -- Detecting CXX compile features - done
+1> [CMake] -- [b4mesh] : toolchain is [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake]
+1> [CMake] -- [b4mesh] : CMAKE_BUILD_TYPE is [Debug]
+1> [CMake] -- [toolchain/lazy_detection] : Lazy Green SDK detection ... USING_GREEN_SDK is [ON]
+1> [CMake] -- [toolchain/import.cmake] Importing GreenSDK ...
+1> [CMake] -- [toolchain/import.cmake] custom GreenSDK variable RELOCATED_HOST_DIR=[/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk]...
+1> [CMake] -- [toolchain/import.cmake] CMAKE_CXX_COMPILER=[/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/arm-buildroot-linux-uclibcgnueabi-g++]
+1> [CMake] -- [libdbus-cpp] Loading dependency ...
+1> [CMake] -- Found Boost: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/arm-buildroot-linux-uclibcgnueabi/sysroot/usr/include (found suitable version "1.73.0", minimum required is "1.65.0") found components: system 
+1> [CMake] -- [b4mesh] core_engine/ressources : detecting [dbusxx-xml2cpp] at [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/dbusxx-xml2cpp]
+1> [CMake] -- [b4mesh] core_engine/ressources : output is generated in [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK/sources/core_engine/ressources/generation_output]
+1> [CMake] -- Found Boost: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/arm-buildroot-linux-uclibcgnueabi/sysroot/usr/include (found suitable version "1.73.0", minimum required is "1.65.0") found components: random system 
+1> [CMake] -- Found Boost: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/arm-buildroot-linux-uclibcgnueabi/sysroot/usr/include (found suitable version "1.73.0", minimum required is "1.65.0") found components: system 
+1> [CMake] -- Looking for C++ include pthread.h
+1> [CMake] -- Looking for C++ include pthread.h - found
+1> [CMake] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+1> [CMake] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+1> [CMake] -- Found Threads: TRUE  
+1> [CMake] -- b4mesh : Remote machines IPs set to :
+1> [CMake] -- - 10.181.178.217
+1> [CMake] -- - 10.181.172.130
+1> [CMake] -- - 10.154.134.26
+1> [CMake] -- - 10.154.134.170
+1> [CMake] -- - 10.181.178.210
+1> [CMake] -- b4mesh : remote_install_dir set to : /var/persistent-data/b4mesh
+1> [CMake] -- The C compiler identification is GNU 9.3.0
+1> [CMake] -- Detecting C compiler ABI info
+1> [CMake] -- Detecting C compiler ABI info - done
+1> [CMake] -- Check for working C compiler: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/arm-buildroot-linux-uclibcgnueabi-gcc - skipped
+1> [CMake] -- Detecting C compile features
+1> [CMake] -- Detecting C compile features - done
+1> [CMake] -- b4mesh::live_visualizer ...
+1> [CMake] --  - b4mesh::live_visualizer : refresh rate set to : 3000
+1> [CMake] --  - b4mesh::live_visualizer : (remote) install dir set to : /var/persistent-data/b4mesh/live_visualizer
+1> [CMake] --  - b4mesh::live_visualizer : nodes filestream detected on : [/tmp/blockgraph]
+1> [CMake] -- Configuring done
+1> [CMake] -- Generating done
+1> [CMake] -- Build files have been written to: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK
+1> Variables CMake extraites.
+1> Fichiers sources et en-têtes extraits.
+1> Modèle de code extrait.
+1> Chemins include extraits.
+```
+
+Possible output (build)
 
 ```log
 cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK;/root/.vs/cmake/bin/cmake --build "$HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK"  ;
 
 [1/14] cd /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/sources/core_engine/ressources && /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/dbusxx-xml2cpp /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/sources/core_engine/ressources/consensus.xml --proxy=/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK/sources/core_engine/ressources/generation_output/includes/b4mesh/core_engine/generated/consensus.hpp && /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/dbusxx-xml2cpp /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/sources/core_engine/ressources/state.xml --proxy=/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK/sources/core_engine/ressources/generation_output/includes/b4mesh/core_engine/generated/state.hpp
+generating code for interface net.qolsr.Consensus...
+generating code for interface net.qolsr.Qolyester.State...
+generating code for interface net.qolsr.Qolyester.Interfaces...
+generating code for interface net.qolsr.Qolyester.PeerSignals...
+generating code for interface net.qolsr.Qolyester.PendingInterfaces...
+generating code for interface net.qolsr.Qolyester.Links...
+generating code for interface net.qolsr.Qolyester.Neighbors...
+generating code for interface net.qolsr.Qolyester.MIDs...
+generating code for interface net.qolsr.Qolyester.HNAs...
+generating code for interface net.qolsr.Qolyester.Gates...
+generating code for interface net.qolsr.Qolyester.LocalTopology...
+generating code for interface net.qolsr.Qolyester.GlobalTopology...
+generating code for interface net.qolsr.Qolyester.ReachableNodes...
+generating code for interface net.qolsr.Qolyester.ExcludedMACs...
+generating code for interface net.qolsr.Qolyester.Stations...
+generating code for interface net.qolsr.Qolyester.Associations...
+generating code for interface net.qolsr.Qolyester.VLANs...
+generating code for interface net.qolsr.Qolyester.Log...
+generating code for interface net.qolsr.Qolyester.Parameters...
+[2/14] Building CXX object sources/core_engine/CMakeFiles/b4mesh_coreEngine.dir/sources/consensus.cpp.o
+[3/12] cd /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK && /root/.vs/cmake/bin/cmake --graphviz=/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc/build/dependencies_diagram.dot . && dot -Tpng /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc/build/dependencies_diagram.dot -o /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc/build/dependencies_diagram.png
+-- [b4mesh] Loading modules [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/cmake/modules] ...
+-- [b4mesh] : toolchain is [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake]
+-- [b4mesh] : CMAKE_BUILD_TYPE is [Debug]
+-- [toolchain/lazy_detection] : Lazy Green SDK detection ... USING_GREEN_SDK is [ON]
+-- [toolchain/import.cmake] Importing GreenSDK ...
+-- [toolchain/import.cmake] custom GreenSDK variable RELOCATED_HOST_DIR=[/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk]...
+-- [toolchain/import.cmake] CMAKE_CXX_COMPILER=[/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/arm-buildroot-linux-uclibcgnueabi-g++]
+-- [libdbus-cpp] Loading dependency ...
+-- [b4mesh] core_engine/ressources : detecting [dbusxx-xml2cpp] at [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/bin/dbusxx-xml2cpp]
+-- [b4mesh] core_engine/ressources : output is generated in [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK/sources/core_engine/ressources/generation_output]
+-- Found Boost: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/arm-buildroot-linux-uclibcgnueabi/sysroot/usr/include (found suitable version "1.73.0", minimum required is "1.65.0") found components: random system 
+-- Found Boost: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk/arm-buildroot-linux-uclibcgnueabi/sysroot/usr/include (found suitable version "1.73.0", minimum required is "1.65.0") found components: system 
+-- b4mesh : Remote machines IPs set to :
 # etc ...
 ```
 
