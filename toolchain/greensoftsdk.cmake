@@ -10,7 +10,7 @@ set(greensoftsdk_tarball_path ${FindFile_result})
 
 message(STATUS "[greensoftsdk] ...")
 set(greensoftsdk_expected_sha256sum
-    "0cd474065448cf4c237f168c8566bc76b18f42da3fece6ef02519b7ec955bf0a"
+    "4df49ed8637e3fd1387c8622b0e2cb33adff9c849c2fcf0b3cd4ff33185c4e36"
     CACHE STRING
     "GreenSoftSDK LibDBusC++ : Expected tarball sha256sum result"
 )
@@ -62,7 +62,7 @@ set(greensoftsdk_libdbuscpp_tarball_path ${FindFile_result})
 
 file(SHA256 ${greensoftsdk_libdbuscpp_tarball_path} greensoftsdk_libdbus-cpp_sha256sum)
 set(greensoftsdk_libdbus-cpp_expected_sha256sum
-    "6842e99baf73372ae8d047c3b2d79ca2f5d57f900cb436890a9a8ac19930b411"
+    "4ff9ab1f894b45d3a95705147e16a5565aa9f1859ca4cd20c202e4a9bee68c44"
     CACHE STRING
     "GreenSoftSDK LibDBusC++ : Expected tarball sha256sum result"
 )
