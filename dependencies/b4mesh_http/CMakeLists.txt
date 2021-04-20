@@ -8,7 +8,8 @@ project ("b4mesh_http")
 include(FetchContent)
 
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system date_time thread chrono regex random)
+find_package(Boost REQUIRED COMPONENTS system random)
+#find_package(Boost REQUIRED COMPONENTS system date_time thread chrono regex random)
 add_library(boost_beast INTERFACE)
 target_include_directories(boost_beast INTERFACE
 #	installation non-cloisonnee
@@ -27,6 +28,12 @@ target_link_libraries(${PROJECT_NAME} INTERFACE
 	Boost::system # Boost::asio requirement
 	boost_beast
 )
+add_library(b4mesh::http ALIAS ${PROJECT_NAME})
 
-enable_testing()
-add_subdirectory(tests)
+set(b4mesh_http_BuildTests OFF CACHE INTERNAL "")
+message(STATUS "[b4mesh::http] Build tests is [${b4mesh_http_BuildTests}]")
+
+if (${b4mesh_http_BuildTests})
+	enable_testing()
+	add_subdirectory(tests)
+endif()
