@@ -104,6 +104,8 @@ class B4Mesh
          */ 
         void RegisterTransaction(std::string payload);
 
+        void RetransmitTransactions();
+
          /**
          * Broadcast the transaction to the local group
          */ 
@@ -216,7 +218,10 @@ class B4Mesh
          * from the non-leaders nodes. The leader node will then process this anwsers to 
          * found missing side-chains.
          */
-        void ChildlessBlockTreatment(const std::string& msg_payload, std::string ip);
+        void ProcessChildlessResponse(const std::string& msg_payload, std::string ip);
+        void RegisterChildless(std::string childless, std::string ip);
+        void ChildlessBlockTreatment(std::string childless, std::string ip);
+        void CheckMergeBlockCreation(void);
 
         /**
          * Send a full side-chain to the leader upon a GROUPBRANCH_REQ
@@ -228,6 +233,8 @@ class B4Mesh
          *  after receiving a merge block
          */
         void SyncNode(vector<Transaction> transactions);
+        void StartSyncProcedure(vector<Transaction> transactions);
+        void SendBranchRequest();
 
         /**
          * Updates the missing_block_list. If new block is a missing parent
@@ -305,7 +312,7 @@ class B4Mesh
 
         bool mergeBlock;            //  When mergeBlock is true, GenerateBlock functions creates a merge block 
         bool createBlock;           //  When createBlock is false, a block can't be created.  (Merge Procedure)
-        double lastBlock;           //  The time of the creation of the last block
+        double lastBlock_creation_time; //  The time of the creation of the last block
         std::string groupId;        // GroupId of a group
         std::vector<std::pair<std::string, std::string>> missing_block_list;    // List of missing blocks in the local BG <BlockHash, IpOfNodeWhoHasTheMissingParent>
         std::vector<std::string> missing_childless;     // Hashes of childless block not in the local blockgraph

@@ -15,8 +15,9 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   timer_recurrentTask(io_context,std::chrono::steady_clock::now()),
   timer_childless(io_context,std::chrono::steady_clock::now())
 {
-
+  /* Group Management System Variables Init */
   groupId = string(32,0);
+  /* Blockgraph Protocol Variables Init */
   missing_block_list = std::vector<pair<string, std::string>> ();
   missing_childless = std::vector<std::string> ();
   waiting_list = std::map<std::string, Block>();
@@ -24,7 +25,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	recover_branch = std::multimap<int, std::string> ();
 	mergeBlock = false;
   createBlock = true;
-	lastBlock = 0;
+	lastBlock_creation_time = 0;
 
   /* Variables for the blockchain performances */
   numTxsG = 0;  //Num of txs generated
@@ -67,6 +68,8 @@ void B4Mesh::setCreateBlock (bool cb)
 void B4Mesh::timer_recurrentTask_fct (const boost::system::error_code& /*e*/) 
 {
 	Ask4MissingBlocks();
+  RetransmitTransactions();
+
   timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
@@ -118,7 +121,7 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
         else if (message_type == CHILDLESSBLOCK_REP){
           // Upon reception: Leader execute this functin -
           DEBUG << BOLDYELLOW << " CHILDLESSBLOCK_REP: " << ip << RESET << std::endl;
-          ChildlessBlockTreatment(p.GetPayload(), ip);
+          ProcessChildlessResponse(p.GetPayload(), ip);
         }
         /* ------------ GROUPBRANCH_REQ PACKET ------------------ */
         else if (message_type == GROUPBRANCH_REQ){
@@ -146,8 +149,6 @@ void B4Mesh::ReceivePacket(std::string packet, std::string ip)
 
 // ************** GENERATION DES TRANSACTIONS *****************************
 void B4Mesh::GenerateTransactions(){
-
-
     
     numTxsG += 1;
 
@@ -175,53 +176,69 @@ void B4Mesh::RegisterTransaction(std::string payload){
 void B4Mesh::SendTransaction(Transaction t){
 
 	DEBUG << BOLDCYAN << " sending new transaction packet : " << t << " with hash " << t.GetHash() << RESET << std::endl;
-    string serie = t.Serialize();
-    ApplicationPacket packet(ApplicationPacket::TRANSACTION, serie);
+  string serie = t.Serialize();
+  ApplicationPacket packet(ApplicationPacket::TRANSACTION, serie);
 
-    node_->BroadcastPacket(packet, false);
+  node_->BroadcastPacket(packet, false);
 }
 
 //  ******* TRANSACTION RELATED METHODS **************** */
 void B4Mesh::TransactionsTreatment(Transaction t)
 {
   auto t1 = std::chrono::high_resolution_clock::now();
-    if (!IsTxInMempool(t)){
-    //    DEBUG << "Transaction not in mempool. " << std::endl;
-        if (!blockgraph.IsTxInBG(t)){
-      //      DEBUG << "Transaction not in Blockgraph. " << std::endl;
-            if (IsSpaceInMempool()){
-        //        DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
-                pending_transactions[t.GetHash()] = t;
-			        	// trace purpose
-				        pending_transactions_time[t.GetHash()] = getSeconds();
-            } else { // No space in mempool.
-           //     DEBUG << "Transaction's Mempool is full" << std::endl;
-           //     DEBUG << "Dumping transaction..." << std::endl;
-                lostTrans++;
-            }
-        } else { // Transaction already in blockgraph
-        //    DEBUG << "Transaction already present in Blockgraph\n Dumping transaction ...  " << std::endl;
-            numDumpingTxs++;
-        }
-    } else { // Transaction already in mempool
-      //  DEBUG << "Transaction already present in Memepool\n Dumping transaction ... " << std::endl;
-        numDumpingTxs++;
-    }
-
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-    tx_treatment_time.push_back(time_treatment.count());
-    total_treatment_tx_t += time_treatment;
-
-    // If leader and enough transactions in mempool. Then create block.
-    if(node_->consensus_.AmILeader() == true)
-    {
-      if (TestPendingTxs() == true && createBlock == true)
-      {
-        
-        GenerateBlocks();
+  if (!IsTxInMempool(t)){
+  //    DEBUG << "Transaction not in mempool. " << std::endl;
+      if (!blockgraph.IsTxInBG(t)){
+    //      DEBUG << "Transaction not in Blockgraph. " << std::endl;
+          if (IsSpaceInMempool()){
+      //        DEBUG << "Adding transaction in mempool... (" << t.GetHash() << ")" << std::endl;
+              pending_transactions[t.GetHash()] = t;
+              // trace purpose
+              pending_transactions_time[t.GetHash()] = getSeconds();
+          } else { // No space in mempool.
+          //     DEBUG << "Transaction's Mempool is full" << std::endl;
+          //     DEBUG << "Dumping transaction..." << std::endl;
+              lostTrans++;
+          }
+      } else { // Transaction already in blockgraph
+      //    DEBUG << "Transaction already present in Blockgraph\n Dumping transaction ...  " << std::endl;
+          numDumpingTxs++;
       }
+  } else { // Transaction already in mempool
+    //  DEBUG << "Transaction already present in Memepool\n Dumping transaction ... " << std::endl;
+      numDumpingTxs++;
+  }
+
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  tx_treatment_time.push_back(time_treatment.count());
+  total_treatment_tx_t += time_treatment;
+
+  // If leader and enough transactions in mempool. Then create block.
+  if(node_->consensus_.AmILeader() == true){
+    if (TestPendingTxs() == true && createBlock == true){     
+      GenerateBlocks();
     }
+  }
+}
+
+void B4Mesh::RetransmitTransactions(){
+  // Retransmission of transactions to be sure that old transactions are register
+	if (pending_transactions.size() > 0)
+	{
+		for(auto &mem_i: pending_transactions)
+		{
+		//	Transaction t = mem_i.second;
+			if ( mem_i.second.GetTimestamp() + T_RETRANS < getSeconds() )
+			{
+				DEBUG << YELLOW << "--> Retransmission transation" << RESET << std::endl;
+				numRTxsG ++;
+				SendTransaction(mem_i.second);
+			}
+		}
+	}
+  // For trace purpose
+	visuMemPool << pending_transactions.size() << " " << (float)(pending_transactions.size())/(float)(SIZE_MEMPOOL) << "%" << std::endl;
 }
 
 bool B4Mesh::IsTxInMempool (Transaction t)
@@ -274,7 +291,8 @@ void B4Mesh::BlockTreatment(Block b){
       if (b.IsMergeBlock()){
       //  DEBUG << " BlockTreatment: Block "<< b.GetHash().data() << " is a merge block" << std::endl;
       //  DEBUG << "Starting synchronization process..." << std::endl;
-        SyncNode(b.GetTransactions());
+        //SyncNode(b.GetTransactions());
+        StartSyncProcedure(b.GetTransactions());
         AddBlockToBlockgraph(b);
       } else {
         // The block is not a merge block
@@ -324,6 +342,31 @@ void B4Mesh::BlockTreatment(Block b){
   total_treatment_block_t += time_treatment;
 }
 
+void B4Mesh::StartSyncProcedure(std::vector<Transaction> transactions){
+
+  std::string::size_type n;
+  std::vector<std::string> myChildless = blockgraph.GetChildlessBlockList();
+  std::vector<string>::iterator it;
+
+  DEBUG << "Start Synchronization procedure " << std::endl;
+
+  for (auto &tx : transactions){
+    string tmp = tx.GetPayload();
+    n = tmp.find(" ");
+    int idnode = stoi(tmp.substr(0, n));
+    std::string hash = tmp.substr(n+1);
+
+    it = find(myChildless.begin(), myChildless.end(), hash);
+    if (it == myChildless.end()){
+      RegisterChildless(hash, node_->consensus_.GetIPFromId(idnode));
+    }
+    ChildlessBlockTreatment(hash, node_->consensus_.GetIPFromId(idnode));
+  }
+  SendBranchRequest();
+  
+}
+
+/*
 void B4Mesh::SyncNode(vector<Transaction> transactions){
   std::string::size_type n;
   std::vector<std::string> myChildless = blockgraph.GetChildlessBlockList();
@@ -376,6 +419,12 @@ void B4Mesh::SyncNode(vector<Transaction> transactions){
     UpdateMissingList(missing_b, node_->consensus_.GetIPFromId(idnode));
   }
 
+  SendBranchRequest();
+}
+*/
+
+void B4Mesh::SendBranchRequest(){
+
   group_branch_hdr_t branch_req;
   branch_req.msg_type = GROUPBRANCH_REQ;
   std::string serie_branch_b_h = "";
@@ -408,8 +457,8 @@ void B4Mesh::SyncNode(vector<Transaction> transactions){
       cntt:;
     }
   }
-}
 
+}
 
 std::vector<std::string> B4Mesh::GetParentsNotInWL(std::vector<std::string> parents){
 
@@ -470,15 +519,13 @@ void B4Mesh::EraseMissingBlock(string b_hash){
   for (auto pair_m_b = missing_block_list.begin(); pair_m_b != missing_block_list.end(); pair_m_b++){
     if(pair_m_b->first == b_hash){
 
-	  //trace purpose
-	  total_missingBlockTime += getSeconds() - missing_list_time[pair_m_b->first];
-	  count_missingBlock ++;
-	  missing_list_time.erase(pair_m_b->first);
-	  DEBUG << " remove from missing list " << pair_m_b->first << " at " << getSeconds() << " cumul " << total_missingBlockTime << " count "<< count_missingBlock << std::endl;
-
+      //trace purpose
+      total_missingBlockTime += getSeconds() - missing_list_time[pair_m_b->first];
+      count_missingBlock ++;
+      missing_list_time.erase(pair_m_b->first);
+      DEBUG << " remove from missing list " << pair_m_b->first << " at " << getSeconds() << " cumul " << total_missingBlockTime << " count "<< count_missingBlock << std::endl;
       DEBUG << " EraseMissingBlock: Erasing block " << pair_m_b->first << " from missing_block_list"<< std::endl;
       missing_block_list.erase(pair_m_b);
-
       return;
     }
   }
@@ -511,8 +558,7 @@ void B4Mesh::UpdateMissingList(vector<string> unknown_p, std::string ip){
 
 void B4Mesh::UpdateWaitingList(){
 	bool addblock = true; 
-	while (addblock)
-	{ 
+	while (addblock){ 
 		addblock = false;
 		for (auto it = waiting_list.cbegin(); it != waiting_list.cend();){
 			DEBUG << "Update waiting list: starting with block: " << it->first.data() << std::endl;
@@ -527,12 +573,11 @@ void B4Mesh::UpdateWaitingList(){
 				total_waitingBlockTime += getSeconds() - waiting_list_time[it->first];
         count_waitingBlock ++;
         waiting_list_time.erase(it->first);
-				
 				DEBUG << "Update waiting list: All parents are present -> Adding block."<< std::endl;
 				AddBlockToBlockgraph(it->second);
+
 				waiting_list.erase(it->first);
 				addblock = true;
-
 				break;
 			} else {
 				DEBUG << "Not all parents from this block are present. keeping the block in the list" << std::endl;
@@ -555,12 +600,12 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
   }
 
   // remove the entries when a full branch is recovered
-  for (auto it2 = recover_branch.begin(); it2 != recover_branch.end();){
-    if (it2->second == b.GetHash()){
-      it2 = recover_branch.erase(it2);
+  for (auto it = recover_branch.begin(); it != recover_branch.end();){
+    if (it->second == b.GetHash()){
+      it = recover_branch.erase(it);
     }
     else {
-      ++it2;
+      ++it;
     }
   }
 
@@ -574,104 +619,55 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
   UpdatingMempool(b.GetTransactions());
   DEBUG << " AddBlockToBlockgraph: Adding the block "<< b.GetHash().data() << " to the blockgraph" << std::endl;
   blockgraph.AddBlock(b);
-
   // For traces propuses
   CreateGraph(b);
-
   // For visualisation
   AddBlockToVisuFile(b);
 }
 
-
-void B4Mesh::AddBlockToVisuFile(Block b){
-
-    json j;
-    j["node"]["hash"] =  stoi(b.GetHash());
-    j["node"]["groupId"] = stoi(b.GetGroupId());
-
-    std::vector<std::string> parents_of_block = b.GetParents();
-    std::vector<int> parents_of_block_prettify;
-
-    for (auto &p : parents_of_block){
-      if (p == "01111111111111111111111111111111"){
-          parents_of_block_prettify.push_back(0);
-      } else {
-          parents_of_block_prettify.push_back(stoi(p));
-      }
-    }
-
-    j["node"]["parent"] = parents_of_block_prettify;
-
-    visuBlock << j << std::endl;
-
-}
-
-
 void B4Mesh::UpdatingMempool (vector<Transaction> transactions)
 {
     //DumpMempool();
-
   for (auto &t : transactions){
-      if (pending_transactions.count(t.GetHash()) > 0){
-          DEBUG << " UpdatingMempool: Transaction " << t.GetHash() << " founded" << std::endl;
-          DEBUG << " UpdatingMempool: Erasing transaction from Mempool... " << std::endl;
-          pending_transactions.erase(t.GetHash());
+    if (pending_transactions.count(t.GetHash()) > 0){
+      DEBUG << " UpdatingMempool: Transaction " << t.GetHash() << " founded" << std::endl;
+      DEBUG << " UpdatingMempool: Erasing transaction from Mempool... " << std::endl;
+      pending_transactions.erase(t.GetHash());
 
-    //Trace purpose
-    total_pendingTxTime += getSeconds() - pending_transactions_time[t.GetHash()];
+      //Trace purpose
+      total_pendingTxTime += getSeconds() - pending_transactions_time[t.GetHash()];
       count_pendingTx ++;
       pending_transactions_time.erase(t.GetHash());
-      }
-      else {
-          DEBUG << " UpdatingMempool:  I don't know this transaction " << t.GetHash() << std::endl;
-      }
+    }
+    else {
+      DEBUG << " UpdatingMempool:  I don't know this transaction " << t.GetHash() << std::endl;
+    }
   }
 }
 
 //***************REQUEST_BLOCK METHODS****************************
 void B4Mesh::Ask4MissingBlocks()
 {
-    if (missing_block_list.size() > 0)
-    {
-        DEBUG << " Ask4MissingBlocks: List of missing parents" << std::endl;
-        for (auto &a : missing_block_list){
-            DEBUG << " block: " << a.first << std::endl;
+  if (missing_block_list.size() > 0)
+  {
+    DEBUG << " Ask4MissingBlocks: List of missing parents" << std::endl;
+    for (auto &pair_m_b : missing_block_list){
+      if (!IsBlockInWaitingList(pair_m_b.first))
+      {
+        DEBUG << "Ask4MissingBlocks: asking for block: " << pair_m_b.first <<" to node: " << node_->consensus_.GetIdFromIP(pair_m_b.second) << std::endl;
+        string serie = pair_m_b.first;
+        ApplicationPacket packet(ApplicationPacket::REQUEST_BLOCK, serie);
+        if ( pair_m_b.second == "-1")
+        {
+          node_->BroadcastPacket(packet, false);
+        } else {
+          node_->SendPacket(pair_m_b.second, packet, false);
         }
-        for (auto &pair_m_b : missing_block_list){
-			if (!IsBlockInWaitingList(pair_m_b.first))
-			{
-				DEBUG << "Ask4MissingBlocks: asking for block: " << pair_m_b.first <<" to node: " << node_->consensus_.GetIdFromIP(pair_m_b.second) << std::endl;
-				string serie = pair_m_b.first;
-				ApplicationPacket packet(ApplicationPacket::REQUEST_BLOCK, serie);
-				if ( pair_m_b.second == "-1")
-				{
-					node_->BroadcastPacket(packet, false);
-				} else {
-					node_->SendPacket(pair_m_b.second, packet, false);
-				}
-			}
-        }
-    } else {
-        DEBUG << " Ask4MissingBlocks: No blocks in waiting list" << std::endl;
+      }
     }
-
-    // retransmission of transaction to be sure that old transaction are register 
-	if (pending_transactions.size() > 0)
-	{
-		for(auto &mem_i: pending_transactions)
-		{
-		//	Transaction t = mem_i.second;
-			if ( mem_i.second.GetTimestamp() + T_RETRANS < getSeconds() )
-			{
-				DEBUG << YELLOW << "--> Retransmission transation" << RESET << std::endl;
-				numRTxsG ++;
-				SendTransaction(mem_i.second);
-			}
-		}
-	}
-
-	// For trace purpose
-	visuMemPool << pending_transactions.size() << " " << (float)(pending_transactions.size())/(float)(SIZE_MEMPOOL) << "%" << std::endl;
+  } else {
+    DEBUG << " Ask4MissingBlocks: No blocks in waiting list" << std::endl;
+  }
 }
 
 void B4Mesh::SendBlockto(string hash_p, std::string destAddr){
@@ -690,7 +686,6 @@ void B4Mesh::SendBlockto(string hash_p, std::string destAddr){
     DEBUG << " SendBlockto: Block " << hash_p << " not founded!" << std::endl;
     return;
   }
-
 }
 
 //*************CHANGE_TOPO METHODS***********************************
@@ -725,7 +720,7 @@ void B4Mesh::Ask4ChildlessBlocks(){
 	  node_->SendPacket(dest.second, packet, false);
   }
   /* new code */
-  timer_childless.expires_from_now(std::chrono::seconds(3));
+  timer_childless.expires_from_now(std::chrono::seconds(5));
   timer_childless.async_wait(boost::bind(&B4Mesh::timer_childless_fct, this, boost::asio::placeholders::error));
 }
 
@@ -766,14 +761,11 @@ void B4Mesh::SendChildlessBlocks(std::string destAddr){
   }
 }
 
-void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string senderAddr){
+void B4Mesh::ProcessChildlessResponse(const std::string& msg_payload, std::string senderAddr){
   // Only executed by the leader
-
-  std::int32_t idSender = node_->consensus_.GetIdFromIP(senderAddr);
   std::string deserie = msg_payload;
-  std::string tmp_hash = "";
-  std::vector<std::string> myChildless = blockgraph.GetChildlessBlockList();
   std::vector<std::string> sender_childless = std::vector<std::string> ();
+  std::string tmp_hash;
 
   deserie = deserie.substr(sizeof(childlessblock_rep_hdr_t), deserie.size());
 
@@ -784,104 +776,114 @@ void B4Mesh::ChildlessBlockTreatment(const std::string& msg_payload, std::string
     deserie = deserie.substr(32, deserie.size());
   }
 
-  //Register node answer
   for (auto &cb : sender_childless){
-    // The sender node has already at least two childless block registered 
-    if (recover_branch.count(idSender) > 1){
-      //Getting the hashes matching the sender node key
-      auto range = recover_branch.equal_range(idSender);
-      bool findHash = false;
-      for (auto i = range.first; i != range.second; ++i){
-        if (i->second == cb){
-          // This chidless block has already been registered
-          findHash = true;
-        }
-      }
-      if (findHash == true){
-        DEBUG << " Childless hash: " << cb << " has already been registered" << std::endl;
-        continue;
-      } else {
-        DEBUG << " Childless hash: " << cb << " is now registered" << std::endl;
-        recover_branch.insert(pair<int, string> (idSender, cb));
-      }
-    } else {
-      // the node has one or none chidlless block registered
-      auto search = recover_branch.find(idSender);
-      if (search != recover_branch.end()){
-        if (search->second == cb){
-          continue;
-        }
-      } else {
-        DEBUG << " Chidlless hash: " << cb << " is now registered" << endl;
-        recover_branch.insert(pair<int, string> (idSender, cb));
+    RegisterChildless(cb, senderAddr);
+    ChildlessBlockTreatment(cb, senderAddr);
+  }
+
+  // List of responses gqthered by the leader node so far
+  DEBUG << "Current leader node list of responses" << endl;
+  for (auto &node : recover_branch){
+    DEBUG << "ProcessChildlessResponse: Node: " << node.first << " has childless block: " << node.second << std::endl;
+  } 
+  CheckMergeBlockCreation();
+
+}
+
+void B4Mesh::RegisterChildless(std::string childless_hash, std::string senderAddr){
+  // Register childless block
+
+  std::int32_t idSender = node_->consensus_.GetIdFromIP(senderAddr);
+
+  DEBUG << "RegisterChildless: Register childless block: " << childless_hash << " from node: " << senderAddr << std::endl;
+  // The sender node has already at least one childless block registered
+  if (recover_branch.count(idSender) > 0){
+    //Getting the hashes matching the sender node key
+    auto range = recover_branch.equal_range(idSender);
+    bool findHash = false;
+    for (auto i = range.first; i != range.second; ++i){
+      if (i->second == childless_hash){
+        // This chidless block has already been registered
+        findHash = true;
       }
     }
-  }
-
-  DEBUG << " Current list of responses: " << std::endl;
-  for (auto &node : recover_branch){
-    DEBUG << " Node: " << node.first << " has childless block: " << node.second << std::endl;
-  }
-  
-  // Analyze chidless block hash
-  for (auto &cb : sender_childless){
-
-    std::vector<std::string>::iterator it;
-    it = find(missing_childless.begin(), missing_childless.end(), cb);
-    if (it != missing_childless.end()){
-      //If this childless block is already registered, then check next one
-      DEBUG << " ChildlessBlockTreatment: Childless block alredy registered" << std::endl;
-      continue;
+    if (findHash == true){
+      DEBUG << " Childless hash: " << childless_hash << " has already been registered" << std::endl;
+      return;
     } else {
-      if (find(myChildless.begin(), myChildless.end(), cb) != myChildless.end()){
-        DEBUG << "This Childless block: " << cb << " is also a childless block of mine" << std::endl;
-        continue;
-      } else {
-        // If childless block is not a childless block of mine
-        DEBUG << "This Childless block: " << cb << " is not a childless block of mine" << std::endl;
-        if (blockgraph.HasBlock(cb)){
-          DEBUG << " ChildlessBlockTreatment: Childless block is present in local blockgraph...Ignoring childless block" << std::endl;
-          continue;
-        } else {
-          DEBUG << " ChildlessBlockTreatment: Childless block is not present in blockgraph...Checking if CB is present in missing_block_list" << std::endl;
-          if (IsBlockInWaitingList(cb)){
-            DEBUG << " ChildlessBlockTreatment: Childless block is already present in the waiting_list...Ignoring childless block" << std::endl;
-            continue;
-          } else {
-            DEBUG << " ChildlessBlockTreatment: Childless block is not present in waiting list...Checking if CB is present in missing_block_list" << std::endl;
-            if (IsBlockInMissingList(cb)){
-              DEBUG << " ChildlessBlockTreatment: Childless block already in missing_block_list. Ignoring childless block" << std::endl;
-              continue;
-            } else {
-              DEBUG << " ChildlessBlockTreatment: Block not in missing_block_list. Adding block to missig_block_list " << std::endl;
-              DEBUG << " ChildlessBlockTreatment: Asking for this block " << cb << " branch "  << std::endl;
-              // Adding childless block hash in the list of missing block since we now know of it existance
-              missing_block_list.push_back(make_pair(cb, senderAddr));
-              // adding missing childless block to the list of childless block to recover
-              missing_childless.push_back(cb);
+      DEBUG << " Childless hash: " << childless_hash << " is now registered" << std::endl;
+      recover_branch.insert(pair<int, string> (idSender, childless_hash));
+    }
+  } else {
+    DEBUG << " Childless hash: " << childless_hash << " is now registered" << std::endl;
+    recover_branch.insert(pair<int, string> (idSender, childless_hash));
+  }
 
-			  // Trace purpose
-			  DEBUG << "add missing list " << cb << " at " << getSeconds() << std::endl;
-	  		  missing_list_time[cb] = getSeconds();
-            }
+}
+
+void B4Mesh::ChildlessBlockTreatment(std::string childless_hash, std::string senderAddr){
+
+  std::vector<std::string> myChildless = blockgraph.GetChildlessBlockList();
+  std::vector<std::string>::iterator it;
+
+  DEBUG << "ChildlessBlockTreatment" << std::endl;
+  
+  it = find(missing_childless.begin(), missing_childless.end(), childless_hash); 
+  if (it != missing_childless.end()){
+    //If this childless block is already registered, then exit
+    DEBUG << " ChildlessBlockTreatment: Childless block alredy registered" << std::endl;
+    return;
+  } else {
+    if (find(myChildless.begin(), myChildless.end(), childless_hash) != myChildless.end()){
+      DEBUG << "This Childless block: " << childless_hash << " is also a childless block of mine" << std::endl;
+      return;
+    } else {
+      // If childless block is not a childless block of mine
+      DEBUG << "This Childless block: " << childless_hash << " is not a childless block of mine" << std::endl;
+      if (blockgraph.HasBlock(childless_hash)){
+        DEBUG << " ChildlessBlockTreatment: Childless block is present in local blockgraph...Ignoring childless block" << std::endl;
+        return;
+      } else {
+        DEBUG << " ChildlessBlockTreatment: Childless block is not present in blockgraph...Checking if CB is present in waiting list" << std::endl;
+        if (IsBlockInWaitingList(childless_hash)){
+          DEBUG << " ChildlessBlockTreatment: Childless block is already present in the waiting_list...Ignoring childless block" << std::endl;
+          return;
+        } else {
+          DEBUG << " ChildlessBlockTreatment: Childless block is not present in waiting list...Checking if CB is present in missing_block_list" << std::endl;
+          if (IsBlockInMissingList(childless_hash)){
+            DEBUG << " ChildlessBlockTreatment: Childless block already in missing_block_list. Ignoring childless block" << std::endl;
+            return;
+          } else {
+            DEBUG << " ChildlessBlockTreatment: Block not in missing_block_list. Adding block to missig_block_list " << std::endl;
+            DEBUG << " ChildlessBlockTreatment: Asking for this block " << childless_hash << " branch "  << std::endl;
+            // Adding childless block hash in the list of missing block since we now know of it existance
+            missing_block_list.push_back(make_pair(childless_hash, senderAddr));
+            // adding missing childless block to the list of childless block to recover
+            missing_childless.push_back(childless_hash);
+            // Trace purpose
+            DEBUG << "add missing list " << childless_hash << " at " << getSeconds() << std::endl;
+            missing_list_time[childless_hash] = getSeconds();
           }
         }
       }
     }
   }
 
-  int i = 0;
+}
+
+void B4Mesh::CheckMergeBlockCreation(){
+  int ans = 0;
   for (auto &n_node : node_->GetnewNodes()){
     auto search = recover_branch.find(n_node.first);
     if (search == recover_branch.end()){
       DEBUG << "Answer of node: " << n_node.first << " not received yet" << std::endl;
-      i++;
+      ans++;
     }
   }
-  if (i == 0 && !createBlock){
+  if (ans == 0 && !createBlock){
     // Create Merge BLOCK
-    mergeBlock = true;
     DEBUG << "A merge block can be created now." << std::endl;
+    mergeBlock = true;
     createBlock = true;
 
     GenerateBlocks();
@@ -937,7 +939,7 @@ void B4Mesh::SendBranch4Sync(const std::string& msg_payload, std::string destAdd
 bool B4Mesh::TestPendingTxs(){
     // Only leader execute this function
 
-	if (getSeconds() - lastBlock > SAFETIME){
+	if (getSeconds() - lastBlock_creation_time > SAFETIME){
 		if (pending_transactions.size() > MIN_SIZE_BLOCK){
 			DEBUG << YELLOW << " TestPendingTxs: Enough txs to create a block." << std::endl;
 			return true;
@@ -1046,9 +1048,11 @@ void B4Mesh::GenerateBlocks(){
 	}
 
  // DEBUG << " GenerateBlock: Parents of new block are: " << std::endl;
+  /*
   for (auto &p : p_block){
   //  DEBUG << " GenerateBlock: Block: " << p << std::endl;
   }
+  */
 
 	block.SetParents(p_block);
 
@@ -1059,7 +1063,7 @@ void B4Mesh::GenerateBlocks(){
 	block.SetIndex(index+1);
 	block.SetTimestamp(getSeconds());
 
-	lastBlock = getSeconds();
+	lastBlock_creation_time = getSeconds();
 
 //	DEBUG << " Block size is:   " << block.GetSize() <<  std::endl;
 	SendBlockToConsensus(block);
@@ -1110,6 +1114,29 @@ int B4Mesh::SizeMempoolBytes(void){
     ret += t.second.GetSize();
     }
     return ret;
+}
+
+void B4Mesh::AddBlockToVisuFile(Block b){
+
+    json j;
+    j["node"]["hash"] =  stoi(b.GetHash());
+    j["node"]["groupId"] = stoi(b.GetGroupId());
+
+    std::vector<std::string> parents_of_block = b.GetParents();
+    std::vector<int> parents_of_block_prettify;
+
+    for (auto &p : parents_of_block){
+      if (p == "01111111111111111111111111111111"){
+          parents_of_block_prettify.push_back(0);
+      } else {
+          parents_of_block_prettify.push_back(stoi(p));
+      }
+    }
+
+    j["node"]["parent"] = parents_of_block_prettify;
+
+    visuBlock << j << std::endl;
+
 }
 
 void B4Mesh::GenerateResults()
@@ -1218,7 +1245,6 @@ void B4Mesh::GenerateResults()
 	char filename3[50];
 	sprintf(filename3, "block_creation_time-%d.txt", node_->consensus_.GetId());
 	output_file3.open(filename3, ios::out);
-	output_file3 << "#block_creation_time" << " " << "with: " << SIZE_BLOCK << std::endl;
 	for(auto &it : block_creation_time)
     {
       output_file3 << it << std::endl; 
@@ -1230,7 +1256,6 @@ void B4Mesh::GenerateResults()
 	char filename4[50];
 	sprintf(filename4, "block_treatment_time-%d.txt", node_->consensus_.GetId());
 	output_file4.open(filename4, ios::out);
-	output_file4 << "#block_treatment_time" << " " << "with: " << SIZE_BLOCK << std::endl;
 	for(auto &it : block_treatment_time)
     {
       output_file4 << it << std::endl; 
@@ -1242,7 +1267,6 @@ void B4Mesh::GenerateResults()
 	char filename5[50];
 	sprintf(filename5, "tx_treatment_time-%d.txt", node_->consensus_.GetId());
 	output_file5.open(filename5, ios::out);
-	output_file5 << "#tx_treatment_time" << std::endl;
 	for(auto &it : tx_treatment_time)
     {
       output_file5 << it << std::endl; 
