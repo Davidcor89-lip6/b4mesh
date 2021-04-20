@@ -40,12 +40,16 @@ find_package(Boost 1.65.0 REQUIRED
 ## nlohmann_json::nlohmann_json)
 include(${CMAKE_SOURCE_DIR}/cmake/modules/dependencies/fetch_nlohmann_json.cmake)
 fetch_nlohmann_json()
+if (NOT TARGET DBusCXX_asio_integration)
+    include(${CMAKE_SOURCE_DIR}/cmake/modules/dependencies/libdbus-cpp-asio-integration.cmake)
+endif()
 
 add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::random
     Boost::system
     nlohmann_json::nlohmann_json
     DBusCXX
+    #DBusCXX_asio_integration
     ${PROJECT_NAME}::utils
     ${PROJECT_NAME}::core_engine::generated
 )
@@ -59,6 +63,7 @@ target_link_libraries(${PROJECT_NAME}_coreEngine
     PUBLIC
     # because of useless .cpp files, we need to push extra stuffs into PUBLIC exposure
         DBusCXX
+        #DBusCXX_asio_integration
         ${PROJECT_NAME}::core_engine::generated
 )
 add_library(${PROJECT_NAME}::core_engine ALIAS ${PROJECT_NAME}_coreEngine)

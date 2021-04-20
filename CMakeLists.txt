@@ -48,6 +48,7 @@ endif()
 ### Build : dependencies
 
 include(dependencies/libdbus-cpp)
+include(dependencies/libdbus-cpp-asio-integration)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/b4mesh_http)
 
 set(CMAKE_CXX_STANDARD 17) # 20

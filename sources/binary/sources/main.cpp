@@ -15,11 +15,7 @@ using boost::asio::ip::tcp;
 #include <b4mesh/core_engine/node.hpp>
 #include <b4mesh/core_engine/configs.hpp>
 #include <b4mesh/utils/utils.hpp>
-
-
 #include <b4mesh/http/endpoint.hpp>
-
-
 
 int main(int argc, char* argv[])
 {
