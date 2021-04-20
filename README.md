@@ -66,6 +66,8 @@ mkdir /path/to/build
 cd /path/to/build
 cmake /path/to/sources
 cmake --target greensoftsdk /path/to/build
+- *Wait quite a long time ...*  
+  *(Takes >1 hour using a I5-8250U CPU and 8 Go RAM)*
 ```
 
 Example output, using an external `Docker` container *(Ubuntu 18.04 LTS)* as build target,  
@@ -156,7 +158,6 @@ If you are using Microsoft Visual Studio :
 
 - Select `Linux-GCC-Debug-WithGreenSDK`
 - Press F7 or Build > Build all
-- *Wait quite a long time ...*
 
 Possible output (cache generation) :
 
