@@ -29,6 +29,7 @@ add_dependencies(${PROJECT_NAME}_binary
     ${PROJECT_NAME}::utils
     Boost::system
     Threads::Threads
+    b4mesh_http
 )
 target_link_libraries(${PROJECT_NAME}_binary
     PRIVATE
@@ -36,6 +37,7 @@ target_link_libraries(${PROJECT_NAME}_binary
         ${PROJECT_NAME}::utils
         Boost::system
         Threads::Threads
+        b4mesh_http
 )
 add_executable(${PROJECT_NAME}::binary ALIAS ${PROJECT_NAME}_binary)
 

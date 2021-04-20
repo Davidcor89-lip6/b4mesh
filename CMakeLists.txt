@@ -45,7 +45,10 @@ else ()
     return() # only target allowed is toolchain generation
 endif()
 
+### Build : dependencies
+
 include(dependencies/libdbus-cpp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/b4mesh_http)
 
 set(CMAKE_CXX_STANDARD 17) # 20
 set(CMAKE_CXX_STANDARD_REQUIRED True)

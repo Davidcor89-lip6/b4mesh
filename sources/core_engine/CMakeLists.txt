@@ -37,10 +37,14 @@ find_package(Boost 1.65.0 REQUIRED
         random
         system
 )
+## nlohmann_json::nlohmann_json)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/dependencies/fetch_nlohmann_json.cmake)
+fetch_nlohmann_json()
 
 add_dependencies(${PROJECT_NAME}_coreEngine
     Boost::random
     Boost::system
+    nlohmann_json::nlohmann_json
     DBusCXX
     ${PROJECT_NAME}::utils
     ${PROJECT_NAME}::core_engine::generated
@@ -49,6 +53,7 @@ target_link_libraries(${PROJECT_NAME}_coreEngine
     PRIVATE
         Boost::random
         Boost::system
+        nlohmann_json::nlohmann_json
         ${PROJECT_NAME}::utils
         ${PROJECT_NAME}::core_engine::generated
     PUBLIC
