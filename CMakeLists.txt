@@ -91,29 +91,20 @@ set(remote_install_dir "NOT_DEFINED" CACHE PATH "deployement : remote install di
 if (remote_install_dir MATCHES "NOT_DEFINED")
     message(FATAL_ERROR "`remote_install_dir` is a mandatory parameter")
 endif()
-include(${CMAKE_SOURCE_DIR}/cmake_modules/utility.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/utility.cmake)
 unquote_string(${remote_install_dir} remote_install_dir)
 
 message(STATUS "${PROJECT_NAME} : remote_install_dir set to : ${remote_install_dir}")
 
-include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/remote_deploy.cmake)
 
 ## remote FS initialization
-# install(CODE "MESSAGE(\"Initializing remote directories...\")")
-install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
-# install(CODE "initialize_remote_FS(
-#                 DESTINATIONS \"${remote_machines_IP}\"
-#                 PATH
-#                     ${remote_install_dir}
-#                 SSHPASS_USER    b4meshroot
-#                 SSH_USER        default
-#                 ROOT_PASSWORD   b4meshroot
-#             )"
-# )
+install(CODE "MESSAGE(\"[deployment] Initializing remote directories...\")")
+install(CODE "include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/remote_deploy.cmake)")
 
 ## nginx
 # - /add_transaction
-install(CODE "MESSAGE(\"Deploying b4mesh (nginx endpoints)...\")")
+install(CODE "MESSAGE(\"[deployment] Deploying b4mesh (nginx endpoints)...\")")
 install(CODE "send_to_remote_machines(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
