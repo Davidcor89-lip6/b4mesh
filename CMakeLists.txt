@@ -19,16 +19,17 @@ enable_testing()
 ## Documentation
 ### Dependencies diagram generation
 
-find_program(DOT_EXE NAME dot)
-if (NOT ${DOT_EXE})
+find_program(dot NAME DOT_EXE)
+if (NOT EXISTS ${DOT_EXE})
+    message(STATUS "[${PROJECT_NAME}] : program [dot] not found. Install dot/graphviz package to enable [${PROJECT_NAME}_generates_cmake_dependencies_diagram] target")
+else()
+    message(STATUS "[${PROJECT_NAME}] : program [dot] detected at ${DOT_EXE}. Generating [${PROJECT_NAME}_generates_cmake_dependencies_diagram] target")
     set(DependenciesDiagramNameNoExt ${CMAKE_CURRENT_SOURCE_DIR}/doc/build/dependencies_diagram)
     add_custom_target(${PROJECT_NAME}_generates_cmake_dependencies_diagram ALL
         COMMAND ${CMAKE_COMMAND} "--graphviz=${DependenciesDiagramNameNoExt}.dot" .
-        COMMAND dot -Tpng ${DependenciesDiagramNameNoExt}.dot -o ${DependenciesDiagramNameNoExt}.png
+        COMMAND ${DOT_EXE} -Tpng ${DependenciesDiagramNameNoExt}.dot -o ${DependenciesDiagramNameNoExt}.png
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
-else()
-    message(STATUS "[${PROJECT_NAME}] : Info : program [dot] not found. Install dot to enable [${PROJECT_NAME}_generates_cmake_dependencies_diagram] target")
 endif()
 
 ## Build
