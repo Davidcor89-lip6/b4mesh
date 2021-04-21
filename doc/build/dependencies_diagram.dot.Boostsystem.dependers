@@ -3,18 +3,22 @@ node [
   fontsize = "12"
 ];
     "node1" [ label = "Boost::system", shape = septagon ];
-    "node7" [ label = "b4mesh_utils\n(b4mesh::utils)", shape = pentagon ];
-    "node7" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
-    "node3" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
-    "node3" -> "node7" [ style = dotted ] // b4mesh_coreEngine -> b4mesh_utils
+    "node11" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
+    "node11" -> "node1" [ style = dashed ] // b4mesh_http -> Boost::system
     "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
-    "node0" -> "node3" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
+    "node0" -> "node11" [ style = dotted ] // b4mesh_binary -> b4mesh_http
+    "node8" [ label = "b4mesh_utils\n(b4mesh::utils)", shape = pentagon ];
+    "node8" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
+    "node4" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
+    "node4" -> "node8" [ style = dotted ] // b4mesh_coreEngine -> b4mesh_utils
     "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
-    "node0" -> "node7" [ style = dotted ] // b4mesh_binary -> b4mesh_utils
-    "node3" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
-    "node3" -> "node1" [ style = dotted ] // b4mesh_coreEngine -> Boost::system
+    "node0" -> "node4" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
     "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
-    "node0" -> "node3" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
+    "node0" -> "node8" [ style = dotted ] // b4mesh_binary -> b4mesh_utils
+    "node4" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
+    "node4" -> "node1" [ style = dotted ] // b4mesh_coreEngine -> Boost::system
+    "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
+    "node0" -> "node4" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
     "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
     "node0" -> "node1" [ style = dotted ] // b4mesh_binary -> Boost::system
 }

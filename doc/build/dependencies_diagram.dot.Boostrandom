@@ -2,5 +2,5 @@ digraph "Boost::random" {
 node [
   fontsize = "12"
 ];
-    "node4" [ label = "Boost::random", shape = septagon ];
+    "node5" [ label = "Boost::random", shape = septagon ];
 }

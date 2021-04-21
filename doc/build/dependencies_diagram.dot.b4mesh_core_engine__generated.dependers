@@ -2,9 +2,9 @@ digraph "b4mesh_core_engine__generated" {
 node [
   fontsize = "12"
 ];
-    "node6" [ label = "b4mesh_core_engine__generated\n(b4mesh::core_engine::generated)", shape = pentagon ];
-    "node3" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
-    "node3" -> "node6"  // b4mesh_coreEngine -> b4mesh_core_engine__generated
+    "node7" [ label = "b4mesh_core_engine__generated\n(b4mesh::core_engine::generated)", shape = pentagon ];
+    "node4" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
+    "node4" -> "node7"  // b4mesh_coreEngine -> b4mesh_core_engine__generated
     "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
-    "node0" -> "node3" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
+    "node0" -> "node4" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
 }

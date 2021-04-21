@@ -1,0 +1,8 @@
+digraph "b4mesh_http" {
+node [
+  fontsize = "12"
+];
+    "node11" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
+    "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
+    "node0" -> "node11" [ style = dotted ] // b4mesh_binary -> b4mesh_http
+}

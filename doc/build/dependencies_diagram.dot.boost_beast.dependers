@@ -1,0 +1,10 @@
+digraph "boost_beast" {
+node [
+  fontsize = "12"
+];
+    "node12" [ label = "boost_beast", shape = pentagon ];
+    "node11" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
+    "node11" -> "node12" [ style = dashed ] // b4mesh_http -> boost_beast
+    "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
+    "node0" -> "node11" [ style = dotted ] // b4mesh_binary -> b4mesh_http
+}

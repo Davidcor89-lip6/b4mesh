@@ -1,0 +1,8 @@
+digraph "DBusCXX_asio_integration" {
+node [
+  fontsize = "12"
+];
+    "node6" [ label = "DBusCXX_asio_integration", shape = doubleoctagon ];
+    "node2" [ label = "DBusCXX", shape = doubleoctagon ];
+    "node6" -> "node2"  // DBusCXX_asio_integration -> DBusCXX
+}

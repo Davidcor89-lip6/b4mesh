@@ -25,21 +25,33 @@ subgraph clusterLegend {
     "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
     "node1" [ label = "Boost::system", shape = septagon ];
     "node0" -> "node1" [ style = dotted ] // b4mesh_binary -> Boost::system
-    "node2" [ label = "Threads::Threads", shape = pentagon ];
-    "node0" -> "node2" [ style = dotted ] // b4mesh_binary -> Threads::Threads
-    "node3" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
-    "node4" [ label = "Boost::random", shape = septagon ];
-    "node3" -> "node4" [ style = dotted ] // b4mesh_coreEngine -> Boost::random
-    "node3" -> "node1" [ style = dotted ] // b4mesh_coreEngine -> Boost::system
-    "node5" [ label = "DBusCXX", shape = doubleoctagon ];
-    "node3" -> "node5"  // b4mesh_coreEngine -> DBusCXX
-    "node6" [ label = "b4mesh_core_engine__generated\n(b4mesh::core_engine::generated)", shape = pentagon ];
-    "node3" -> "node6"  // b4mesh_coreEngine -> b4mesh_core_engine__generated
-    "node7" [ label = "b4mesh_utils\n(b4mesh::utils)", shape = pentagon ];
-    "node7" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
-    "node8" [ label = "INTERFACE", shape = septagon ];
-    "node7" -> "node8"  // b4mesh_utils -> INTERFACE
-    "node3" -> "node7" [ style = dotted ] // b4mesh_coreEngine -> b4mesh_utils
-    "node0" -> "node3" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
-    "node0" -> "node7" [ style = dotted ] // b4mesh_binary -> b4mesh_utils
+    "node2" [ label = "DBusCXX", shape = doubleoctagon ];
+    "node0" -> "node2" [ style = dotted ] // b4mesh_binary -> DBusCXX
+    "node3" [ label = "Threads::Threads", shape = pentagon ];
+    "node0" -> "node3" [ style = dotted ] // b4mesh_binary -> Threads::Threads
+    "node4" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
+    "node5" [ label = "Boost::random", shape = septagon ];
+    "node4" -> "node5" [ style = dotted ] // b4mesh_coreEngine -> Boost::random
+    "node4" -> "node1" [ style = dotted ] // b4mesh_coreEngine -> Boost::system
+    "node4" -> "node2"  // b4mesh_coreEngine -> DBusCXX
+    "node6" [ label = "DBusCXX_asio_integration", shape = doubleoctagon ];
+    "node6" -> "node2"  // DBusCXX_asio_integration -> DBusCXX
+    "node4" -> "node6"  // b4mesh_coreEngine -> DBusCXX_asio_integration
+    "node7" [ label = "b4mesh_core_engine__generated\n(b4mesh::core_engine::generated)", shape = pentagon ];
+    "node4" -> "node7"  // b4mesh_coreEngine -> b4mesh_core_engine__generated
+    "node8" [ label = "b4mesh_utils\n(b4mesh::utils)", shape = pentagon ];
+    "node8" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
+    "node9" [ label = "INTERFACE", shape = septagon ];
+    "node8" -> "node9"  // b4mesh_utils -> INTERFACE
+    "node4" -> "node8" [ style = dotted ] // b4mesh_coreEngine -> b4mesh_utils
+    "node10" [ label = "nlohmann_json\n(nlohmann_json::nlohmann_json)", shape = pentagon ];
+    "node4" -> "node10" [ style = dotted ] // b4mesh_coreEngine -> nlohmann_json
+    "node0" -> "node4" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
+    "node11" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
+    "node11" -> "node1" [ style = dashed ] // b4mesh_http -> Boost::system
+    "node11" -> "node3" [ style = dashed ] // b4mesh_http -> Threads::Threads
+    "node12" [ label = "boost_beast", shape = pentagon ];
+    "node11" -> "node12" [ style = dashed ] // b4mesh_http -> boost_beast
+    "node0" -> "node11" [ style = dotted ] // b4mesh_binary -> b4mesh_http
+    "node0" -> "node8" [ style = dotted ] // b4mesh_binary -> b4mesh_utils
 }

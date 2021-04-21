@@ -1,0 +1,12 @@
+digraph "b4mesh_http" {
+node [
+  fontsize = "12"
+];
+    "node11" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
+    "node1" [ label = "Boost::system", shape = septagon ];
+    "node11" -> "node1" [ style = dashed ] // b4mesh_http -> Boost::system
+    "node3" [ label = "Threads::Threads", shape = pentagon ];
+    "node11" -> "node3" [ style = dashed ] // b4mesh_http -> Threads::Threads
+    "node12" [ label = "boost_beast", shape = pentagon ];
+    "node11" -> "node12" [ style = dashed ] // b4mesh_http -> boost_beast
+}

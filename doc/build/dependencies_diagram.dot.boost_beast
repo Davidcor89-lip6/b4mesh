@@ -1,0 +1,6 @@
+digraph "boost_beast" {
+node [
+  fontsize = "12"
+];
+    "node12" [ label = "boost_beast", shape = pentagon ];
+}
