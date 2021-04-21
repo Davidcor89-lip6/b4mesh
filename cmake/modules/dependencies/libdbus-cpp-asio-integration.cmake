@@ -19,10 +19,8 @@ if (${USING_GREEN_SDK})
         message(FATAL_ERROR "[libdbus-cpp-asio-integration] Green SDK toolchain detected but GREEN_SDK_IMPORTED=[${GREEN_SDK_IMPORTED}]")
     endif()
 
-    message(">>>>>>>>>> ${GREEN_SDK_LIBDIR}/libdbus-c++-asio-1.so")
-
     add_library(DBusCXX_asio_integration SHARED IMPORTED GLOBAL)
-    set_target_properties(DBusCXX PROPERTIES
+    set_target_properties(DBusCXX_asio_integration PROPERTIES
         #IMPORTED_CONFIGURATIONS         "RELEASE;DEBUG"
         IMPORTED_LOCATION               ${GREEN_SDK_LIBDIR}/libdbus-c++-asio-1.so
         INTERFACE_INCLUDE_DIRECTORIES   ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1
