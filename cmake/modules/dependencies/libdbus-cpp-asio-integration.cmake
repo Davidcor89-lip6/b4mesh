@@ -26,10 +26,7 @@ if (${USING_GREEN_SDK})
         INTERFACE_INCLUDE_DIRECTORIES   ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1
         INCLUDE_DIRECTORIES             ${GREEN_SDK_INCLUDEDIR}/dbus-c++-1
     )
-    add_dependencies(DBusCXX_asio_integration
-        public
-            DBusCXX
-    )
+    add_dependencies(DBusCXX_asio_integration DBusCXX)
 else()
     message(FATAL_ERROR "[libdbus-cpp-asio-integration] : depends on GreenSDK")
 endif()
