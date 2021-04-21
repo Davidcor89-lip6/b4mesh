@@ -57,9 +57,16 @@ cmake /path/to/sources        # refresh CMake cache
 cmake --build /path/to/build  # Generates other targets
 ```
 
+> ℹ️ You may be willing to use `b4mesh/CMakeSettings.json` to handle your CMake cache/build command lines.  
 Alternatively, you can select your target using **CMake** `--target` option explicitely.
 
 #### Toolchain generation
+
+Toolchain generation exposes the following CMake targets :
+
+| name | description |
+| ---- | ----------- |
+| **greensoftsdk** | Green IT SDK/toolchain, on which relies `b4mesh` |
 
 ```cmake
 mkdir /path/to/build
@@ -110,11 +117,6 @@ Generate graphviz: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc
 -- Build files have been written to: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk
 [3/7] Performing build step for 'greensoftsdk'
 [greensoftsdk] Building SDK in /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk...
-/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config:3503:warning: override: reassigning to symbol BR2_PACKAGE_BOOST
-/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config:3504:warning: override: reassigning to symbol BR2_PACKAGE_BOOST_SYSTEM
-/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config:3505:warning: override: reassigning to symbol BR2_PACKAGE_LIBDBUS_CPP
-/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config:3506:warning: override: reassigning to symbol BR2_TOOLCHAIN_BUILDROOT_WCHAR
-/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config:3507:warning: override: reassigning to symbol BR2_PACKAGE_BOOST_RANDOM
 #
 # configuration written to /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config
 #
@@ -141,6 +143,15 @@ Réussite de l'opération Tout générer.
 ```
 
 #### 🛠️ Project build
+
+The project's top-level CMakeLists.txt exposes the following targets :
+
+| name | description |
+| ---- | ----------- |
+| **b4mesh_binary**                                 | Project's main output (executable) |
+| **b4mesh_coreEngine**                             | b4mesh::core_engine, on which depends **b4mesh_binary**<br>*(see [#dependencies_management section](#dependencies-management))* |
+| **b4mesh_core_engine__generate_ressources**       | Generates ressources on which depends b4mesh::core_engine|
+| **b4mesh_generates_cmake_dependencies_diagram**   | Generates all build target dependencies diagrams, available in <project_dir>/doc/build/ |
 
 Generate another cache for the project, or override the same one.  
 To enable project build instead of toolchain generation, you need to specify a valid path to a toolchain which is part of a Green SDK installation directory.
