@@ -535,3 +535,17 @@ In the snippet above deployement results in the following files :
 -- Generating done
 -- Build files have been written to: C:/Dev/b4mesh_main/build
 ```
+
+## Analysis
+
+### CppCheck
+
+Here is a command line to generate an XML report only for `b4mesh` source files :
+
+```bash
+cppcheck \
+    -i ./_deps/ \
+    -i ../Linux-GCC-Debug_target_greensoftsdk/ \
+    -i ./CMakeFiles/ \
+    --xml --enable=all --force --project=./compile_commands.json . 2> cppcheck_output.xml
+```

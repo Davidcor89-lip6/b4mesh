@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.4.1"/>
+    <errors>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::transform algorithm instead of a raw loop." verbose="Consider using std::transform algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/blockgraph.cpp" file="sources\core_engine\sources\blockgraph.cpp" line="76"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::transform algorithm instead of a raw loop." verbose="Consider using std::transform algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/blockgraph.cpp" file="sources\core_engine\sources\blockgraph.cpp" line="154"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::copy algorithm instead of a raw loop." verbose="Consider using std::copy algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/blockgraph.cpp" file="sources\core_engine\sources\blockgraph.cpp" line="175"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::any_of algorithm instead of a raw loop." verbose="Consider using std::any_of algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/blockgraph.cpp" file="sources\core_engine\sources\blockgraph.cpp" line="186"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::accumulate algorithm instead of a raw loop." verbose="Consider using std::accumulate algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/block.cpp" file="sources\core_engine\sources\block.cpp" line="227"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::any_of algorithm instead of a raw loop." verbose="Consider using std::any_of algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/block.cpp" file="sources\core_engine\sources\block.cpp" line="238"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::any_of algorithm instead of a raw loop." verbose="Consider using std::any_of algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/block.cpp" file="sources\core_engine\sources\block.cpp" line="271"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;token&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;token&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/consensus.cpp" file="sources\core_engine\sources\consensus.cpp" line="102"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::copy algorithm instead of a raw loop." verbose="Consider using std::copy algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/node.cpp" file="sources\core_engine\sources\node.cpp" line="60"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::any_of, std::all_of, std::none_of, or std::accumulate algorithm instead of a raw loop." verbose="Consider using std::any_of, std::all_of, std::none_of, or std::accumulate algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/node.cpp" file="sources\core_engine\sources\node.cpp" line="111"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;findNode&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;findNode&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/node.cpp" file="sources\core_engine\sources\node.cpp" line="83"/>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &amp;#039;flag&amp;#039; can be reduced." verbose="The scope of the variable &amp;#039;flag&amp;#039; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &amp;#039;i&amp;#039; can be reduced:&#10;void f(int x)&#10;{&#10;    int i = 0;&#10;    if (x) {&#10;        // it&amp;#039;s safe to move &amp;#039;int i = 0;&amp;#039; here&#10;        for (int n = 0; n &amp;lt; 10; ++n) {&#10;            // it is possible but not safe to move &amp;#039;int i = 0;&amp;#039; here&#10;            do_something(&amp;amp;i);&#10;        }&#10;    }&#10;}&#10;When you see this message it is always safe to reduce the variable scope 1 level." cwe="398">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="492"/>
+        </error>
+        <error id="shadowVariable" severity="style" msg="Local variable &amp;#039;it&amp;#039; shadows outer variable" verbose="Local variable &amp;#039;it&amp;#039; shadows outer variable" cwe="398">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="369" info="Shadow variable"/>
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="332" info="Shadowed declaration"/>
+        </error>
+        <error id="shadowVariable" severity="style" msg="Local variable &amp;#039;it&amp;#039; shadows outer variable" verbose="Local variable &amp;#039;it&amp;#039; shadows outer variable" cwe="398">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="398" info="Shadow variable"/>
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="332" info="Shadowed declaration"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::any_of algorithm instead of a raw loop." verbose="Consider using std::any_of algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="453"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::any_of algorithm instead of a raw loop." verbose="Consider using std::any_of algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="463"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::copy algorithm instead of a raw loop." verbose="Consider using std::copy algorithm instead of a raw loop." cwe="398">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="996"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;serie_branch_b_h&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;serie_branch_b_h&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="383"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;flag&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;flag&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="492"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;block_hash&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;block_hash&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="897"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;gp_id&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;gp_id&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="898"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &amp;#039;create_blockgraph&amp;#039; is assigned a value that is never used." verbose="Variable &amp;#039;create_blockgraph&amp;#039; is assigned a value that is never used." cwe="563">
+            <location file0="sources/core_engine/sources/b4mesh_p.cpp" file="sources\core_engine\sources\b4mesh_p.cpp" line="1090"/>
+        </error>
+    </errors>
+</results>
