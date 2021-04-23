@@ -16,10 +16,31 @@ project(b4mesh
 )
 enable_testing()
 
+## Analysys/code-quality
+### Clang-Tidy
+
+option(b4mesh_USE_CLANG_TIDY "Use clang-tidy ?" OFF)
+message(STATUS "[${PROJECT_NAME}] : option [b4mesh_USE_CLANG_TIDY] set to ${b4mesh_USE_CLANG_TIDY}")
+
+if (${b4mesh_USE_CLANG_TIDY})
+    find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+    if (NOT EXISTS ${CLANG_TIDY_EXE})
+        message(WARNING "[${PROJECT_NAME}] : program [clang-tidy] not found. Install LLVM clang-tidy to enable codebase analysis")
+    else()
+        message(STATUS "[${PROJECT_NAME}] : program [clang-tidy] detected at ${CLANG_TIDY_EXE}")
+        set(CMAKE_CXX_CLANG_TIDY
+            clang-tidy;
+            -header-filter=.;
+            -checks=*;)
+        message(STATUS "[${PROJECT_NAME}] : using clang-tidy checks arguments : "
+        " ${CMAKE_CXX_CLANG_TIDY}")
+    endif()
+endif()
+
 ## Documentation
 ### Dependencies diagram generation
 
-find_program(dot NAME DOT_EXE)
+find_program(DOT_EXE NAMES dot)
 if (NOT EXISTS ${DOT_EXE})
     message(STATUS "[${PROJECT_NAME}] : program [dot] not found. Install dot/graphviz package to enable [${PROJECT_NAME}_generates_cmake_dependencies_diagram] target")
 else()

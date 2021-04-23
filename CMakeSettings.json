@@ -38,7 +38,7 @@
       "configurationType": "Debug",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-Db4mesh_USE_CLANG_TIDY:BOOL=ON",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_arm" ],
@@ -55,13 +55,13 @@
       "variables": [
         {
           "name": "remote_machines_IP",
-          "type": "STRING",
-          "value": "10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210"
+          "value": "10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210",
+          "type": "STRING"
         },
         {
           "name": "remote_install_dir",
-          "type": "PATH",
-          "value": "/var/persistent-data/b4mesh"
+          "value": "/var/persistent-data/b4mesh",
+          "type": "PATH"
         }
       ]
     },
