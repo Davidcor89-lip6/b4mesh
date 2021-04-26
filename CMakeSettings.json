@@ -38,7 +38,7 @@
       "configurationType": "Debug",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "-Db4mesh_USE_CLANG_TIDY:BOOL=ON",
+      "cmakeCommandArgs": "-Db4mesh_USE_CLANG_TIDY:BOOL=OFF",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_arm" ],

@@ -19,8 +19,6 @@ node [
     "node4" -> "node8" [ style = dotted ] // b4mesh_coreEngine -> b4mesh_utils
     "node1" [ label = "Boost::system", shape = septagon ];
     "node8" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
-    "node9" [ label = "INTERFACE", shape = septagon ];
-    "node8" -> "node9"  // b4mesh_utils -> INTERFACE
-    "node10" [ label = "nlohmann_json\n(nlohmann_json::nlohmann_json)", shape = pentagon ];
-    "node4" -> "node10" [ style = dotted ] // b4mesh_coreEngine -> nlohmann_json
+    "node9" [ label = "nlohmann_json\n(nlohmann_json::nlohmann_json)", shape = pentagon ];
+    "node4" -> "node9" [ style = dotted ] // b4mesh_coreEngine -> nlohmann_json
 }

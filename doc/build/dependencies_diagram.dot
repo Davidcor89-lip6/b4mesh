@@ -41,17 +41,15 @@ subgraph clusterLegend {
     "node4" -> "node7"  // b4mesh_coreEngine -> b4mesh_core_engine__generated
     "node8" [ label = "b4mesh_utils\n(b4mesh::utils)", shape = pentagon ];
     "node8" -> "node1" [ style = dashed ] // b4mesh_utils -> Boost::system
-    "node9" [ label = "INTERFACE", shape = septagon ];
-    "node8" -> "node9"  // b4mesh_utils -> INTERFACE
     "node4" -> "node8" [ style = dotted ] // b4mesh_coreEngine -> b4mesh_utils
-    "node10" [ label = "nlohmann_json\n(nlohmann_json::nlohmann_json)", shape = pentagon ];
-    "node4" -> "node10" [ style = dotted ] // b4mesh_coreEngine -> nlohmann_json
+    "node9" [ label = "nlohmann_json\n(nlohmann_json::nlohmann_json)", shape = pentagon ];
+    "node4" -> "node9" [ style = dotted ] // b4mesh_coreEngine -> nlohmann_json
     "node0" -> "node4" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
-    "node11" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
-    "node11" -> "node1" [ style = dashed ] // b4mesh_http -> Boost::system
-    "node11" -> "node3" [ style = dashed ] // b4mesh_http -> Threads::Threads
-    "node12" [ label = "boost_beast", shape = pentagon ];
-    "node11" -> "node12" [ style = dashed ] // b4mesh_http -> boost_beast
-    "node0" -> "node11" [ style = dotted ] // b4mesh_binary -> b4mesh_http
+    "node10" [ label = "b4mesh_http\n(b4mesh::http)", shape = pentagon ];
+    "node10" -> "node1" [ style = dashed ] // b4mesh_http -> Boost::system
+    "node10" -> "node3" [ style = dashed ] // b4mesh_http -> Threads::Threads
+    "node11" [ label = "boost_beast", shape = pentagon ];
+    "node10" -> "node11" [ style = dashed ] // b4mesh_http -> boost_beast
+    "node0" -> "node10" [ style = dotted ] // b4mesh_binary -> b4mesh_http
     "node0" -> "node8" [ style = dotted ] // b4mesh_binary -> b4mesh_utils
 }

@@ -18,7 +18,7 @@ find_package(Boost 1.65.0 REQUIRED
     COMPONENTS
         system
 )
-add_dependencies(${PROJECT_NAME}_utils INTERFACE
+add_dependencies(${PROJECT_NAME}_utils
     Boost::system
 )
 target_link_libraries(${PROJECT_NAME}_utils INTERFACE
