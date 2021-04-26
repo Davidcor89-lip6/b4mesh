@@ -7,14 +7,14 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DBOOST_ROOT=C:\\Dev\\dependencies\\boost_1_71_0",
+      "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "variables": [
         {
           "name": "BOOST_ROOT",
           "value": "C:\\Dev\\dependencies\\boost_1_71_0",
-          "type": "UNINITIALIZED"
+          "type": "PATH"
         }
       ]
     },
