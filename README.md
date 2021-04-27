@@ -57,6 +57,9 @@ Thus, building the project only requires to generates CMake's cache and build **
 > But also set build options :
 >   - `-DCMAKE_BUILD_TYPE:STRING="Release"`
 
+**NB** : By default, `greensoftsdk` target install the output toolchain into `${CMAKE_INSTALL_PREFIX}/toolchain`,  
+so you might want to set the `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option when generating the toolchain.
+
 #### Toolchain generation (command line)
 
 Toolchain generation exposes the following CMake targets :
@@ -238,6 +241,9 @@ The project's top-level CMakeLists.txt exposes the following targets :
 
 Generate another cache for the project, or override the same one.  
 To enable project build instead of toolchain generation, you need to specify a valid path to a toolchain which is part of a Green SDK installation directory.
+
+**NB** : By default, `greensoftsdk` target install the output toolchain into `${CMAKE_INSTALL_PREFIX}/toolchain`,  
+so you might want to set the `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option when generating the toolchain.
 
 ```bash
 mkdir build && cd build
