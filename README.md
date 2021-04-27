@@ -11,16 +11,16 @@ use the green communication tutorial
 
 ## 🏗️ How to build this project ?
 
-The following project requires a ***two-step action***.
+The following project build requires a ***two-step action***.
 
 ### Requirements
 
 | Package name | Minimum release |
 | ------------ | --------------- |
-| `CMake`        | **3.14.2** *(>= 3.18.3975358 is better)* |
-| `GCC`          | **9.3.0** *(7.5 might work)* |
-| One of:<br>- `gmake`<br>- `nmake`<br>- `make` | ? |
-| One of:<br>- `bash`<br>- `sh`      | ? |
+| `CMake`                       | **3.14.2** *(>= 3.18.3975358 is better)* |
+| `GCC`                         | **9.3.0** *(7.5 might work)* |
+| `gmake`, `nmake` or `make`    | ? |
+| `bash` or `sh`                | ? |
 
 ### Dependencies management
 
@@ -30,45 +30,34 @@ Self-generated build diagram, using `b4mesh_generates_cmake_dependencies_diagram
 
 ### 🛠️ Toolchain generation
 
-This cache generation, by default, only allow **`greensoftsdk`** target.  
-Thus, `build all` is allowed, which is convenient.
+The first cache generation, by default, only allow a target named **`greensoftsdk`**.  
+This target will generate Green's toolchain.
 
 ## b4mesh compilation
 
 > ℹ️ *`Makefile` usage is **deprecated**, use `modern-CMake` instead*
 
-### Using `modern-CMake`
+### **Using `modern-CMake`**
 
 `b4mesh` build use standard CMake cache/build process,  
-with a twist that is the use of an external toolchain which is generated prior to the main build.
-
+with a twist that is the use of an external toolchain which must be generated prior to the main build.  
 Thus, building the project only requires to generates CMake's cache and build **twice**.  
 
 - The first time, the toolchain is not generated yet, thus won't be detected.  
-  It will be selected as sole target, and generated then.
-- The second time, the toolchain is detected. Other targets are built.
+  It will be selected as sole target - *`greensoftsdk`* -.
+- The second time, the toolchain is detected. Other targets are generated.
 
-```bash
-mkdir /path/to/build
-cd /path/to/build
-cmake /path/to/sources        # generates CMake cache
-cmake --target greensoftsdk --build /path/to/build  # generates the toolchain
-cmake /path/to/sources        # refresh CMake cache
-cmake --build /path/to/build  # Generates other targets
-```
-
-> ℹ️ You may be willing to use `b4mesh/CMakeSettings.json` to handle your CMake cache/build command lines.  
+> ℹ️ If your IDE supports it, you may be willing to use the provided [CMakeSettings.json](./CMakeSettings.json) file to handle your CMake cache/build command lines.  
 > Alternatively, you can select your target using **CMake** `--target` option explicitely.
 
-> ℹ️ Feel free to add extra options that best fit your needs to the basic `cmake --target greensoftsdk ..` command.  
-> Such as :  
->   - `--parallel` / `-j <jobs>`
+> ℹ️ Feel free to add extra options that best fit your needs, such as :  
 >   - `-G <generator_name>`
+>   - `--parallel` / `-j <jobs>`
 >
 > But also set build options :
 >   - `-DCMAKE_BUILD_TYPE:STRING="Release"`
 
-#### Toolchain generation
+#### Toolchain generation (command line)
 
 Toolchain generation exposes the following CMake targets :
 
@@ -79,20 +68,19 @@ Toolchain generation exposes the following CMake targets :
 ```cmake
 # 1 - cache generation (using ${SOURCE_DIR}/build as cache directory)
 #     Here, we use Ninja to build in Release
-
 cd /path/to/sources/
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE:STRING="Release" -G "Ninja" --target greensoftsdk ..
 
 # 2 - toolchain build
-
 cmake --build . --target greensoftsdk
-- *Wait quite a long time ...*  
-  *(Takes >1 hour using a I5-8250U CPU and 8 Go RAM)*
+# Wait quite a long time ... (Takes >1 hour using a I5-8250U CPU and 8 Go RAM)
 ```
 
+#### Toolchain generation (Microsoft Visual Studio cross-plateform)
+
 Example output, using an external `Docker` container *(Ubuntu 18.04 LTS)* as build target,  
-and `Microsoft Visual Studio 2019` remote Linux compilation for CMake project default tool.
+and `Microsoft Visual Studio 2019` cross-plateform, remote Linux compilation for CMake project default tool.
 
 To reproduce :
 
@@ -102,7 +90,87 @@ To reproduce :
 - Select `Linux-GCC-Debug_target_greensoftsdk` CMake Settings or similar
 - Press F7 or Build > Build all
 
-Possible output :
+<details><summary>Possible cache generation output</summary>
+<p>
+```log
+1> Copie des fichiers sur la machine distante.
+1> Début de la copie des fichiers sur la machine distante.
+1> [rsync] rsync -t --delete --delete-excluded -v -r --exclude=.vs --exclude=.git --exclude=out -8  "." rsync://root@localhost:63708/-root-.vs-b4mesh-04888722-7ab6-435b-947b-dca7becdfea8-src
+1> [rsync] sending incremental file list
+1> [rsync] ./
+1> [rsync] README.md
+1> [rsync] deleting live_visualizer/configuration.js
+1> [rsync] analysis/clang-tidy_output.txt
+1> [rsync] doc/build/
+1> [rsync] doc/build/dependencies_diagram.dot
+1> [rsync] doc/build/dependencies_diagram.dot.Boostrandom
+1> [rsync] doc/build/dependencies_diagram.dot.Boostrandom.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.Boostsystem
+1> [rsync] doc/build/dependencies_diagram.dot.Boostsystem.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.DBusCXX
+1> [rsync] doc/build/dependencies_diagram.dot.DBusCXX.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.DBusCXX_asio_integration
+1> [rsync] doc/build/dependencies_diagram.dot.DBusCXX_asio_integration.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.ThreadsThreads
+1> [rsync] doc/build/dependencies_diagram.dot.ThreadsThreads.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_binary
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_binary.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_coreEngine
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_coreEngine.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_core_engine__generated
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_core_engine__generated.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_http
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_http.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_utils
+1> [rsync] doc/build/dependencies_diagram.dot.b4mesh_utils.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.boost_beast
+1> [rsync] doc/build/dependencies_diagram.dot.boost_beast.dependers
+1> [rsync] doc/build/dependencies_diagram.dot.nlohmann_json
+1> [rsync] doc/build/dependencies_diagram.dot.nlohmann_json.dependers
+1> [rsync] doc/build/dependencies_diagram.png
+1> [rsync] live_visualizer/
+1> [rsync] live_visualizer/nginx/
+1> [rsync] live_visualizer/nginx/http_live_visualizer.conf
+1> [rsync] sources/utils/
+1> [rsync] sources/utils/CMakeLists.txt
+1> [rsync] 
+1> [rsync] sent 176,941 bytes  received 6,992 bytes  73,573.20 bytes/sec
+1> [rsync] total size is 10,008,738  speedup is 54.42
+1> Fin de la copie des fichiers (durée calendaire 00h:00m:04s:129ms).
+1> La génération de CMake a démarré pour la configuration : 'Linux-GCC-Debug_target_greensoftsdk'.
+1> Exécutable cmake trouvé sur /root/.vs/cmake/bin/cmake.
+1> /root/.vs/cmake/bin/cmake -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="$HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/install/Linux-GCC-Debug_target_greensoftsdk" -DCMAKE_CXX_COMPILER:FILEPATH="/usr/bin/g++-9" -DCMAKE_C_COMPILER:FILEPATH="/usr/bin/gcc-9" --target greensoftsdk "/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/CMakeLists.txt";
+1> [CMake] -- [b4mesh] Loading modules [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/cmake/modules] ...
+1> [CMake] -- The CXX compiler identification is GNU 9.3.0
+1> [CMake] -- Detecting CXX compiler ABI info
+1> [CMake] -- Detecting CXX compiler ABI info - done
+1> [CMake] -- Check for working CXX compiler: /usr/bin/g++-9 - skipped
+1> [CMake] -- Detecting CXX compile features
+1> [CMake] -- Detecting CXX compile features - done
+1> [CMake] -- [b4mesh] : option [b4mesh_USE_CLANG_TIDY] set to OFF
+1> [CMake] -- [b4mesh] : program [dot] detected at /usr/bin/dot. Generating [b4mesh_generates_cmake_dependencies_diagram] target
+1> [CMake] -- [b4mesh] : toolchain is []
+1> [CMake] -- [b4mesh] : CMAKE_BUILD_TYPE is [Debug]
+1> [CMake] -- [toolchain/lazy_detection] : Lazy Green SDK detection ... USING_GREEN_SDK is [OFF]
+1> [CMake] -- [FindFile] Scanning [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/toolchain/archives] for [greensoft-sdk-*.tar.xz] ...
+1> [CMake] -- [FindFile] Found    [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/toolchain/archives/greensoft-sdk-2021-01-25-14ae3.tar.xz]
+1> [CMake] -- [greensoftsdk] ...
+1> [CMake] -- [FindFile] Scanning [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/toolchain/archives] for [libdbus-cpp-*.tar.gz] ...
+1> [CMake] -- [FindFile] Found    [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/toolchain/archives/libdbus-cpp-e02d9095.tar.gz]
+1> [CMake] -- Configuring done
+1> [CMake] -- Generating done
+1> [CMake] -- Build files have been written to: /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk
+1> Variables CMake extraites.
+1> Fichiers sources et en-têtes extraits.
+1> Modèle de code extrait.
+1> Chemins include extraits.
+1> Fin de la génération de CMake.
+```
+</p>
+</details>
+
+<details><summary>Possible build output : </summary>
+<p>
 
 ```log
 Début de la copie des fichiers sur la machine distante.
@@ -155,6 +223,7 @@ Relocating the buildroot SDK from /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7b
 [7/7] Completed 'greensoftsdk'
 Réussite de l'opération Tout générer.
 ```
+</p></details>
 
 #### 🛠️ Project build
 
@@ -162,8 +231,8 @@ The project's top-level CMakeLists.txt exposes the following targets :
 
 | name | description |
 | ---- | ----------- |
-| **b4mesh_binary**                                 | Project's main output (executable) |
-| **b4mesh_coreEngine**                             | b4mesh::core_engine, on which depends **b4mesh_binary**<br>*(see [#dependencies_management section](#dependencies-management))* |
+| **b4mesh_binary**                                 | `b4mesh::binary`<br>project's main output (executable) |
+| **b4mesh_coreEngine**                             | `b4mesh::core_engine`<br>on which depends **b4mesh_binary**<br>*(see [#dependencies_management section](#dependencies-management))* |
 | **b4mesh_core_engine__generate_ressources**       | Generates ressources on which depends b4mesh::core_engine|
 | **b4mesh_generates_cmake_dependencies_diagram**   | Generates all build target dependencies diagrams, available in <project_dir>/doc/build/ |
 
@@ -183,6 +252,8 @@ cmake \
     ..
 ```
 
+> ℹ️ B4mesh::live_visualizer specific CMake options are detailed [here](#configuration-installation-deployement)
+
 > ℹ️ If you plan to locally install your project outputs : 
 > - do not forget to add an `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option,  
 > - and invoke a `cmake --install .` command after the build as well.
@@ -199,8 +270,8 @@ If you are using Microsoft Visual Studio :
 - Select `Linux-GCC-Debug-WithGreenSDK`
 - Press F7 or Build > Build all
 
-Possible output (cache generation) :
-
+<details><summary>Possible cache generation output</summary>
+<p>
 ```log
 1> Copie des fichiers sur la machine distante.
 1> Début de la copie des fichiers sur la machine distante.
@@ -292,7 +363,11 @@ Possible output (cache generation) :
 1> Chemins include extraits.
 ```
 
-Possible output (build)
+</p>
+</details>
+
+<details><summary>Possible build output</summary>
+<p>
 
 ```log
 cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK;/root/.vs/cmake/bin/cmake --build "$HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug-WithGreenSDK"  ;
@@ -335,9 +410,14 @@ generating code for interface net.qolsr.Qolyester.Parameters...
 # etc ...
 ```
 
+</p></details>
+
 > See the [#Notes](#notes) section below for generated commands details.
 
 ### [***deprecated***] Using `Unix-Makefile`
+
+<details><summary>Show this deprecated section</summary>
+<p>
 
 In the makefile, you need to change the link the greencommunication toolchain.   
 Create the folder "build" and "build_local", if they don't exist.   
@@ -392,7 +472,10 @@ $ cd Results
 $ ./txt2Png blockgraph-X.txt res-X.png
 ($ eog res-X.png)
 
-### Notes
+</p>
+</details>
+
+### **Notes**
 
 Also, if your CMake release is fresh enough, you are strongly encouraged to use the modern invocation synthax :
 
@@ -427,9 +510,6 @@ cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Deb
 # ...
 ```
 
-*Nb : Makefile usage is `deprecated`*.
-
-
 ## Nginx configuration
 
 ### Automatically
@@ -437,10 +517,16 @@ cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Deb
 See `#Configuration, installation, deployement` section below
 
 ### Manually ***(deprecated)***
->$ sudo rwdo -s
->$ vi /etc/nginx/conf.d/qolyester-http.conf 
 
-``` bash
+<details><summary>Show deprecated details</summary>
+<p>
+
+```bash
+sudo rwdo -s
+vi /etc/nginx/conf.d/qolyester-http.conf 
+```
+
+```bash
 server {
         listen  *:80;
         listen  [::]:80;
@@ -456,7 +542,12 @@ server {
 }
 ```
 
->$ sudo nginx -s reload
+```bash
+sudo nginx -s reload
+```
+
+</p>
+</details>
 
 ## live visualisation
 
