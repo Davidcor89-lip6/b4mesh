@@ -58,7 +58,15 @@ cmake --build /path/to/build  # Generates other targets
 ```
 
 > ℹ️ You may be willing to use `b4mesh/CMakeSettings.json` to handle your CMake cache/build command lines.  
-Alternatively, you can select your target using **CMake** `--target` option explicitely.
+> Alternatively, you can select your target using **CMake** `--target` option explicitely.
+
+> ℹ️ Feel free to add extra options that best fit your needs to the basic `cmake --target greensoftsdk ..` command.  
+> Such as :  
+>   - `--parallel` / `-j <jobs>`
+>   - `-G <generator_name>`
+>
+> But also set build options :
+>   - `-DCMAKE_BUILD_TYPE:STRING="Release"`
 
 #### Toolchain generation
 
@@ -69,10 +77,16 @@ Toolchain generation exposes the following CMake targets :
 | **greensoftsdk** | Green IT SDK/toolchain, on which relies `b4mesh` |
 
 ```cmake
-mkdir /path/to/build
-cd /path/to/build
-cmake /path/to/sources
-cmake --target greensoftsdk /path/to/build
+# 1 - cache generation (using ${SOURCE_DIR}/build as cache directory)
+#     Here, we use Ninja to build in Release
+
+cd /path/to/sources/
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE:STRING="Release" -G "Ninja" --target greensoftsdk ..
+
+# 2 - toolchain build
+
+cmake --build . --target greensoftsdk
 - *Wait quite a long time ...*  
   *(Takes >1 hour using a I5-8250U CPU and 8 Go RAM)*
 ```
@@ -156,13 +170,28 @@ The project's top-level CMakeLists.txt exposes the following targets :
 Generate another cache for the project, or override the same one.  
 To enable project build instead of toolchain generation, you need to specify a valid path to a toolchain which is part of a Green SDK installation directory.
 
-```cmake
-cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH="/path/to/GreenSDK_toolchain_install/toolchainfile.cmake"
+```bash
+mkdir build && cd build
+cmake \
+    -G "Ninja"                                 \   # your favorite generator
+    -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" \   # Debug, Release, RelWithDebInfo or MinSizeRel
+    -DCMAKE_TOOLCHAIN_FILE:FILEPATH="/path/to/GreenSDK_toolchain_install/toolchainfile.cmake" \ # toolchain
+    \ # b4mesh specific options :
+    -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+    -Dremote_install_dir:PATH="/var/persistent-data/b4mesh"                                                 \
+    -Db4mesh_USE_CLANG_TIDY:BOOL=OFF                                                                        \
+    ..
 ```
 
-Then build the project
-```cmake
-cmake --build "/path/to/project/build"
+> ℹ️ If you plan to locally install your project outputs : 
+> - do not forget to add an `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option,  
+> - and invoke a `cmake --install .` command after the build as well.
+
+Then build the project, using `cmake --build`,  
+or manually invoque your generator *(`Unix-Makefile`, `Ninja`, etc.)*
+
+```bash
+cmake --build "/path/to/project/build" . # assuming '.' is your cache path
 ```
 
 If you are using Microsoft Visual Studio :
@@ -364,6 +393,12 @@ $ ./txt2Png blockgraph-X.txt res-X.png
 ($ eog res-X.png)
 
 ### Notes
+
+Also, if your CMake release is fresh enough, you are strongly encouraged to use the modern invocation synthax :
+
+```bash
+cmake -S . -B build # etc.
+```
 
 Feel free to add extra parameters to your `cmake` commands lines.
 
