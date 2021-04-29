@@ -30,7 +30,7 @@
 #define T_RETRANS 60
 
 // Limit in seconds for the block creation
-#define SAFETIME 5
+#define TIME_BTW_BLOCK 5
 
 // Trace option
 #define LIVEBLOCK_FILE "/tmp/blockgraph"

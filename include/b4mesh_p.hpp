@@ -77,6 +77,8 @@ class B4Mesh
          * Sets the flag createblock to control the block creation process 
          */
         void setCreateBlock(bool cb);
+
+        void RegisterGroupId(string groupId);
         
         /**
          * Function that generate the blockgraph file
@@ -116,6 +118,12 @@ class B4Mesh
          * create a block. -Only Leader - the block is broadcasted to the local group
          */
         void GenerateBlocks();
+
+        bool IsMergeInProcess ();
+
+        Block GenerateMergeBlock(Block &block);
+
+        Block GenerateRegularBlock(Block &block);
 
         /**
          * Select the older transactions to put them in a block
@@ -314,6 +322,7 @@ class B4Mesh
         bool createBlock;           //  When createBlock is false, a block can't be created.  (Merge Procedure)
         double lastBlock_creation_time; //  The time of the creation of the last block
         std::string groupId;        // GroupId of a group
+        std::vector<std::string> groupId_register;
         std::vector<std::pair<std::string, std::string>> missing_block_list;    // List of missing blocks in the local BG <BlockHash, IpOfNodeWhoHasTheMissingParent>
         std::vector<std::string> missing_childless;     // Hashes of childless block not in the local blockgraph
         std::map<std::string, Transaction> pending_transactions;  // mempool of transactions
