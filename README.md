@@ -2,7 +2,15 @@
 
 Développment du projet **b4mesh** sur le materiel de **Green IT**.
 
-## Components descriptions
+## Solution overview
+
+Each nodes of the blockgraph - *individualy hosted on a Green-communication router* - contains the following components :
+
+- A running instance of `b4mesh::binary`, which implements the node's logic
+- An `NGinx` server instance, which handles the API using httpd network access
+- A live visualisation web application, accesible from the nginx server
+
+### Components descriptions
 
 | Component name | Visibility  | Description |
 | -------------- | ----------- | ----------- |
@@ -11,6 +19,14 @@ Développment du projet **b4mesh** sur le materiel de **Green IT**.
 | `b4mesh::httpd`           | internal | Httpd interface<br>used in `b4mesh::binary` |
 | `b4mesh::core_engine`     | internal | blockgraph implementation<br>used in `b4mesh::binary` |
 | `b4mesh::utils`           | internal | `b4mesh::binary` technical utilities/misc |
+
+### Nodes API
+
+| Endpoint | Component | Method | Input type | Description | Output type | Return |
+| -------- | --------- | ------ | ---------- | ----------- | ----------- | ------ |
+| `/add_transaction` | `b4mesh::binary` | PUT, POST | RAW | Add a transaction into the blockgraph | JSON | {<br>  "operation":"add_transaction",<br>  "return_value": "OK"<br>} |
+| `/blockgraph_live_visualizer/view` | `b4mesh::live_visualizer` | GET | Standard HTTP request | Blockgraph live visualizer<br>(Web application) | Http page | |
+| `/blockgraph_live_visualizer/get_nodes` | none<br>/tmp/blockgraph file, live-fed by `b4mesh::binary` | GET | Live stream that represents blockgraph nodes/transactions | | RAW / JSON | See [description here](#live-visualisation) for details |
 
 ## Routers configuration
 
