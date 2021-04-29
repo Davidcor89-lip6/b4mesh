@@ -33,11 +33,11 @@ Self-generated build diagram, using `b4mesh_generates_cmake_dependencies_diagram
 The first cache generation, by default, only allow a target named **`greensoftsdk`**.  
 This target will generate Green's toolchain.
 
-## b4mesh compilation
+#### **Using `command-line` and `Unix-Makefile`**
 
-> ℹ️ *`Makefile` usage is **deprecated**, use `modern-CMake` instead*
+> ℹ️ Command-line configuration and *`Makefile` usage is **deprecated**, use `modern-CMake` instead*
 
-### **Using `modern-CMake`**
+#### **Using `modern-CMake`**
 
 `b4mesh` build use standard CMake cache/build process,  
 with a twist that is the use of an external toolchain which must be generated prior to the main build.  
@@ -60,27 +60,50 @@ Thus, building the project only requires to generates CMake's cache and build **
 **NB** : By default, `greensoftsdk` target install the output toolchain into `${CMAKE_INSTALL_PREFIX}/toolchain`,  
 so you might want to set the `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option when generating the toolchain.
 
-#### Toolchain generation (command line)
-
 Toolchain generation exposes the following CMake targets :
 
 | name | description |
 | ---- | ----------- |
 | **greensoftsdk** | Green IT SDK/toolchain, on which relies `b4mesh` |
 
-```cmake
-# 1 - cache generation (using ${SOURCE_DIR}/build as cache directory)
-#     Here, we use Ninja to build in Release
-cd /path/to/sources/
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE:STRING="Release" -G "Ninja" --target greensoftsdk ..
+##### **Toolchain generation** (command line)
 
-# 2 - toolchain build
-cmake --build . --target greensoftsdk
-# Wait quite a long time ... (Takes >1 hour using a I5-8250U CPU and 8 Go RAM)
-```
+Here, we use `${SOURCE_DIR}/build` as cache directory for `CMake`, and `ninja` as generator.
 
-#### Toolchain generation (Microsoft Visual Studio cross-plateform)
+- CMake >= `3.13.5`
+
+  ```bash
+  cd path/to/source && mkdir build;
+  # cache generation
+  cmake -G "Ninja" \
+        -DCMAKE_BUILD_TYPE:STRING="Release" \
+        -DCMAKE_INSTALL_PREFIX:PATH="/path/to/install" \
+        --target greensoftsdk \
+        -S . -B ./build/
+  # build
+  cmake --build ./build/
+  ```
+
+- CMake <= `3.12`
+
+  ```bash
+  # cache genreation
+  cd /path/to/sources/
+  mkdir build && cd build
+  cmake -G "Ninja" \
+        -DCMAKE_BUILD_TYPE:STRING="Release" \
+        -DCMAKE_INSTALL_PREFIX:PATH="/path/to/install" \
+        --target greensoftsdk \
+        ..
+  
+  # build
+  cmake --build .
+  ```
+
+> Note about the build time :  
+> *The toolchain build takes quite a while. Expect >= 2 hours using a I5-8250U CPU and 8 Go RAM for instance*
+
+##### **Toolchain generation** (Microsoft Visual Studio cross-plateform)
 
 Example output, using an external `Docker` container *(Ubuntu 18.04 LTS)* as build target,  
 and `Microsoft Visual Studio 2019` cross-plateform, remote Linux compilation for CMake project default tool.
@@ -228,7 +251,12 @@ Réussite de l'opération Tout générer.
 ```
 </p></details>
 
-#### 🛠️ Project build
+### 🛠️ Project build
+
+The following steps describe how to build b4mesh projects components.  
+This requires that previous steps was succesfuly followed (see the [toolchain generation section](#️-toolchain-generation) above).
+
+#### **Using `modern-CMake`**
 
 The project's top-level CMakeLists.txt exposes the following targets :
 
@@ -238,6 +266,8 @@ The project's top-level CMakeLists.txt exposes the following targets :
 | **b4mesh_coreEngine**                             | `b4mesh::core_engine`<br>on which depends **b4mesh_binary**<br>*(see [#dependencies_management section](#dependencies-management))* |
 | **b4mesh_core_engine__generate_ressources**       | Generates ressources on which depends b4mesh::core_engine|
 | **b4mesh_generates_cmake_dependencies_diagram**   | Generates all build target dependencies diagrams, available in <project_dir>/doc/build/ |
+
+##### **Project build (command lines)**
 
 Generate another cache for the project, or override the same one.  
 To enable project build instead of toolchain generation, you need to specify a valid path to a toolchain which is part of a Green SDK installation directory.
@@ -270,6 +300,8 @@ or manually invoque your generator *(`Unix-Makefile`, `Ninja`, etc.)*
 ```bash
 cmake --build "/path/to/project/build" . # assuming '.' is your cache path
 ```
+
+##### **Project build (Ms Visual Studio)**
 
 If you are using Microsoft Visual Studio :
 
@@ -420,7 +452,7 @@ generating code for interface net.qolsr.Qolyester.Parameters...
 
 > See the [#Notes](#notes) section below for generated commands details.
 
-### [***deprecated***] Using `Unix-Makefile`
+#### [***deprecated***] Using `Unix-Makefile`
 
 <details><summary>Show this deprecated section</summary>
 <p>
@@ -466,7 +498,7 @@ means that you forget the "sudo" ;)
 
  >$ curl -X PUT -d "serialiezd payload" 0.0.0.0:4242/add_transaction
 
-#### results
+##### results
 
 Create the folder "Results"
 
