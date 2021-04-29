@@ -2,10 +2,19 @@
 
 Développment du projet **b4mesh** sur le materiel de **Green IT**.
 
-## configure all yours routers
+## Components descriptions
 
-use the green communication tutorial
-(GreenPi / b4meshnetwork)
+| Component name | Visibility  | Description |
+| -------------- | ----------- | ----------- |
+| `b4mesh::binary`          | external | Node instance which runs on each router |
+| `b4mesh::live_visualizer` | external | Web application which creates a live rendering of the blockgraph,<br>from the current node perspective |
+| `b4mesh::httpd`           | internal | Httpd interface<br>used in `b4mesh::binary` |
+| `b4mesh::core_engine`     | internal | blockgraph implementation<br>used in `b4mesh::binary` |
+| `b4mesh::utils`           | internal | `b4mesh::binary` technical utilities/misc |
+
+## Routers configuration
+
+Use the green communication tutorial *(GreenPi/b4meshnetwork)*
 
 > **todo** : link to the tutorial here
 
@@ -50,12 +59,7 @@ Thus, building the project only requires to generates CMake's cache and build **
 > ℹ️ If your IDE supports it, you may be willing to use the provided [CMakeSettings.json](./CMakeSettings.json) file to handle your CMake cache/build command lines.  
 > Alternatively, you can select your target using **CMake** `--target` option explicitely.
 
-> ℹ️ Feel free to add extra options that best fit your needs, such as :  
->   - `-G <generator_name>`
->   - `--parallel` / `-j <jobs>`
->
-> But also set build options :
->   - `-DCMAKE_BUILD_TYPE:STRING="Release"`
+> ℹ️ Feel free to add extra options that best fit your needs, such as `-G` or `--parallel`/`-j`.
 
 **NB** : By default, `greensoftsdk` target install the output toolchain into `${CMAKE_INSTALL_PREFIX}/toolchain`,  
 so you might want to set the `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option when generating the toolchain.
@@ -548,11 +552,13 @@ cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Deb
 # ...
 ```
 
+
+
 ## Nginx configuration
 
 ### Automatically
 
-See `#Configuration, installation, deployement` section below
+See [Configuration, installation, deployement](#configuration-installation-deployement) section below
 
 ### Manually ***(deprecated)***
 
@@ -589,14 +595,16 @@ sudo nginx -s reload
 
 ## live visualisation
 
-In the file "/tmp/blockgraph", you can find a live feed of the blockgraph under a json format.
-Each node is under the format : 
+The component `b4mesh::binary` use a file, `/tmp/blockgraph` as a live stream destination for json-formated serialized nodes outputs.  
+Thus, at any moment, that file contains a - *serialized* - blockgraph representation from the current node perspective, using such format :
 
 ```json
 {"node":{"groupId":217,"hash":7144646,"parent":[9288542]}}
 {"node":{"groupId":217,"hash":2681597,"parent":[7144646]}}
 {"node":{"groupId":26,"hash":7377976,"parent":[2681597,8515655]}}
 ```
+
+This format is used for live visualisation, e.g `b4mesh::live_visualizer` component
 
 ### Configuration, installation, deployement
 
