@@ -1,4 +1,4 @@
-name: cmake-green-toolchain
+name: cmake-green-toolchain_latest-env
 
 on: [push, pull_request]
 
