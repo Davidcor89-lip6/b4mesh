@@ -44,7 +44,36 @@ jobs:
         )
 
     - name: CMake cache generation
-      run: ${ { steps.cmake_and_ninja.outputs.cmake_dir } }/cmake -G "Ninja" -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/build/output --target greensoftsdk -S ${{github.workspace}} -B ${{github.workspace}}/build
+      shell: cmake -P {0}
+      run: |
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/ninja" ninja_program)
 
-    - name: Build
-      run: ${ { steps.cmake_and_ninja.outputs.cmake_dir } }/cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        execute_process(
+          COMMAND ${ { steps.cmake_and_ninja.outputs.cmake_dir } }/cmake
+            -S .
+            -B ./build
+            -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}}
+            -DCMAKE_INSTALL_PREFIX:PATH=./build/output
+            -G Ninja
+            -D CMAKE_MAKE_PROGRAM=${ninja_program}
+          RESULT_VARIABLE result
+        )
+        if (NOT result EQUAL 0)
+          message(FATAL_ERROR "Bad exit status")
+        endif()
+
+    - name: CMake build
+      shell: cmake -P {0}
+      run: |
+        set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
+
+        execute_process(
+          COMMAND ${{steps.cmake_and_ninja.outputs.cmake_dir}}/cmake
+            --build ./build
+            --config ${{env.BUILD_TYPE}}
+            --target greensoftsdk
+          RESULT_VARIABLE result
+        )
+        if (NOT result EQUAL 0)
+          message(FATAL_ERROR "Bad exit status")
+        endif()
