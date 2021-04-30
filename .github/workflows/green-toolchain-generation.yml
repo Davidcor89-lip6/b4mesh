@@ -49,7 +49,7 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/ninja" ninja_program)
 
         execute_process(
-          COMMAND ${ { steps.cmake_and_ninja.outputs.cmake_dir } }/cmake
+          COMMAND ${{steps.cmake_and_ninja.outputs.cmake_dir}}/cmake
             -S .
             -B ./build
             -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}}
