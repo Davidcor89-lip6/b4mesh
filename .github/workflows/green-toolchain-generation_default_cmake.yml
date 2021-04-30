@@ -1,0 +1,20 @@
+name: cmake-green-toolchain
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # todo : matrix (linux only)
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: CMake cache generation
+      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/build/output -S ${{github.workspace}} -B ${{github.workspace}}/build
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target greensoftsdk

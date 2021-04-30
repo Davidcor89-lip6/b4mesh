@@ -12,8 +12,39 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    # see https://cristianadam.eu/20191222/using-github-actions-with-c-plus-plus-and-cmake/
+    - name: Download Ninja and CMake
+      id: cmake_and_ninja
+      shell: cmake -P {0}
+      run: |
+        set(ninja_version "1.9.0")
+        set(cmake_version "3.16.2")
+
+        message(STATUS "Using host CMake version: ${CMAKE_VERSION}")
+
+        set(ninja_suffix "linux.zip")
+        set(cmake_suffix "Linux-x86_64.tar.gz")
+        set(cmake_dir "cmake-${cmake_version}-Linux-x86_64/bin")
+
+        set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
+        file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
+
+        set(cmake_url "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-${cmake_suffix}")
+        file(DOWNLOAD "${cmake_url}" ./cmake.zip SHOW_PROGRESS)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./cmake.zip)
+
+        # Save the path for other steps
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
+        message("::set-output name=cmake_dir::${cmake_dir}")
+
+        execute_process(
+          COMMAND chmod +x ninja
+          COMMAND chmod +x ${cmake_dir}/cmake
+        )
+
     - name: CMake cache generation
-      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/build/output --target greensoftsdk -S ${{github.workspace}} -B ${{github.workspace}}/build
+      run: ${ { steps.cmake_and_ninja.outputs.cmake_dir } }/cmake -G "Ninja" -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/build/output --target greensoftsdk -S ${{github.workspace}} -B ${{github.workspace}}/build
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: ${ { steps.cmake_and_ninja.outputs.cmake_dir } }/cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
