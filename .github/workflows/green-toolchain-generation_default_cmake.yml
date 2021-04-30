@@ -14,6 +14,9 @@ jobs:
     # Use default cmake, default generator, default builder
     - uses: actions/checkout@v2
 
+    - name: Install required dependencies packages
+      run : sudo apt update && sudo apt install libboost-dev
+
     - name: CMake cache generation
       run: cmake -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/build/output -S ${{github.workspace}} -B ${{github.workspace}}/build
 
