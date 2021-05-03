@@ -55,6 +55,7 @@ endif()
 
 ## Build
 
+message(STATUS "[${PROJECT_NAME}] : current user is [$ENV{USER}]")
 message(STATUS "[${PROJECT_NAME}] : toolchain is [${CMAKE_TOOLCHAIN_FILE}]")
 message(STATUS "[${PROJECT_NAME}] : CMAKE_BUILD_TYPE is [${CMAKE_BUILD_TYPE}]")
 

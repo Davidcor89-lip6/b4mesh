@@ -1,5 +1,9 @@
 # Extract, build, and create targets related to GreenSoftSDK
 
+if ($ENV{USER} STREQUAL "")
+    message(FATAL_ERROR "[greensoftsdk] USER not set in ENV")
+endif()
+
 include(b4mesh/FindFile)
 
 FindFile(
