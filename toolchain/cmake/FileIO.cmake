@@ -16,7 +16,7 @@ function(FileIO)
 
 	message(STATUS "[FileIO] REMOVING lines matching any of [${FILEIO_TO_REMOVE_PATTERNS}] ...")
 	foreach(PATTERN IN LISTS FILEIO_TO_REMOVE_PATTERNS)
-		message(STATUS "[FileIO] - [${PATTERN}]")
+		message(STATUS "[FileIO] -= [${PATTERN}]")
 	endforeach()
 
 	file(WRITE ${FILEIO_PATH} "")
@@ -36,7 +36,7 @@ function(FileIO)
 
 	message(STATUS "[FileIO] ADDING [${FILEIO_TO_ADD}] lines ...")
 	foreach (LINE IN LISTS FILEIO_TO_ADD)
-		message(STATUS "[FileIO] + [${LINE}]")
+		message(STATUS "[FileIO] += [${LINE}]")
 		file(APPEND ${FILEIO_PATH} "${LINE}\n")
 	endforeach()
 
