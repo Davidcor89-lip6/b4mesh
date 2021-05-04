@@ -296,8 +296,14 @@ To enable project build instead of toolchain generation, you need to specify a v
 **NB** : By default, `greensoftsdk` target install the output toolchain into `${CMAKE_INSTALL_PREFIX}/toolchain`,  
 so you might want to set the `-DCMAKE_INSTALL_PREFIX:PATH="/path/to/install/"` option when generating the toolchain.
 
+**NB** : By default, Green toolchainfile.cmake path is : `<INSTALL_PREFIX>/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake`
+
+> **WARNING** : If you previously used `${SOURCE_DIR}/build` as CMake cache destination for toolchain generation,  
+> then you need to empty it first.  
+> Otherwise, caches might mix-up, which is most likely to result in an ill-formed toolchain detection
+
 ```bash
-mkdir build && cd build
+rm -rf build && mkdir build && cd build
 cmake \
     -G "Ninja"                                 \   # your favorite generator
     -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" \   # Debug, Release, RelWithDebInfo or MinSizeRel
