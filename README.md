@@ -138,6 +138,7 @@ To reproduce :
 
 <details><summary>Possible cache generation output</summary>
 <p>
+
 ```log
 1> Copie des fichiers sur la machine distante.
 1> Début de la copie des fichiers sur la machine distante.
@@ -330,6 +331,7 @@ If you are using Microsoft Visual Studio :
 
 <details><summary>Possible cache generation output</summary>
 <p>
+
 ```log
 1> Copie des fichiers sur la machine distante.
 1> Début de la copie des fichiers sur la machine distante.
