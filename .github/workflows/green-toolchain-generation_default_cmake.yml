@@ -22,8 +22,35 @@ jobs:
               libboost-random-dev \
               libboost-system-dev
 
-    - name: CMake cache generation
-      run: cmake -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/build/output -S ${{github.workspace}} -B ${{github.workspace}}/build
+    # todo : validate -G "Ninja" instead of default "Unix-Makefile"
+    - name: toolchain - CMake cache generation
+      run: cmake \
+            -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} \
+            -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/out/install \
+            -S ${{github.workspace}} \
+            -B ${{github.workspace}}/out/build
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target greensoftsdk
+    - name: toolchain - CMake build
+      run: cmake \
+            --build ${{github.workspace}}/out/build
+            --config ${{env.BUILD_TYPE}}
+            --target greensoftsdk
+
+    - name: toolchain - post build cache cleaning
+      run: rm -rf ${{github.workspace}}/out/build
+
+    - name: project - CMake cache generation
+      run: cmake \
+            -DCMAKE_BUILD_TYPE:STRING="Release" \
+            -DCMAKE_TOOLCHAIN_FILE:FILEPATH="${{github.workspace}}/out/install/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake" \
+            -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
+            -Dremote_install_dir:PATH="/var/persistent-data/b4mesh" \
+            -Db4mesh_USE_CLANG_TIDY:BOOL=OFF \
+            -S ${{github.workspace}} \
+            -B ${{github.workspace}}/out/build
+
+    - name: project - CMake build
+      run: cmake \
+            --build ${{github.workspace}}/out/build
+            --config ${{env.BUILD_TYPE}}
+            --target greensoftsdk
