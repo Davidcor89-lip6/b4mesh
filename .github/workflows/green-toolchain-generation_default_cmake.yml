@@ -27,14 +27,16 @@ jobs:
 
     # todo : validate -G "Ninja" instead of default "Unix-Makefile"
     - name: toolchain - CMake cache generation
-      run: cmake \
+      run: |
+        cmake \
             -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} \
             -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/out/install \
             -S ${{github.workspace}} \
             -B ${{github.workspace}}/out/build
 
     - name: toolchain - CMake build
-      run: cmake \
+      run: |
+        cmake \
             --build ${{github.workspace}}/out/build
             --config ${{env.BUILD_TYPE}}
             --target greensoftsdk
@@ -43,7 +45,8 @@ jobs:
       run: rm -rf ${{github.workspace}}/out/build/*
 
     - name: project - CMake cache generation
-      run: cmake \
+      run: |
+        cmake \
             -DCMAKE_BUILD_TYPE:STRING="Release" \
             -DCMAKE_TOOLCHAIN_FILE:FILEPATH="${{github.workspace}}/out/install/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake" \
             -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
@@ -53,7 +56,8 @@ jobs:
             -B ${{github.workspace}}/out/build
 
     - name: project - CMake build
-      run: cmake \
+      run: |
+        cmake \
             --build ${{github.workspace}}/out/build
             --config ${{env.BUILD_TYPE}}
             --target greensoftsdk
