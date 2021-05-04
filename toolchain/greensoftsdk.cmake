@@ -78,41 +78,46 @@ if (NOT ${greensoftsdk_libdbus-cpp_sha256sum} MATCHES ${greensoftsdk_libdbus-cpp
     )
 endif()
 
+### Subsetp : "[greensoftsdk] patching [.config] file step ..."
+
+set(dot_config_to_add_lines
+    BR2_PACKAGE_BOOST=y
+    BR2_PACKAGE_BOOST_SYSTEM=y
+    BR2_PACKAGE_LIBDBUS_CPP=y
+    BR2_TOOLCHAIN_BUILDROOT_WCHAR=y
+    BR2_PACKAGE_BOOST_RANDOM=y
+)
+set(dot_config_to_remove_lines
+# WIP avec Green : ces deux options sont inutiles pour notre cas
+# https://github.com/Davidcor89-lip6/b4mesh/issues/44#issuecomment-831288991
+
+    ^BR2_TARGET_UBOOT
+    ^BR2_ROOTFS_POST_IMAGE_SCRIPT
+)
+
+# Portable List conversion : "A;B" -> "A$<SEMICOLON>B"
+set(dot_config_to_add_lines_to_str "${dot_config_to_add_lines}")
+set(dot_config_to_remove_lines_to_str "${dot_config_to_remove_lines}")
+string(REPLACE ";" "$<SEMICOLON>" dot_config_to_add_lines_to_str "${dot_config_to_add_lines_to_str}")
+string(REPLACE ";" "$<SEMICOLON>" dot_config_to_remove_lines_to_str "${dot_config_to_remove_lines_to_str}")
+
 ExternalProject_Add_Step(greensoftsdk patch_dot_config_file
     DEPENDEES           update
     DEPENDERS           configure
     
-    COMMENT             "[greensoftsdk] add_boost_to_config step ..."
-    # BR2_PACKAGE_BOOST=y
+    COMMENT             "[greensoftsdk] patching [.config] file step ..."
     COMMAND             ${CMAKE_COMMAND}  
-                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=BR2_PACKAGE_BOOST=y
-                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
-    # BR2_PACKAGE_BOOST_SYSTEM=y
-    COMMAND             ${CMAKE_COMMAND}  
-                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=BR2_PACKAGE_BOOST_SYSTEM=y
-                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
-    # BR2_PACKAGE_LIBDBUS_CPP=y
-    COMMAND             ${CMAKE_COMMAND}  
-                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=BR2_PACKAGE_LIBDBUS_CPP=y
-                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
-    # BR2_TOOLCHAIN_BUILDROOT_WCHAR=y
-    COMMAND             ${CMAKE_COMMAND}  
-                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=BR2_TOOLCHAIN_BUILDROOT_WCHAR=y
-                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
-    # BR2_PACKAGE_BOOST_RANDOM=y
-    COMMAND             ${CMAKE_COMMAND}  
-                            -DFileAppend_DESTINATION=<SOURCE_DIR>/.config
-                            -DFileAppend_DATA=BR2_PACKAGE_BOOST_RANDOM=y
-                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileAppend.cmake
+                            -DFileIO_DIRECT_CALL:BOOL=ON
+                            -DFileIO_PATH:PATH=<SOURCE_DIR>/.config
+                            -DFileIO_TO_ADD=${dot_config_to_add_lines_to_str}
+                            -DFileIO_TO_REMOVE_PATTERNS=${dot_config_to_remove_lines_to_str}
+                            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FileIO.cmake
 
     WORKING_DIRECTORY   <SOURCE_DIR>
     BYPRODUCTS          <SOURCE_DIR>/.config
     ALWAYS              true
 )
+
 ExternalProject_Add_Step(greensoftsdk add_libdbus-cpp
     DEPENDEES           configure
     DEPENDERS           build

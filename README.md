@@ -224,11 +224,11 @@ Fin de la copie des fichiers (durée calendaire 00h:00m:00s:524ms).
 cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk;/root/.vs/cmake/bin/cmake --build "$HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk"  ;
 
 [1/9] [greensoftsdk] add_boost_to_config step ...
--- [FileAppend.cmake] Appenning [BR2_PACKAGE_BOOST=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
--- [FileAppend.cmake] Appenning [BR2_PACKAGE_BOOST_SYSTEM=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
--- [FileAppend.cmake] Appenning [BR2_PACKAGE_LIBDBUS_CPP=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
--- [FileAppend.cmake] Appenning [BR2_TOOLCHAIN_BUILDROOT_WCHAR=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
--- [FileAppend.cmake] Appenning [BR2_PACKAGE_BOOST_RANDOM=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
+-- [FileIO.cmake] += [BR2_PACKAGE_BOOST=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
+-- [FileIO.cmake] += [BR2_PACKAGE_BOOST_SYSTEM=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
+-- [FileIO.cmake] += [BR2_PACKAGE_LIBDBUS_CPP=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
+-- [FileIO.cmake] += [BR2_TOOLCHAIN_BUILDROOT_WCHAR=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
+-- [FileIO.cmake] += [BR2_PACKAGE_BOOST_RANDOM=y] to [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk/toolchain/greensoftsdk-prefix/src/greensoftsdk/.config]
 [2/7] cd /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Debug_target_greensoftsdk && /root/.vs/cmake/bin/cmake --graphviz=/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc/build/dependencies_diagram.dot . && dot -Tpng /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc/build/dependencies_diagram.dot -o /root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/doc/build/dependencies_diagram.png
 -- [b4mesh] Loading modules [/root/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/src/cmake/modules] ...
 -- [b4mesh] : toolchain is []
