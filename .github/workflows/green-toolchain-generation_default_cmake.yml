@@ -22,6 +22,9 @@ jobs:
               libboost-random-dev \
               libboost-system-dev
 
+    - name: Creating CMake directories (cache, install)
+      run: mkdir -p ${{github.workspace}}/out/build && ${{github.workspace}}/out/build
+
     # todo : validate -G "Ninja" instead of default "Unix-Makefile"
     - name: toolchain - CMake cache generation
       run: cmake \
@@ -37,7 +40,7 @@ jobs:
             --target greensoftsdk
 
     - name: toolchain - post build cache cleaning
-      run: rm -rf ${{github.workspace}}/out/build
+      run: rm -rf ${{github.workspace}}/out/build/*
 
     - name: project - CMake cache generation
       run: cmake \
