@@ -54,9 +54,6 @@ if (DEFINED FileIO_DIRECT_CALL)
 		message(FATAL_ERROR "[FileIO.cmake] : Missing mandatory argument FileIO_TO_REMOVE_PATTERNS")
 	endif()
 
-	message(STATUS ">>>> FILEIO : [${FileIO_TO_ADD}]")
-	message(STATUS ">>>> FILEIO : [${FileIO_TO_REMOVE_PATTERNS}]")
-
 	FileIO(PATH ${FileIO_PATH}
 		TO_ADD
 			${FileIO_TO_ADD}

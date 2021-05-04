@@ -37,8 +37,8 @@ jobs:
     - name: toolchain - CMake build
       run: |
         cmake \
-            --build ${{github.workspace}}/out/build
-            --config ${{env.BUILD_TYPE}}
+            --build ${{github.workspace}}/out/build \
+            --config ${{env.BUILD_TYPE}} \
             --target greensoftsdk
 
     - name: toolchain - post build cache cleaning
@@ -58,6 +58,6 @@ jobs:
     - name: project - CMake build
       run: |
         cmake \
-            --build ${{github.workspace}}/out/build
-            --config ${{env.BUILD_TYPE}}
+            --build ${{github.workspace}}/out/build \
+            --config ${{env.BUILD_TYPE}} \
             --target greensoftsdk
