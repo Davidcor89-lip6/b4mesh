@@ -23,7 +23,7 @@ jobs:
               libboost-system-dev
 
     - name: Creating CMake directories (cache, install)
-      run: mkdir -p ${{github.workspace}}/out/build && ${{github.workspace}}/out/build
+      run: mkdir -p ${{github.workspace}}/out/build && mkdir -p ${{github.workspace}}/out/build
 
     # todo : validate -G "Ninja" instead of default "Unix-Makefile"
     - name: toolchain - CMake cache generation
