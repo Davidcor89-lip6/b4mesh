@@ -59,5 +59,4 @@ jobs:
       run: |
         cmake \
             --build ${{github.workspace}}/out/build \
-            --config ${{env.BUILD_TYPE}} \
-            --target greensoftsdk
+            --config ${{env.BUILD_TYPE}}
