@@ -36,6 +36,8 @@ Use the green communication tutorial *(GreenPi/b4meshnetwork)*
 
 ## 🏗️ How to build this project ?
 
+> ℹ️ You can find command lines examples in the default [CI workflow descriptor file](.github/workflows/green-toolchain-generation_default_cmake.yml).
+
 The following project build requires a ***two-step action***.
 
 ### Requirements
@@ -43,7 +45,7 @@ The following project build requires a ***two-step action***.
 | Package name | Minimum release |
 | ------------ | --------------- |
 | `CMake`                       | **3.14.2** *(>= 3.18.3975358 is better)* |
-| `GCC`                         | **9.3.0** *(7.5 might work)* |
+| `GCC`                         | **7.5** *(>= 9.0.0 is better)*|
 | `gmake`, `nmake` or `make`    | ? |
 | `bash` or `sh`                | ? |
 
@@ -273,6 +275,8 @@ Réussite de l'opération Tout générer.
 </p></details>
 
 ### 🛠️ Project build
+
+> ℹ️ Beside reading this documention, you should simply check for available CMake options.  
 
 The following steps describe how to build b4mesh projects components.  
 This requires that previous steps was succesfuly followed (see the [toolchain generation section](#️-toolchain-generation) above).
@@ -576,13 +580,103 @@ cd $HOME/.vs/b4mesh/04888722-7ab6-435b-947b-dca7becdfea8/out/build/Linux-GCC-Deb
 # ...
 ```
 
+## 🏗️ How to install this project ?
 
+Depending on CMake's option `DEPLOYEMENT_TYPE` - either `LOCAL` or `REMOTE`,  
+b4mesh components - *including `b4mesh::live_visualizer`, see [live visualisation](#live-visualisation) section for details* - can be install locally or on remotes machines.
+
+### Local installation
+
+The behavior described hereafter happends when `DEPLOYEMENT_TYPE` is set to `LOCAL`.
+
+- `b4mesh` binaries and libraries are locally installed, into `CMAKE_INSTALL_PREFIX` path as destination.  
+  According to CMake standard, names are generated according to the build plateform.  
+  > Exemple : `b4mesh::core_engine` output filename is :  
+  > `${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}${PROJECT_NAME}_coreEngine${CMAKE_SHARED_LIBRARY_SUFFIX}`
+  > - Which might results in `libb4mesh_coreEngine.so` on Linux, `b4mesh_coreEngine.dll` on Windows.
+
+```bash
+cmake --build /path/to/build/ --target install
+
+# or directly use your generator
+# - with Unix-Makefile : make install
+# - with Ninja-builder : ninja install
+```
+
+Possible installation result :
+
+```log
+/path/to/b4mesh/install/dir/
+|-- b4mesh
+|   |-- bin
+|   |   `-- b4mesh_binary
+|   `-- lib
+|       `-- libb4mesh_coreEngine.so
+`-- b4mesh_live_visualizer
+    |-- configuration.js
+    |-- favicon.ico
+    |-- index.html
+    |-- nginx
+    |   `-- http_live_visualizer.conf
+    |-- scripts
+    |   |-- json_to_dot.js
+    |   |-- poll_worker_task.js
+    |   |-- string_hash.js
+    |   `-- view_operations.js
+    `-- style.css
+
+6 directories, 11 files
+```
+
+> About the `RPATH` : `b4mesh_binary` dynamically requires `libb4mesh_coreEngine.so` to run properly.
+
+### Remote deployement
+
+The behavior described hereafter happends when `DEPLOYEMENT_TYPE` is set to `REMOTE`.
+
+Involved build arguments :
+
+| Argument | type |  Mandatory ? | Default value |
+| -------- | ---- | ------------ | ------------- |
+| DEPLOYEMENT_TYPE             | ENUM<br>`LOCAL` or `REMOTE`       | NO  | LOCAL |
+| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | Yes | None  |
+| remote_install_dir           | PATH | No | None |
+
+> About the `RPATH` : `b4mesh_binary` dynamically requires `libb4mesh_coreEngine.so` to run properly.
+
+This 
+
+```log
+/path/to/b4mesh/install/dir/
+|-- b4mesh_binary
+|-- libb4mesh_coreEngine.so
+`-- b4mesh_live_visualizer
+    |-- configuration.js
+    |-- favicon.ico
+    |-- index.html
+    |-- scripts
+    |   |-- json_to_dot.js
+    |   |-- poll_worker_task.js
+    |   |-- string_hash.js
+    |   `-- view_operations.js
+    `-- style.css
+```
+
+As well as nginx configuration files:
+
+```log
+/etc/nginx/qolyester.d/
+ |-- add_transaction.conf
+ |-- http_live_visualizer.conf
+```
+
+And will make the Nginx server instance to reload its configuration, in order to apply changes.
 
 ## Nginx configuration
 
 ### Automatically
 
-See [Configuration, installation, deployement](#configuration-installation-deployement) section below
+See [Configuration, installation, deployement](#configuration-installation-deployement) section above.
 
 ### Manually ***(deprecated)***
 
@@ -619,6 +713,10 @@ sudo nginx -s reload
 
 ## live visualisation
 
+> ⚠️**Warning** : this component is part of `b4mesh`.  
+Thus, all informations described hereunder are for documentation purpose only.  
+All configuration, build, install and deployement steps are handled by `b4mesh` top-level CMakeLists.txt.
+
 The component `b4mesh::binary` use a file, `/tmp/blockgraph` as a live stream destination for json-formated serialized nodes outputs.  
 Thus, at any moment, that file contains a - *serialized* - blockgraph representation from the current node perspective, using such format :
 
@@ -632,7 +730,7 @@ This format is used for live visualisation, e.g `b4mesh::live_visualizer` compon
 
 ### Configuration, installation, deployement
 
-CMake's top-level script handle **configuration**, **install**, and **deployement** - *on remote machines* - of b4mesh's `live visualisation` component.
+CMake's top-level script handle **configuration**, **install**, and **deployement** - *locally or on remote machines* - of b4mesh's `live visualisation` component.
 
 **NB** : Such script also handles nginx endpoints configuration, deploying into `/etc/nginx/qolyester.d` path.
 
@@ -643,7 +741,8 @@ CMake's top-level script handle **configuration**, **install**, and **deployemen
 
 | Argument | type |  Mandatory ? | Default value |
 | -------- | ---- | ------------ | ------------- |
-| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | Yes | None |
+| DEPLOYEMENT_TYPE             | ENUM<br>`LOCAL` or `REMOTE`       | NO  | LOCAL |
+| remote_machines_IP           | STRING<BR>*(`\;-separated` LIST)* | Yes | None  |
 | remote_install_dir           | PATH | No | None |
 | live_visualizer_install_dir  | PATH | Yes if standalone | Only if not standalone :<br>`${remote_install_dir}`/live_visualizer |
 | live_visualizer_refresh_rate | INTEGER<br>*(in milliseconds)* | No | 3000 |
@@ -665,7 +764,7 @@ cmake   --target=b4mesh_live_visualizer \ # force standalone
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
         ..
-cmake --install .
+cmake --build . --target install
 ```
 
 Which is equivalent to :
@@ -677,7 +776,7 @@ cmake   \
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
         ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
-cmake --install .
+cmake --build . --target install
 ```
 
 Alternatively, as mentioned in the arguments table hereabove,  
