@@ -63,7 +63,4 @@ jobs:
 
 
     - name: project - CMake install
-      run: |
-        cmake \
-            --build ${{github.workspace}}/out/build \
-            --target install
+      run: cmake --install ${{github.workspace}}/out/build

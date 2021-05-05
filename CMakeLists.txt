@@ -103,7 +103,7 @@ endif()
 
 ### Install : local
 
-install(CODE "MESSAGE(\"[${PROJECT_NAME}] : Installing locally ...\")")
+install(CODE "MESSAGE(\"[${PROJECT_NAME}] : Installing locally, into [${CMAKE_INSTALL_PREFIX}]...\")")
 include(GNUInstallDirs)
 install(
     TARGETS

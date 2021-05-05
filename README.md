@@ -596,7 +596,7 @@ The behavior described hereafter happends when `DEPLOYEMENT_TYPE` is set to `LOC
   > - Which might results in `libb4mesh_coreEngine.so` on Linux, `b4mesh_coreEngine.dll` on Windows.
 
 ```bash
-cmake --build /path/to/build/ --target install
+cmake --install /path/to/build/
 
 # or directly use your generator
 # - with Unix-Makefile : make install
@@ -764,7 +764,8 @@ cmake   --target=b4mesh_live_visualizer \ # force standalone
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
         ..
-cmake --build . --target install
+cmake --build .
+cmake --install .
 ```
 
 Which is equivalent to :
@@ -776,7 +777,8 @@ cmake   \
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         -Dlive_visualizer_install_dir:PATH=\"/var/persistent-data/b4mesh/live_visualizer\"                      \
         ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
-cmake --build . --target install
+cmake --build .
+cmake --install .
 ```
 
 Alternatively, as mentioned in the arguments table hereabove,  
@@ -792,6 +794,7 @@ cmake   \
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         -Dremote_install_dir:PATH=\"/var/persistent-data/b4mesh\" \ # remote_install_dir here, not explicit live_visualizer_install_dir
         ../live_visualizer # explictly run live_visualizer/CMakeLists.txt, not the top-level script
+cmake --build .
 cmake --install .
 ```
 
@@ -804,6 +807,7 @@ cmake   \
         -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
         -Dremote_install_dir:PATH=\"/var/persistent-data/b4mesh\"
         ..
+cmake --build .
 cmake --install .
 ```
 
