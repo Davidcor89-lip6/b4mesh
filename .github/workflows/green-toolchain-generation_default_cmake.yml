@@ -60,3 +60,7 @@ jobs:
         cmake \
             --build ${{github.workspace}}/out/build \
             --config ${{env.BUILD_TYPE}}
+
+
+    - name: project - CMake install
+      run: cmake --build . --target install

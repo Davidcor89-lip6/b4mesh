@@ -89,64 +89,98 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sources)
 
 # todo : option(b4mesh_BUILD_TESTS) => test() + gtest dependencies
 
-## Deployement
+## Install
 
-# todo : package() ... ?
-
-### Binary
-
-# todo ...
-# - install() ... include(GNUInstallDirs)
-
-### Live visualizer
-
-set(remote_machines_IP "NOT_DEFINED" CACHE PATH "deployement : list of ;-separated remotes IP")
-if (remote_machines_IP MATCHES "NOT_DEFINED")
-    message(FATAL_ERROR "`remote_machines_IP` is a mandatory parameter")
-endif()
-message(STATUS "${PROJECT_NAME} : Remote machines IPs set to :")
-foreach(IP IN LISTS remote_machines_IP)
-    message(STATUS "- ${IP}")
-endforeach()
-
-set(remote_install_dir "NOT_DEFINED" CACHE PATH "deployement : remote install dir")
-if (remote_install_dir MATCHES "NOT_DEFINED")
-    message(FATAL_ERROR "`remote_install_dir` is a mandatory parameter")
-endif()
-include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/utility.cmake)
-unquote_string(${remote_install_dir} remote_install_dir)
-
-message(STATUS "${PROJECT_NAME} : remote_install_dir set to : ${remote_install_dir}")
-
-include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/remote_deploy.cmake)
-
-## remote FS initialization
-install(CODE "MESSAGE(\"[deployment] Initializing remote directories...\")")
-install(CODE "include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/remote_deploy.cmake)")
-
-## nginx
-# - /add_transaction
-install(CODE "MESSAGE(\"[deployment] Deploying b4mesh (nginx endpoints)...\")")
-install(CODE "send_to_remote_machines(
-                DESTINATIONS \"${remote_machines_IP}\"
-                PATH
-                    /tmp
-                FILES
-                    ${CMAKE_SOURCE_DIR}/nginx/add_transaction.conf
-                SSHPASS_USER    b4meshroot
-                SSH_USER        default
-            )"
+set(DEPLOYEMENT_TYPE_ALLOWED_VALUES
+    LOCAL
+    REMOTE
 )
-foreach(IP IN LISTS remote_machines_IP)
-    install(CODE "remote_root_move_file(
-        DESTINATION_IP      ${IP} 
-        SOURCE_PATH         /tmp/add_transaction.conf
-        DESTINATION_PATH    /etc/nginx/qolyester.d/
-        SSHPASS_USER        b4meshroot
-        SSH_USER            default
-        ROOT_PASSWORD       b4meshroot
-    )")
-endforeach()
+set(DEPLOYEMENT_TYPE "LOCAL" CACHE PATH "Deployement type : LOCAL or REMOTE")
+message(STATUS "[${PROJECT_NAME}] : DEPLOYEMENT_TYPE_ALLOWED_VALUES set to [${DEPLOYEMENT_TYPE}]")
+if (NOT ("${DEPLOYEMENT_TYPE}" IN_LIST DEPLOYEMENT_TYPE_ALLOWED_VALUES))
+    message(FATAL_ERROR "DEPLOYEMENT_TYPE : not allowed value [${DEPLOYEMENT_TYPE}] used.")
+endif()
+
+### Install : local
+
+install(CODE "MESSAGE(\"[${PROJECT_NAME}] : Installing locally ...\")")
+include(GNUInstallDirs)
+install(
+    TARGETS
+        ${PROJECT_NAME}_utils
+        ${PROJECT_NAME}_coreEngine
+        ${PROJECT_NAME}_binary
+        ${PROJECT_NAME}_http
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/${CMAKE_INSTALL_LIBDIR}
+    RESOURCE DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/resources
+)
+
+### Install : remote (deployement)
+
+if ("${DEPLOYEMENT_TYPE}" STREQUAL "REMOTE")
+
+    set(remote_machines_IP "NOT_DEFINED" CACHE PATH "deployement : list of ;-separated remotes IP")
+    if (remote_machines_IP MATCHES "NOT_DEFINED")
+        message(FATAL_ERROR "`remote_machines_IP` is a mandatory parameter")
+    endif()
+    message(STATUS "${PROJECT_NAME} : Remote machines IPs set to :")
+    foreach(IP IN LISTS remote_machines_IP)
+        message(STATUS "- ${IP}")
+    endforeach()
+
+    set(remote_install_dir "NOT_DEFINED" CACHE PATH "deployement : remote install dir")
+    if (remote_install_dir MATCHES "NOT_DEFINED")
+        message(FATAL_ERROR "`remote_install_dir` is a mandatory parameter")
+    endif()
+    include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/utility.cmake)
+    unquote_string(${remote_install_dir} remote_install_dir)
+
+    message(STATUS "${PROJECT_NAME} : remote_install_dir set to : ${remote_install_dir}")
+
+    include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/remote_deploy.cmake)
+
+    ## remote FS initialization
+    install(CODE "MESSAGE(\"[deployment] Initializing remote directories...\")")
+    install(CODE "include(${CMAKE_SOURCE_DIR}/cmake/modules/b4mesh/remote_deploy.cmake)")
+
+    ## Binaries / libraries
+    install(CODE "MESSAGE(\"[deployment] Deploying b4mesh (binaries / libraries)...\")")
+    install(CODE "send_to_remote_machines(
+                    DESTINATIONS \"${remote_machines_IP}\"
+                    PATH
+                        ${remote_install_dir}
+                    FILES
+                        ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}_binary
+                        ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}${PROJECT_NAME}_coreEngine${CMAKE_SHARED_LIBRARY_SUFFIX}
+                    SSHPASS_USER    b4meshroot
+                    SSH_USER        default
+                )"
+    )
+
+    ## nginx
+    # - /add_transaction
+    install(CODE "MESSAGE(\"[deployment] Deploying b4mesh (nginx endpoints)...\")")
+    install(CODE "send_to_remote_machines(
+                    DESTINATIONS \"${remote_machines_IP}\"
+                    PATH
+                        /tmp
+                    FILES
+                        ${CMAKE_SOURCE_DIR}/nginx/add_transaction.conf
+                    SSHPASS_USER    b4meshroot
+                    SSH_USER        default
+                )"
+    )
+    foreach(IP IN LISTS remote_machines_IP)
+        install(CODE "remote_root_move_file(
+            DESTINATION_IP      ${IP} 
+            SOURCE_PATH         /tmp/add_transaction.conf
+            DESTINATION_PATH    /etc/nginx/qolyester.d/
+            SSHPASS_USER        b4meshroot
+            SSH_USER            default
+            ROOT_PASSWORD       b4meshroot
+        )")
+    endforeach()
+endif()
 
 add_subdirectory(live_visualizer)
-
