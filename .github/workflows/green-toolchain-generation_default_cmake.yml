@@ -48,6 +48,7 @@ jobs:
       run: |
         cmake \
             -DCMAKE_BUILD_TYPE:STRING="Release" \
+            -DCMAKE_INSTALL_PREFIX:PATH=${{github.workspace}}/out/install \
             -DCMAKE_TOOLCHAIN_FILE:FILEPATH="${{github.workspace}}/out/install/toolchain/greensoftsdk/share/buildroot/toolchainfile.cmake" \
             -Dremote_machines_IP:STRING="10.181.178.217;10.181.172.130;10.154.134.26;10.154.134.170;10.181.178.210" \
             -Dremote_install_dir:PATH="/var/persistent-data/b4mesh" \
