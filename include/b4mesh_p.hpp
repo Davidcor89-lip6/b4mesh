@@ -77,6 +77,8 @@ class B4Mesh
          * Sets the flag createblock to control the block creation process 
          */
         void setCreateBlock(bool cb);
+
+        void RegisterGroupId(string groupId);
         
         /**
          * Function that generate the blockgraph file
@@ -104,6 +106,8 @@ class B4Mesh
          */ 
         void RegisterTransaction(std::string payload);
 
+        void RetransmitTransactions();
+
          /**
          * Broadcast the transaction to the local group
          */ 
@@ -114,6 +118,12 @@ class B4Mesh
          * create a block. -Only Leader - the block is broadcasted to the local group
          */
         void GenerateBlocks();
+
+        bool IsMergeInProcess ();
+
+        Block GenerateMergeBlock(Block &block);
+
+        Block GenerateRegularBlock(Block &block);
 
         /**
          * Select the older transactions to put them in a block
@@ -153,7 +163,7 @@ class B4Mesh
         /**
          * Updates the Mempool once the Block is added to the BG
          */
-        void UpdatingMempool(std::vector<Transaction> transactions);
+        void UpdatingMempool(std::vector<Transaction> transactions, std::string b_hash);
 
 
     public:
@@ -216,7 +226,10 @@ class B4Mesh
          * from the non-leaders nodes. The leader node will then process this anwsers to 
          * found missing side-chains.
          */
-        void ChildlessBlockTreatment(const std::string& msg_payload, std::string ip);
+        void ProcessChildlessResponse(const std::string& msg_payload, std::string ip);
+        void RegisterChildless(std::string childless, std::string ip);
+        void ChildlessBlockTreatment(std::string childless, std::string ip);
+        void CheckMergeBlockCreation(void);
 
         /**
          * Send a full side-chain to the leader upon a GROUPBRANCH_REQ
@@ -228,6 +241,8 @@ class B4Mesh
          *  after receiving a merge block
          */
         void SyncNode(vector<Transaction> transactions);
+        void StartSyncProcedure(vector<Transaction> transactions);
+        void SendBranchRequest();
 
         /**
          * Updates the missing_block_list. If new block is a missing parent
@@ -290,6 +305,12 @@ class B4Mesh
          */
         int SizeMempoolBytes ();
 
+        void MempoolSampling ();
+
+        void TxsPerformances ();
+
+        void TraceTxLatency (Transaction t, std::string b_hash);
+
     public:
         /*
             * Getting performances using Traces
@@ -298,17 +319,16 @@ class B4Mesh
 
     public:
         /* Traces for B4Mesh App */
-        unsigned int sizemempool;
         std::vector <std::pair<int, std::pair <int, int>>> blockgraph_file;
 
     private:
         // Private member variables of blockgraph protocol
 
-        unsigned int blocktxsSize;  //  The critiria of num of txs in mempool to create a block
         bool mergeBlock;            //  When mergeBlock is true, GenerateBlock functions creates a merge block 
         bool createBlock;           //  When createBlock is false, a block can't be created.  (Merge Procedure)
-        double lastBlock;           //  The time of the creation of the last block
+        double lastBlock_creation_time; //  The time of the creation of the last block
         std::string groupId;        // GroupId of a group
+        std::vector<std::string> groupId_register;
         std::vector<std::pair<std::string, std::string>> missing_block_list;    // List of missing blocks in the local BG <BlockHash, IpOfNodeWhoHasTheMissingParent>
         std::vector<std::string> missing_childless;     // Hashes of childless block not in the local blockgraph
         std::map<std::string, Transaction> pending_transactions;  // mempool of transactions
@@ -319,6 +339,7 @@ class B4Mesh
         std::ofstream visuBlock; //File to visualize live the blockgraph 
         void AddBlockToVisuFile(Block b);
         std::ofstream visuMemPool; //File to visualize live the number of transaction in the mempool and usage rate
+        std::ofstream visuTxsPerf; //File to visualize the nomber of transactions committed per second and the number of txs generated
     
     private:
         // Private member variable use for performances purposes   
@@ -346,6 +367,7 @@ class B4Mesh
         std::map<std::string, double> pending_transactions_time;  // time when a transaction enter the mempool
         std::map<std::string, double> waiting_list_time; // time when a blocks enter the waiting list
         std::map<std::string, double> missing_list_time; // time when a blocks enter the missing list
+        std::multimap<std::string, std::pair<std::string, double>> TxsLatency;
     
     private:
        
@@ -371,8 +393,14 @@ class B4Mesh
         void timer_recurrentTask_fct (const boost::system::error_code& /*e*/);
         boost::asio::steady_timer timer_recurrentTask;
 
+        void timer_recurrentSampling_fct (const boost::system::error_code& /*e*/);
+        boost::asio::steady_timer timer_recurrentSampling;
+
         void timer_childless_fct (const boost::system::error_code& /*e*/);
         boost::asio::steady_timer timer_childless;
+
+        void timer_checkCreateBlock_fct (const boost::system::error_code& /*e*/);
+        boost::asio::steady_timer timer_createBlock;
 
 };
 

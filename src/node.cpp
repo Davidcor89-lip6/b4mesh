@@ -70,6 +70,7 @@ void node::setGroupId (std::vector<std::string> new_listnodes){
         groupstring += ip;
     }
     groupId = hashing(groupstring); 
+    b4mesh_->RegisterGroupId(groupId);
     std::cout << " Group Id is: " << groupId << std::endl;
 }
 
