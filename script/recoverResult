@@ -6,10 +6,14 @@ List_IP=("10.181.178.217" "10.181.172.130" "10.154.134.26" "10.154.134.170" "10.
 for addr in "${List_IP[@]}"
 do
     echo $addr
+    sshpass -p 'b4meshroot' ssh default@$addr 'cd /var/persistent-data/b4mesh/; ./changename.sh; exit'
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/blockgraph* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/mempool* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/performances* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/block_creation_time* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/block_treatment_time* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/tx_treatment_time* Results
+    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/live_mempool* Results
+    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/live_txs_perf* Results
+    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/TxsLatency* Results
 done

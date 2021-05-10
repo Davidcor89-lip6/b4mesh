@@ -163,7 +163,7 @@ class B4Mesh
         /**
          * Updates the Mempool once the Block is added to the BG
          */
-        void UpdatingMempool(std::vector<Transaction> transactions);
+        void UpdatingMempool(std::vector<Transaction> transactions, std::string b_hash);
 
 
     public:
@@ -305,6 +305,12 @@ class B4Mesh
          */
         int SizeMempoolBytes ();
 
+        void MempoolSampling ();
+
+        void TxsPerformances ();
+
+        void TraceTxLatency (Transaction t, std::string b_hash);
+
     public:
         /*
             * Getting performances using Traces
@@ -333,6 +339,7 @@ class B4Mesh
         std::ofstream visuBlock; //File to visualize live the blockgraph 
         void AddBlockToVisuFile(Block b);
         std::ofstream visuMemPool; //File to visualize live the number of transaction in the mempool and usage rate
+        std::ofstream visuTxsPerf; //File to visualize the nomber of transactions committed per second and the number of txs generated
     
     private:
         // Private member variable use for performances purposes   
@@ -360,6 +367,7 @@ class B4Mesh
         std::map<std::string, double> pending_transactions_time;  // time when a transaction enter the mempool
         std::map<std::string, double> waiting_list_time; // time when a blocks enter the waiting list
         std::map<std::string, double> missing_list_time; // time when a blocks enter the missing list
+        std::multimap<std::string, std::pair<std::string, double>> TxsLatency;
     
     private:
        
@@ -385,8 +393,14 @@ class B4Mesh
         void timer_recurrentTask_fct (const boost::system::error_code& /*e*/);
         boost::asio::steady_timer timer_recurrentTask;
 
+        void timer_recurrentSampling_fct (const boost::system::error_code& /*e*/);
+        boost::asio::steady_timer timer_recurrentSampling;
+
         void timer_childless_fct (const boost::system::error_code& /*e*/);
         boost::asio::steady_timer timer_childless;
+
+        void timer_checkCreateBlock_fct (const boost::system::error_code& /*e*/);
+        boost::asio::steady_timer timer_createBlock;
 
 };
 

@@ -2,8 +2,9 @@
 
 //Constructor - Global variables initialization
 B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std::string myIP, bool geneTrans)
-  : visuBlock(LIVEBLOCK_FILE),
+  :  visuBlock(LIVEBLOCK_FILE),
   visuMemPool(LIVEMEMPOOL_FILE),
+  visuTxsPerf(LIVETXS_FILE),
   node_(node),
   mIP_(myIP),
   time_start(std::chrono::steady_clock::now()),
@@ -13,7 +14,9 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   dist_exp(rng, boost::exponential_distribution<>(LAMBDA_DIST)), 
   timer_generateT(io_context,std::chrono::steady_clock::now()),
   timer_recurrentTask(io_context,std::chrono::steady_clock::now()),
-  timer_childless(io_context,std::chrono::steady_clock::now())
+  timer_recurrentSampling(io_context, std::chrono::steady_clock::now()),
+  timer_childless(io_context,std::chrono::steady_clock::now()),
+  timer_createBlock(io_context,std::chrono::steady_clock::now())
 {
   /* Group Management System Variables Init */
   groupId = string(32,0);
@@ -41,13 +44,18 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   count_waitingBlock = 0;
 	total_pendingTxTime = 0;
   count_pendingTx = 0;
+  TxsLatency = std::multimap<std::string, std::pair<std::string, double>> ();
   blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
-
-
 
   //recurrent task
   timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
+
+  timer_recurrentSampling.expires_from_now(std::chrono::seconds(10));
+  timer_recurrentSampling.async_wait(boost::bind(&B4Mesh::timer_recurrentSampling_fct, this, boost::asio::placeholders::error));
+
+  timer_createBlock.expires_from_now(std::chrono::seconds(1));
+  timer_createBlock.async_wait(boost::bind(&B4Mesh::timer_checkCreateBlock_fct, this, boost::asio::placeholders::error));
 
   //lancement transaction
   if ( geneTrans )
@@ -75,6 +83,33 @@ void B4Mesh::timer_recurrentTask_fct (const boost::system::error_code& /*e*/)
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
 }
+
+void B4Mesh::timer_recurrentSampling_fct (const boost::system::error_code& /*e*/){
+
+  MempoolSampling ();
+  TxsPerformances ();
+
+  timer_recurrentSampling.expires_from_now(std::chrono::seconds(RECURRENT_SIMPLING));
+  timer_recurrentSampling.async_wait(boost::bind(&B4Mesh::timer_recurrentSampling_fct, this, boost::asio::placeholders::error));
+
+}
+
+void B4Mesh::timer_checkCreateBlock_fct(const boost::system::error_code& /*e*/){
+
+   // If leader and enough transactions in mempool. Then create block.
+  if(node_->consensus_.AmILeader() == false){
+    return;
+  }
+
+  if (TestPendingTxs() == true && createBlock == true){     
+    GenerateBlocks();
+  }
+
+  timer_createBlock.expires_from_now(std::chrono::seconds(1));
+  timer_createBlock.async_wait(boost::bind(&B4Mesh::timer_checkCreateBlock_fct, this, boost::asio::placeholders::error));
+}
+
+
 
 void B4Mesh::RegisterGroupId(std::string group){
 
@@ -199,6 +234,7 @@ void B4Mesh::SendTransaction(Transaction t){
 void B4Mesh::TransactionsTreatment(Transaction t)
 {
   auto t1 = std::chrono::high_resolution_clock::now();
+
   if (!IsTxInMempool(t)){
   //    DEBUG << "Transaction not in mempool. " << std::endl;
       if (!blockgraph.IsTxInBG(t)){
@@ -227,12 +263,6 @@ void B4Mesh::TransactionsTreatment(Transaction t)
   tx_treatment_time.push_back(time_treatment.count());
   total_treatment_tx_t += time_treatment;
 
-  // If leader and enough transactions in mempool. Then create block.
-  if(node_->consensus_.AmILeader() == true){
-    if (TestPendingTxs() == true && createBlock == true){     
-      GenerateBlocks();
-    }
-  }
 }
 
 void B4Mesh::RetransmitTransactions(){
@@ -250,8 +280,7 @@ void B4Mesh::RetransmitTransactions(){
 			}
 		}
 	}
-  // For trace purpose
-	visuMemPool << pending_transactions.size() << " " << (float)(pending_transactions.size())/(float)(SIZE_MEMPOOL) << "%" << std::endl;
+ 
 }
 
 bool B4Mesh::IsTxInMempool (Transaction t)
@@ -266,7 +295,7 @@ bool B4Mesh::IsTxInMempool (Transaction t)
 
 bool B4Mesh::IsSpaceInMempool (){
 
-  if (pending_transactions.size() < SIZE_MEMPOOL){
+  if ( SizeMempoolBytes()/1000 < SIZE_MEMPOOL){
     return true;
   }
   else {
@@ -632,7 +661,7 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
   }
 
 
-  UpdatingMempool(b.GetTransactions());
+  UpdatingMempool(b.GetTransactions(), b.GetHash());
   DEBUG << " AddBlockToBlockgraph: Adding the block "<< b.GetHash().data() << " to the blockgraph" << std::endl;
   blockgraph.AddBlock(b);
   // For traces propuses
@@ -641,13 +670,15 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
   AddBlockToVisuFile(b);
 }
 
-void B4Mesh::UpdatingMempool (vector<Transaction> transactions)
+void B4Mesh::UpdatingMempool (vector<Transaction> transactions, std::string b_hash)
 {
     //DumpMempool();
   for (auto &t : transactions){
     if (pending_transactions.count(t.GetHash()) > 0){
       DEBUG << " UpdatingMempool: Transaction " << t.GetHash() << " founded" << std::endl;
       DEBUG << " UpdatingMempool: Erasing transaction from Mempool... " << std::endl;
+      // Traces
+      TraceTxLatency(t, b_hash);
       pending_transactions.erase(t.GetHash());
 
       //Trace purpose
@@ -657,6 +688,7 @@ void B4Mesh::UpdatingMempool (vector<Transaction> transactions)
     }
     else {
       DEBUG << " UpdatingMempool:  I don't know this transaction " << t.GetHash() << std::endl;
+      TraceTxLatency(t, b_hash);
     }
   }
 }
@@ -951,7 +983,7 @@ bool B4Mesh::TestPendingTxs(){
     // Only leader execute this function
 
 	if (getSeconds() - lastBlock_creation_time > TIME_BTW_BLOCK){
-		if (pending_transactions.size() > MIN_SIZE_BLOCK){
+		if (SizeMempoolBytes()/1000 > MIN_SIZE_BLOCK){
 			DEBUG << YELLOW << " TestPendingTxs: Enough txs to create a block." << std::endl;
 			return true;
 		}
@@ -969,7 +1001,7 @@ vector<Transaction> B4Mesh::SelectTransactions(){
 
   vector<Transaction> transactions;
 
-  while(transactions.size() < SIZE_BLOCK- 1){
+  while(SizeMempoolBytes()/1000 < MAX_SIZE_BLOCK){
     pair<string, double> min_ts = make_pair("0", 9999999);
     for(auto &t : pending_transactions){
       if(find(transactions.begin(), transactions.end(), t.second) != transactions.end()){
@@ -1247,6 +1279,20 @@ void B4Mesh::SendBlockToConsensus(Block b)
 
 // *************** TRACES AND PERFORMANCES ***********************************
 
+void B4Mesh::MempoolSampling (){
+
+   // For trace purpose
+	visuMemPool << getSeconds() << " " << pending_transactions.size() << " " << SizeMempoolBytes()/1000 << " " << (float)((SizeMempoolBytes()/1000)*100)/(float)(SIZE_MEMPOOL) << "%" << std::endl;
+
+}
+
+void B4Mesh::TxsPerformances (){
+
+  visuTxsPerf << getSeconds() << " " << (float)(blockgraph.GetTxsCount())/getSeconds() << " " << blockgraph.GetTxsCount() << " " << numTxsG << std::endl;
+
+}
+
+
 void B4Mesh::CreateGraph(Block &b){
   vector<string> parents_of_block = b.GetParents();
   pair<int,pair<int,int>> create_blockgraph = pair<int,pair<int,int>> ();
@@ -1264,7 +1310,12 @@ void B4Mesh::CreateGraph(Block &b){
   }
 }
 
+void B4Mesh::TraceTxLatency(Transaction t, std::string b_hash){
+  TxsLatency.insert(pair<std::string, std::pair<std::string, double>> (b_hash.data(), make_pair(t.GetHash().data(), getSeconds() - t.GetTimestamp())));
+}
+
 int B4Mesh::SizeMempoolBytes(void){
+
     int ret = 0;
     for (auto &t : pending_transactions){
     ret += t.second.GetSize();
@@ -1330,8 +1381,8 @@ void B4Mesh::GenerateResults()
   std::cout << "B4Mesh: Transactions lost due to mempool space: " << lostTrans << std::endl;
   std::cout << "B4Mesh: Number of droped transactions (already in blockgraph or in mempool):  " << numDumpingTxs << std::endl;
 	std::cout << "B4Mesh: Transactions with multiple occurance in the blockgraph: "  << std::endl;
-	int TxRep = blockgraph.ComputeTransactionRepetition();
-	std::cout << TxRep << std::endl;
+//	int TxRep = blockgraph.ComputeTransactionRepetition();
+//	std::cout << TxRep << std::endl;
 
 
   // --- Performances of the blockgraph ---
@@ -1370,7 +1421,7 @@ void B4Mesh::GenerateResults()
   output_file << "B4Mesh: Number of re transaction: " << numRTxsG << std::endl;
   output_file << "B4Mesh: Transactions lost due to mempool space: " << lostTrans << std::endl;
   output_file << "B4Mesh: Number of droped transactions (already in blockgraph or in mempool):  " << numDumpingTxs << std::endl;
-  output_file << "B4Mesh: Transactions with multiple occurance in the blockgraph: "  << TxRep << std::endl;
+  //output_file << "B4Mesh: Transactions with multiple occurance in the blockgraph: "  << TxRep << std::endl;
 
 
 	// ---The blockgraph into file. ----
@@ -1429,8 +1480,19 @@ void B4Mesh::GenerateResults()
     }
 	output_file5.close();
 
+  // Transaction latency file
+  ofstream output_file6;
+  char filename6[50];
+  sprintf(filename6, "TxsLatency-%d.txt", node_->consensus_.GetId());
+  output_file6.open(filename6, ios::out);
+  for (auto &it : TxsLatency){
+    output_file6 << it.first << " " << it.second.first << " " << it.second.second << std::endl;
+  }
+  output_file6.close();
+
 	// close live file
   visuBlock.close();
 	visuMemPool.close();
+  visuTxsPerf.close();
     
 }

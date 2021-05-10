@@ -15,16 +15,18 @@
 #define PAYLOAD_MAX 600
 
 // Transaction generation
-#define WAIT_FOR_FIRST_TRANSACTION 5 // wait a bit that everyone is started
-#define LAMBDA_DIST 1 // = 1/mean
+#define WAIT_FOR_FIRST_TRANSACTION 10 // wait a bit that everyone is started
+#define LAMBDA_DIST 2 // = 1/mean
 
 // B4mesh recurrent task (Ask4missingblock)
 #define RECCURENT_TIMER 10
+#define RECURRENT_SIMPLING 5
 
 // Blockgraph
-#define SIZE_BLOCK 120        // 120
-#define MIN_SIZE_BLOCK 80
-#define SIZE_MEMPOOL 1000
+#define MAX_SIZE_BLOCK 54        // 120
+#define MIN_SIZE_BLOCK 36
+
+#define SIZE_MEMPOOL 500 //  in kilobytes
 
 // Retransmit transaction timing
 #define T_RETRANS 60
@@ -35,6 +37,8 @@
 // Trace option
 #define LIVEBLOCK_FILE "/tmp/blockgraph"
 #define LIVEMEMPOOL_FILE "./live_mempool.txt"
+#define LIVETXS_FILE "./live_txs_perf.txt"
+
 
 // Only in b4mesh class
 #define DEBUG std::cout << getSeconds() << " : "
