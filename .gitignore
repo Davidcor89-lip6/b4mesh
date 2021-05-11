@@ -3,6 +3,8 @@ build/*
 build_local/*
 Results/*
 
+# CMake
+cmake/external/*
 # generated files
 live_visualizer/configuration.js
 live_visualizer/nginx/http_live_visualizer.conf

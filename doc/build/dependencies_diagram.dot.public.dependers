@@ -1,0 +1,12 @@
+digraph "public" {
+node [
+  fontsize = "12"
+];
+    "node7" [ label = "public", shape = septagon ];
+    "node6" [ label = "DBusCXX_asio_integration", shape = doubleoctagon ];
+    "node6" -> "node7"  // DBusCXX_asio_integration -> public
+    "node4" [ label = "b4mesh_coreEngine\n(b4mesh::core_engine)", shape = doubleoctagon ];
+    "node4" -> "node6"  // b4mesh_coreEngine -> DBusCXX_asio_integration
+    "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
+    "node0" -> "node4" [ style = dotted ] // b4mesh_binary -> b4mesh_coreEngine
+}

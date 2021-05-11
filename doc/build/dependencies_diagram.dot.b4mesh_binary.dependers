@@ -1,0 +1,6 @@
+digraph "b4mesh_binary" {
+node [
+  fontsize = "12"
+];
+    "node0" [ label = "b4mesh_binary\n(b4mesh::binary)", shape = egg ];
+}

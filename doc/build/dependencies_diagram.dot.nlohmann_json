@@ -1,0 +1,6 @@
+digraph "nlohmann_json" {
+node [
+  fontsize = "12"
+];
+    "node9" [ label = "nlohmann_json\n(nlohmann_json::nlohmann_json)", shape = pentagon ];
+}

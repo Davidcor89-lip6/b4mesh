@@ -1,0 +1,6 @@
+digraph "Boost::random" {
+node [
+  fontsize = "12"
+];
+    "node5" [ label = "Boost::random", shape = septagon ];
+}
