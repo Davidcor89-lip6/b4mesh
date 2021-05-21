@@ -309,7 +309,13 @@ class B4Mesh
 
         void TxsPerformances ();
 
+        void BlockCreationRate (std::string b_hash, std::string b_group, int txs, double blockTime);
+
         void TraceTxLatency (Transaction t, std::string b_hash);
+
+        void MempoolPerformance (Transaction t);
+
+        void WaitingListPerformance (std::string b_hash);
 
     public:
         /*
@@ -356,15 +362,17 @@ class B4Mesh
         double total_pendingTxTime; //  The accumulated time that transactions spends in the mempool
         double total_waitingBlockTime;  //  The accumulated time that blocks spend in the waiting list
         double total_missingBlockTime;  //  The accumulated time that block hashes spends in the missing block list
-        std::chrono::duration<double, std::milli> total_process_block_t;
-        std::chrono::duration<double, std::milli> total_process_tx_t;
-        std::chrono::duration<double, std::milli> total_treatment_block_t;
-        std::chrono::duration<double, std::milli> total_treatment_tx_t;
-        std::vector<double> block_creation_time;
-        std::vector<double> tx_creation_time;
-        std::vector<double> block_treatment_time;
-        std::vector<double> tx_treatment_time;
+        // std::chrono::duration<double, std::milli> total_process_block_t; // For ns3 Meausures
+        // std::chrono::duration<double, std::milli> total_treatment_block_t;   // For ns3 Meausures
+        // std::chrono::duration<double, std::milli> total_treatment_tx_t;  // For ns3 Meausures
+        // std::vector<double> block_creation_time; // For ns3 Meausures
+        // std::vector<double> block_treatment_time; // For ns3 Meausures
+        // std::vector<double> tx_treatment_time;  // For ns3 Meausures
+        std::vector<std::pair<std::pair<int, int>, std::pair<int, double>>> block_creation; // Block Information Performances
         std::map<std::string, double> pending_transactions_time;  // time when a transaction enter the mempool
+       // std::map<std::string, std::pair<double, double>> txTime_mempool;
+        std::vector<std::pair<std::pair<double, std::string>, std::pair<double, int>>> txTime_mempool;
+        std::vector<std::pair<std::pair<double, std::string>, std::pair<double, int>>> blockTime_wl;
         std::map<std::string, double> waiting_list_time; // time when a blocks enter the waiting list
         std::map<std::string, double> missing_list_time; // time when a blocks enter the missing list
         std::multimap<std::string, std::pair<std::string, double>> TxsLatency;

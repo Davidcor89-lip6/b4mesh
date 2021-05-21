@@ -25,31 +25,10 @@ int Blockgraph::GetByteSize () {
   }
   return size;
 }
-/*
-int Blockgraph::GetTxsCount (){
-    int totalTx = 0;
-
-    for (auto& b : blocks){
-      totalTx = totalTx + b.second.GetTransactions().size();
-    }
-    return totalTx;
-}
-*/
 
 int Blockgraph::GetTxsCount (){
   return txsCount;
 }
-
-/*
-int Blockgraph::GetTxsByteSize (){
-  int totalBytes = 0;
-
-  for (auto b : blocks){
-    totalBytes += b.second.CalculeTxsSize();
-  }
-  return totalBytes;
-}
-*/
 
 int Blockgraph::GetTxsByteSize (){
   return txsSize;
