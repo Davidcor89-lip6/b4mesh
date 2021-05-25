@@ -1,8 +1,8 @@
 :root {
   font-size: 25px;
   font-family: "Open Sans";
-  --text-primary: #b6b6b6;
-  --text-secondary: #ececec;
+  --text-primary: #e3e3e3;
+  /*--text-secondary: #ececec;*/
   --bg-primary: #23232e;
   --bg-secondary: #141418;
   --transition-speed: 600ms;
@@ -17,7 +17,7 @@ html{
 }
 body {
   
-  background-color: #e6e6e6;
+  background-color: #f2f2f2;
   margin: 0;
   padding: 0;
   height: 100%;
@@ -30,10 +30,11 @@ main {
 
 .navbar {
   position: fixed;
-  background-color: #4F7BAF;
+  background-color: #4F7BFF;
   transition: width 500ms ease;
   overflow: hidden;
   z-index: 10;
+  border-radius: 0px 0.9rem .9rem 0px;
   box-shadow: 8px 7px 10px 0 rgb(0 0 0 / 16%), 0 7px 10px 0 rgb(0 0 0/ 10%);
 }
 
@@ -110,43 +111,13 @@ main {
   color:white ;
 }
 
-
-.logo {
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  text-align: center;
-  color: var(--text-secondary);
-  background: var(--bg-secondary);
-  font-size: 1.5rem;
-  letter-spacing: 0.1ch;
-  width: 100%;
-}
-
-.logo svg {
-  transform: rotateX(180deg);
-  transition: var(--transition-speed);
-}
-
-.logo-text {
-  display: inline;
-  position: absolute;
-  left: -999px;
-  transition: var(--transition-speed);
-}
-
-
-.navbar:hover .logo svg {
-  transform: rotate(-180deg);
-}
-
 .arrow svg {
   transition: var(--transition-speed);
 }
 
 .btn-tlb{
   border: none;
-  background-color: #4F7BAF;
+  background-color: #4F7BFF;
   padding: 0;
   width: 100%;
 }
@@ -345,23 +316,25 @@ main {
   /* margin:auto; */
   display: inline-block;
   width: 7rem;
- 
+  height: 100%;
   display: flex;
   align-content: flex-end;
   justify-content: flex-end;
 }
 .information_label{
-  color: #5e3131;
-  font-size: 22px;
-  border-bottom: 1px solid black;
+  color: #09090973;
+  font-size: 17px;
   font-weight: 600;
+  padding-right: 2rem;
+  margin-left: 0.5rem;
   ;
 }
 .information_value {
 
-  font-size: 40px;
+  font-size: 20px;
   font-weight: bold;
   bottom: 100%;
+  margin-right: 0.8rem;
   text-align: center;
 }
 
@@ -432,8 +405,12 @@ main {
   height: 100%;
   margin-bottom: 0rem;
   background-color: white;
-  border: 1px solid black;
+  border: 1px solid #e3e6f0;
   justify-content: flex-end;
+  border-bottom-left-radius:0.6rem;
+  border-bottom-right-radius: 0.6rem;
+  
+  
 }
 /* Rendering elements */
 /* svg {
@@ -468,22 +445,32 @@ main{
   position: relative;
   flex-direction: column;
   height: 100%;
-  margin-left: 11%;
-  margin-right: 20%;
+  margin-left: 6%;
+  margin-right: 11%;
+  border-bottom-left-radius:0.6rem;
+  border-bottom-right-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+    border-top-left-radius: 0.6rem;
   border: 2px solid var(--text-secondary);
-  box-shadow: 8px 7px 10px 0px rgb(0 0 0 / 16%), 18px 18px 10px 0 rgb(0 0 0 / 10%);
+  box-shadow: 0.1rem 0.2rem 1.8rem 1.1rem rgb(93 81 77 / 30%)
 }
 
 
+
 .infos{
-    position: absolute;
+  height: 100%;
     padding: 0;
     margin: 0;
-    background-color: #e6e6e6;
 }
 
 .h100{
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-bottom-left-radius:0.6rem;
+  border-bottom-right-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+  border-top-left-radius: 0.6rem;
 }
 
 
@@ -500,10 +487,10 @@ main{
 
 .menu{
   margin-left:-5rem;
-  background-color:#4F7BAF ;
+  background-color:#4F7BFF ;
   font-size: 30px;
-  margin-bottom: 4rem;
-  box-shadow: 8px 7px 10px 0 rgb(0 0 0 / 16%), 0 7px 10px 0 rgb(0 0 0 / 10%);
+  margin-bottom: 2rem;
+  box-shadow: 0 0.4rem 0.75rem 0 rgb(58 59 69 / 52%);
 }
 
 .links{
@@ -519,9 +506,12 @@ main{
 .toolbar_element{
   width: 100%;
   display: flex;
-  flex-direction: column;
-  border-left: 1px solid black;
-  border-bottom: 1px solid black;
+  flex-direction: row;
+  margin-left: 12%;
+  align-items: center;
+    border-radius: 4.35rem;
+    background-color: rgb(168 162 162 / 10%);
+  
 }
 
 .menu-link:hover{
@@ -571,9 +561,8 @@ main{
   width: 120px;
   bottom: 100%;
   left: 50%;
-  margin-left: -60px;; /* Use half of the width (120/2 = 60), to center the tooltip */
+  margin-left: -60px;
   transition-delay: 1s;
-  /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 13;
 }
@@ -581,4 +570,122 @@ main{
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+.tooltiparr .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  width: 120px;
+  top: 100%;
+  left: 50%;
+  margin-left: -60px;
+  transition-delay: 1s;
+  position: absolute;
+  z-index: 13;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltiparr:hover .tooltiptext {
+  visibility: visible;
+}
+
+
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: red;
+  color: white;
+  text-align: center;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color:rgb(125 126 128);
+  color: white;
+  text-align: center;
+  display: flex;
+  height: 5%;
+  /* align-items: center; */
+  flex-direction: row;
+}
+
+.footer_element{
+  height: 100%;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+
+.footer_txt{
+  font-size: 16px;
+  color: #d6d6d6;
+}
+
+.footer_txt:after {
+  content: '';
+  position: absolute;;
+  left:4rem;
+  top: 25%;
+  height: 60%;
+  border-right: 1px solid #a1a1a4;
+}
+
+.footer_pic{
+  height: 100%;
+  margin-left: 25px;
+}
+.sorb{
+  height: 75%;
+}
+.squad{
+  height: 80%;
+}
+
+
+.sep:after{
+  content: '';
+  position: absolute;
+  /* bottom: 0px; */
+  left: 5%;
+  width: 80%;
+  border-bottom: 1px solid #3366ff;
+}
+
+.link-container::after{
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  top: 8%;
+  width: 0%;
+  height: 8%;
+  border-right: 1px solid #3366ff;
+}
+
+.card_top{
+    width: 100%;
+    display: flex;
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #4e73df;
+    border: 1px solid #e3e6f0;
+    justify-content: space-between;
+    border-top-right-radius: 0.6rem;
+    border-top-left-radius: 0.6rem;
 }
