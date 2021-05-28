@@ -46,8 +46,6 @@ main {
   flex-direction: column;
   align-items: center;
   height: 100%;
- 
-
 }
 
 .nav-item {
@@ -174,99 +172,7 @@ main {
   position: absolute;
 }
 
-/*Flexbox menu*/
-.row{
-  display: flex;
-  margin-right: 10%;
-  margin-left: 10%;
-  align-content: center;
-  flex-direction: row;
-  background-color: var(--bg-primary);
-  flex-wrap: wrap;
-  justify-content: center;
-  border: 2px solid #b6b6b6;
-  margin-top: 5rem;
-}
-.content-box{
 
-  max-width: 25%;
-  
-  text-align: center;
-}
-/*Container orientation*/
-
-.Orientation{
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  width: 100%;
-  height: 100%;
-  border-bottom: 2px solid #b6b6b6;
-  border-right:  2px solid #b6b6b6;
-}
-
-.orientation-box{
- 
-  flex-direction: column;
-  display:flex;
-  position: relative;
-  justify-content: space-between;
-}
-/*changer de Vue button*/
-
-.view-box{
- 
-  flex-direction: row;
-  margin-left:auto ;
-  display:flex;
-  position: relative;
-  justify-content: space-between;
-}
-
-.t50{
-  flex-basis: 50%;
-  border-left: 2px solid var(--text-primary) ;
-  border-right: 2px solid var(--text-primary) ;
-}
-
-.h50{
-  flex-basis: 50%;
-  border-right: 2px solid var(--text-primary) ;
-}
-
-.view_blockchain{
-  
-  width: 100%;
-  height: 100%;
-  background-color: var(--bg-primary);
-  
-  color: var(--text-primary);
-  border: none;
-  cursor: pointer;
-  font-weight: bold ;
-
-}
-.view_blockchain:hover{
-  background-color: var(--bg-secondary) !important;
-  border:  solid var(--bg-secondary);
-}
-.view_cluster{
-  display:block;
-  width: 100%;
-  height: 100%;
-  padding: 0.6rem;
-  border: 2px solid black;
-  background-color: var(--bg-primary);
-  border:none;
-  color: var(--text-primary);
- 
-  cursor: pointer;
-  font-weight: bold ;
-
-}
-
-.view_cluster:hover{
-  background-color: var(--bg-secondary) !important;
-}
 
 /*Reset zoom button*/
 
@@ -285,33 +191,6 @@ main {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
-
-/*Automate camera button*/
-.camera-box {
-  margin-left: auto;
-  
-} 
-
-.automate-camera{
-  display:block;
-  width: 100%;
-  height: 100%;
-  padding: 0.6rem;
-  background-color: var(--bg-primary);
-  border: 3px solid ;
-  color:  var(--text-primary);
-  border-color: #85160e;
-  cursor: pointer;
-  font-weight: bold ;
-}
-
-.automate-camera:hover{
-  background-color: #85160e !important;
-}
-
-
-/* metrique*/
-
 .informations {
   /* margin:auto; */
   display: inline-block;
@@ -338,66 +217,6 @@ main {
   text-align: center;
 }
 
-/*Animation button*/
-/*
-.cbutton--effect-boris::after {
-	background: rgba(111,148,182,0.1);
-}
-
-.cbutton--effect-boris.cbutton--click::after {
-	-webkit-animation: anim-effect-boris 0.3s forwards;
-	animation: anim-effect-boris 0.3s forwards;
-}
-
-@-webkit-keyframes anim-effect-boris {
-	0% {
-		-webkit-transform: scale3d(0.3, 0.3, 1);
-		transform: scale3d(0.3, 0.3, 1);
-	}
-	25%, 50% {
-		opacity: 1;
-	}
-	to {
-		opacity: 0;
-		-webkit-transform: scale3d(1.2, 1.2, 1);
-		transform: scale3d(1.2, 1.2, 1);
-	}
-}
-@keyframes anim-effect-boris {
-	0% {
-		-webkit-transform: scale3d(0.3, 0.3, 1);
-		transform: scale3d(0.3, 0.3, 1);
-	}
-	25%, 50% {
-		opacity: 1;
-	}
-	to {
-		opacity: 0;
-		-webkit-transform: scale3d(1.2, 1.2, 1);
-		transform: scale3d(1.2, 1.2, 1);
-	}
-}
-
-.abutton::after {
-	position: absolute;
-	margin: -30px 10px 0 -45px;
-	width: 60px;
-	height: 60px;
-	border-radius: 50%;
-	content: '';
-	opacity: 0;
-}
-
-.xbutton::after {
-	position: absolute;
-	margin: -20px 0px 0 -70px;
-	width: 60px;
-	height: 60px;
-	border-radius: 50%;
-	content: '';
-	opacity: 0;
-}
-*/
 
 .graph_container {
   width: 100%;
@@ -412,24 +231,6 @@ main {
   
   
 }
-/* Rendering elements */
-/* svg {
-  overflow: hidden;
-  margin: 1em;
-} 
-.node rect {
-  stroke: #333;
-  stroke-width: 2.5px;
-  fill: white;
-}
-.edgeLabel rect {
-  fill: white;
-}
-.edgePath {
-  stroke: #333;
-  stroke-width: 1.5px;
-  fill: none;
-}*/
 .g{
   height: 100%;
   width: 100%;
@@ -446,7 +247,7 @@ main{
   flex-direction: column;
   height: 100%;
   margin-left: 6%;
-  margin-right: 11%;
+  margin-right: 8%;
   border-bottom-left-radius:0.6rem;
   border-bottom-right-radius: 0.6rem;
   border-top-right-radius: 0.6rem;
@@ -490,7 +291,7 @@ main{
   background-color:#4F7BFF ;
   font-size: 30px;
   margin-bottom: 2rem;
-  box-shadow: 0 0.4rem 0.75rem 0 rgb(58 59 69 / 52%);
+  box-shadow: 1px 0rem 2rem 1px rgb(58 59 69 / 87%);
 }
 
 .links{
@@ -567,7 +368,7 @@ main{
   z-index: 13;
 }
 
-/* Show the tooltip text when you mouse over the tooltip container */
+
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
@@ -589,7 +390,7 @@ main{
   z-index: 13;
 }
 
-/* Show the tooltip text when you mouse over the tooltip container */
+
 .tooltiparr:hover .tooltiptext {
   visibility: visible;
 }
@@ -688,4 +489,11 @@ main{
     justify-content: space-between;
     border-top-right-radius: 0.6rem;
     border-top-left-radius: 0.6rem;
+}
+
+
+.title{
+    
+  background-color: #0054ff61;
+  color: #1f1e33;
 }
