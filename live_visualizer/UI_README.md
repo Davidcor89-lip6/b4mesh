@@ -2,7 +2,6 @@
 
 This documentation details UI features.
 
-![fork_merge_animation](./documentation/fork_merge_animation.gif)
 
 ## Table of content
 
@@ -16,6 +15,7 @@ This documentation details UI features.
     - [Center only (no zoom)](#center-only-no-zoom)
   - [Toolbar](#toolbar)
     - [Graph orientation](#graph-orientation)
+    - [View Mode](#change-view)
     - [Reset zoom *(auto-fit)*](#reset-zoom-auto-fit)
     - [Automate camera](#automate-camera)
   - [Information bar](#information-bar)
@@ -28,8 +28,8 @@ This UI passed tests on using the following web-browsers :
 
 | Web-browser | build |
 | ----------- | ----- |
-| `Google Chrome`   | *89.0.4389.72 (official build) (64 bits)* |
-| `Firefox`         | *78.8.0esr (official build) (32-bit)*     |
+| `Google Chrome`   | *90.0.4430.93 (Build officiel) (64 bits)* |
+| `Firefox`         | *88.0  (official build) (64 bits)*        |
 
 However, `Google Chrome` is highly recommended, its internal memory management is way better than Firefox's one.
 
@@ -37,64 +37,81 @@ However, `Google Chrome` is highly recommended, its internal memory management i
 
 When the application starts, the polled datas are displayed so that the entire graph is contained in the rendering frame.
 
-![](./documentation/images/Capture.PNG)
+![](./documentation/images/conteneur-trait_rouge.PNG)
 
 ## Pan, zoom
 
 ### Zoom-in, zoom-out
 
-Scrolling forward results in a zoom-in, focusing on the mouse's cursor position (relative);  
+Scrolling inside the forward results in a zoom-in, focusing on the mouse's cursor position (relative);  
 while scrolling backward results in the opposite behavior.
 
-![](./documentation/images/scroll_to_zoom.PNG)
+![](./documentation/images/zoom.PNG)
 
 ### Center and zoom
 
-Double-clicking a node results in centering it in the middle of the rendering frame,  
+Double-clicking a node  results in centering it in the middle of the rendering frame,  
 and applying an absolute zoom factor of 4.
 
-> Here, `14175747`.
-
-![](./documentation/images/double_click_to_center_and_zoom.PNG)
-
-### Center only (no zoom)
-
-> Here, `14285323`.
-
-![](./documentation/images/click_to_center_node.PNG)
 
 ## Toolbar
 
+On the left of the screen we can find a menu that serves as a toolbar for visualising the graph with greater usability.
+
+![](./documentation/images/menu-trait_rouge.PNG)
+
+
 ### Graph orientation
 
-Using the upper-left combo-box button below the *"Orientation"* label,  
-the user can change the rendered graph orientation, using the following values :
+Upon clicking the icon with the arrow the graph will change its position by 90 degree clockwise. the icon will also move 90 degree and will always represent de orientation of the graph. 
+For example if the arrow points towards East, the graph is read from left to right.
 
-- Top-down
+We can have these four differents orientations:
+
+- Top-down  
 - Bottom-up
 - Left-right
 - Right-left
 
-Here, `left-right` :
+Here, `bottom-up` :
 
-![](./documentation/images/change_orientation.PNG)
+![](./documentation/images/bottom-up.PNG)
+
+Here, `top-down` :
+
+![](./documentation/images/top-down.PNG)
+
+### Change view
+
+The second button on the toolbar let the user change between two differents views.
+
+The one by default is a view based on event and time, it is the common way of watching a blockhain.
+
+![](./documentation/images/bgraph.PNG)
+
+the second view is a view of the blockgraph where the block are regrouped by cluster .
+
+![](./documentation/images/cluster.PNG)
+
+
 
 ### Reset zoom *(auto-fit)*
 
-Any click on this button will reset the current zoom,  
+the third button will reset the current zoom,  
 so the entire graph would fit in the rendering frame.
 
 NB : However, the current orientation is preserved.
 
 ### Automate camera
-
-This checkbox allows an automatic behavior which always center the freshest (not always last) element of the graph on the rendering frame.
+the last button allows the user to have the camera moving automatically. which means it will always center towards the freshest (not always last) element of the graph on the rendering frame.
 
 This is meant to allow live visualization of large, dynamic graphs without manual pan/zoom.
 
 ![](./documentation/images/automate_camera.PNG)
 
 ## Information bar
+
+![](./documentation/images/info.PNG)
 
 In the upper-right corner, some useful informations about the graph currently rendered are displayed.
 
