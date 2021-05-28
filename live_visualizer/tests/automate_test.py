@@ -4,7 +4,7 @@ import os
 import os.path
 import sys
 
-input_file_path = './datas/blockgraph.dot.json'
+input_file_path = './datas/smoljson.dot.json'
 output_file_dir = './datas/tmp/'
 output_file_path = output_file_dir + 'TestDatas.json'
 
@@ -62,7 +62,7 @@ class LineGeneratorThread(threading.Thread):
                         print(" - line : {}".format(line.strip()), flush=True)
                         with open(output_file_path, 'a+') as output_file:
                             output_file.write(line)
-                            time.sleep(3)
+                            time.sleep(2)
         except OSError as err:
             print("OS error: {0}".format(err), flush=True)
         except:
