@@ -94,6 +94,7 @@ install(CODE "send_to_remote_machines(
                     ${CMAKE_CURRENT_SOURCE_DIR}/configuration.js
                 DIRECTORIES
                     ${CMAKE_CURRENT_SOURCE_DIR}/scripts
+                    ${CMAKE_CURRENT_SOURCE_DIR}/img_web
                 SSHPASS_USER    b4meshroot
                 SSH_USER        default
             )"
