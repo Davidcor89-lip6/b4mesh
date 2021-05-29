@@ -17,7 +17,7 @@
 
 // Transaction generation
 #define WAIT_FOR_FIRST_TRANSACTION 10   //Seconds  
-#define LAMBDA_DIST 3    // = 1/mean
+#define LAMBDA_DIST 1    // = 1/mean
 
 // B4mesh recurrent task (Ask4missingblock)
 #define RECCURENT_TIMER 10      // Seconds
