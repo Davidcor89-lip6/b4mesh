@@ -10,10 +10,12 @@ do
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/blockgraph* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/mempool* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/performances* Results
-    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/block_creation_time* Results
-    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/block_treatment_time* Results
-    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/tx_treatment_time* Results
+    #sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/block_creation_time* Results
+    #sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/block_treatment_time* Results
+    #sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/tx_treatment_time* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/live_mempool* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/live_txs_perf* Results
     sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/TxsLatency* Results
+    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/BlockInfo* Results
+    sshpass -p 'b4meshroot' scp default@$addr:/var/persistent-data/b4mesh/time_mempool* Results
 done
