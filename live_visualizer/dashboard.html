@@ -25,100 +25,7 @@
         crossorigin="anonymous"></script>
     </head>
     <body>
-        <nav class="navbar">
-          <ul class="navbar-nav">
-            <li class="nav-item arrow">
-              <button class="btn-tlb" onclick="orientation_change()">
-              <a href="#" class="nav-link tooltiparr"> <span class="tooltiptext">Change orientation</span>
-                
-                <svg aria-hidden="true"
-                  id="arr"
-                  color ="green"
-                  focusable="false" 
-                  data-prefix="fas" 
-                  data-icon="arrow-right" 
-                  class="svg-inline--fa fa-arrow-right fa-w-14" 
-                  role="img" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 448 512">
-                  <path fill="currentColor" 
-                  d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z">
-                </path>
-              </svg>
-                
-              </a>
-            </button>
-
-            </li>
-            <li class="nav-item  sep">
-              <button class="btn-tlb"  onclick="alternate()">
-              <a href="#" class="nav-link tooltip"> <span class="tooltiptext">Change view</span>
-                <svg
-                  color="white"
-                  class="yo"
-                  aria-hidden="true"
-                  focusable="false"
-                  data-prefix="fas"
-                  data-icon="project-diagram"
-                  class="svg-inline--fa fa-project-diagram fa-w-20 "
-                  role="img"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 640 512"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M384 320H256c-17.67 0-32 14.33-32 32v128c0 17.67 14.33 32 32 32h128c17.67 0 32-14.33 32-32V352c0-17.67-14.33-32-32-32zM192 32c0-17.67-14.33-32-32-32H32C14.33 0 0 14.33 0 32v128c0 17.67 14.33 32 32 32h95.72l73.16 128.04C211.98 300.98 232.4 288 256 288h.28L192 175.51V128h224V64H192V32zM608 0H480c-17.67 0-32 14.33-32 32v128c0 17.67 14.33 32 32 32h128c17.67 0 32-14.33 32-32V32c0-17.67-14.33-32-32-32z"
-                  ></path>
-                </svg>
-                
-              </a>
-              
-            </button>
-            </li>
-            <li class="nav-item sep">
-              <button class="btn-tlb" id="reset_zoom_button">
-              <a href="#" class="nav-link tooltip"><span class="tooltiptext">Reset position</span>
-                <svg 
-                aria-hidden="true"
-                 focusable="false" 
-                 data-prefix="fas" 
-                 data-icon="compress-arrows-alt" 
-                 class="svg-inline--fa fa-compress-arrows-alt fa-w-16" 
-                 role="img" 
-                 xmlns="http://www.w3.org/2000/svg" 
-                 viewBox="0 0 512 512">
-                 <path fill="currentColor" 
-                 d="M200 288H88c-21.4 0-32.1 25.8-17 41l32.9 31-99.2 99.3c-6.2 6.2-6.2 16.4 0 22.6l25.4 25.4c6.2 6.2 16.4 6.2 22.6 0L152 408l31.1 33c15.1 15.1 40.9 4.4 40.9-17V312c0-13.3-10.7-24-24-24zm112-64h112c21.4 0 32.1-25.9 17-41l-33-31 99.3-99.3c6.2-6.2 6.2-16.4 0-22.6L481.9 4.7c-6.2-6.2-16.4-6.2-22.6 0L360 104l-31.1-33C313.8 55.9 288 66.6 288 88v112c0 13.3 10.7 24 24 24zm96 136l33-31.1c15.1-15.1 4.4-40.9-17-40.9H312c-13.3 0-24 10.7-24 24v112c0 21.4 25.9 32.1 41 17l31-32.9 99.3 99.3c6.2 6.2 16.4 6.2 22.6 0l25.4-25.4c6.2-6.2 6.2-16.4 0-22.6L408 360zM183 71.1L152 104 52.7 4.7c-6.2-6.2-16.4-6.2-22.6 0L4.7 30.1c-6.2 6.2-6.2 16.4 0 22.6L104 152l-33 31.1C55.9 198.2 66.6 224 88 224h112c13.3 0 24-10.7 24-24V88c0-21.3-25.9-32-41-16.9z">
-                </path>
-                </svg>
-                <div class="link-text tooltip"  >reset zoom</div>
-              </a>
-            </button>
-            </li>
-            <li class="nav-item sep tooltip"> <span class="tooltiptext">Change view</span>
-              <button  class="btn-tlb" id="auto_cam" >
-              <a href="#" class="nav-link tooltip"  id="auto"> <span class="tooltiptext">Automate camera</span>
-                <svg 
-                id ="camera"
-                color="red"
-                aria-hidden="true" 
-                focusable="false" 
-                data-prefix="fas" 
-                data-icon="video" 
-                class="svg-inline--fa fa-video fa-w-18" 
-                role="img" 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 576 512">
-                <path fill="currentColor" 
-                d="M336.2 64H47.8C21.4 64 0 85.4 0 111.8v288.4C0 426.6 21.4 448 47.8 448h288.4c26.4 0 47.8-21.4 47.8-47.8V111.8c0-26.4-21.4-47.8-47.8-47.8zm189.4 37.7L416 177.3v157.4l109.6 75.5c21.2 14.6 50.4-.3 50.4-25.8V127.5c0-25.4-29.1-40.4-50.4-25.8z"></path>
-                </svg>
-              
-              </a>
-              </button>
-            </li>
-          </ul>
-        </nav>
-
+        
         <main>
           <div class="header">
             <h1 class="title">B4MESH </h1>
@@ -144,7 +51,7 @@
                 </a>
               </li>
               <li class="link-container">
-                <a class="menu-link" href="#">
+                <a class="menu-link" href="index.html">
                   <svg 
                   aria-hidden="true" 
                   focusable="false" 
@@ -161,7 +68,7 @@
                 </a>
               </li>
               <li class="link-container">
-                <a class="menu-link" href="dashboard.html">
+                <a class="menu-link" href="#">
                   <svg
                     color="green"
                     version="1.1"
@@ -190,42 +97,13 @@
             </ul>
           </div>
 
-          <div class="toolbar">
-              <div class="h100">
-                <div class="card_top">
-                  Blockgraph live visualizer
-                  <ul class="infos">
-              
-                    <div class="informations">
-                      <div class="toolbar_element">
-                        <span class="information_label">Blocks</span>
-                        <span class="information_value" id=view_nodes_count>0</span>
-                      </div>
-                      <div class="toolbar_element">
-                        <span class="information_label">Clusters</span>
-                        <span class="information_value" id=view_clusters_count>0</span>
-                      </div>
-                    </div>
-                  </ul>
-                </div>
             
       <!-- Graph -->
-              <div id="graph-container" class="graph_container">
-                
-              </div>
-            </div>
-          </div>
+              
 
        
         </main>
-        <div class="footer">
-          <p class="footer_element footer_txt">Consortium </p>
-          <div class="footer_element">
-            <img class="footer_pic" src="img_web/logo_green_com.png" alt="green communication">
-            <img class="footer_pic sorb" src="img_web/logo_sorbonne.png" alt="sorbonne université">
-            <img class="footer_pic squad " src="img_web/Squad.png" alt="squad">
-          </div>
-        </div>
+      
             
         <script type="text/javascript">
         

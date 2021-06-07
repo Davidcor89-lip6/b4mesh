@@ -51,7 +51,7 @@ void session::handle_read(const boost::system::error_code& error,
         std::cout << "Error with the session " << error << std::endl;
         socket_.close();
         //removeSessionFromList(destIP_, this);
-        delete this;
+        //delete this;
     }
 }
 
@@ -71,7 +71,7 @@ void session::handle_write(const boost::system::error_code& error)
     {
         std::cout << "Error with the session " << error << std::endl;
         socket_.close();
-        delete this;
+        //delete this;
     }
 }
 
