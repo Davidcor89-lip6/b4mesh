@@ -58,7 +58,7 @@ configure_file(
 # [Note] :  As the FS-tree /etc/ is read-only, we need to first store datas into /tmp,
 #           and only then move it to /etc/nginx/qolyester.d/
 install(CODE "MESSAGE(\"Deploying b4mesh::live_visualizer (nginx endpoints)...\")")
-install(CODE "include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/remote_deploy.cmake)")
+install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "send_to_remote_machines(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
@@ -82,7 +82,7 @@ endforeach()
 
 # sources
 install(CODE "MESSAGE(\"Deploying b4mesh::live_visualizer (sources)...\")")
-install(CODE "include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/remote_deploy.cmake)")
+install(CODE "include(${CMAKE_SOURCE_DIR}/cmake_modules/remote_deploy.cmake)")
 install(CODE "send_to_remote_machines(
                 DESTINATIONS \"${remote_machines_IP}\"
                 PATH
