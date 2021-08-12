@@ -1,0 +1,161 @@
+main {
+  padding: 0;
+  margin: 0;
+}
+
+#theGraphs {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+}
+
+#transaction-container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  width: 100%;
+  margin: 0%;
+  padding: 0%;
+}
+
+.toolbar {
+  width: 70%;
+  height: 92%;
+  margin-left: 2%;
+  margin-right: 2%;
+  box-shadow: 0.1rem 0.2rem 7rem 0rem rgb(93 81 77 / 30%);
+}
+
+.toolbar-global {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  height: 100%;
+  margin-left: 2%;
+  margin-right: 2%;
+  border-bottom-left-radius: 0.6rem;
+  border-bottom-right-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+  border-top-left-radius: 0.6rem;
+  border: 2px solid var(--text-secondary);
+  box-shadow: 0.1rem 0.2rem 1.8rem 0rem rgb(93 81 77 / 30%);
+  width: 100%;
+}
+
+#graph-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.memtoolbar {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  height: 100%;
+  margin-left: 6%;
+  margin-right: 8%;
+  border-bottom-left-radius: 0.6rem;
+  border-bottom-right-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+  border-top-left-radius: 0.6rem;
+  border: 2px solid var(--text-secondary);
+  box-shadow: 0.1rem 0.2rem 1.8rem 0rem rgb(93 81 77 / 30%);
+  width: 90%;
+  margin-bottom: 1rem;
+}
+
+.w3-light-grey {
+  width: 50%;
+}
+
+#pour {
+  display: flex;
+  color: rgb(73, 69, 69);
+  height: 0;
+  align-items: center;
+}
+
+td,
+th {
+  border: 1px solid rgb(190, 190, 190);
+  padding: 10px;
+}
+
+td {
+  text-align: center;
+}
+
+tr:nth-child(even) {
+  background-color: #eee;
+}
+
+th[scope="col"] {
+  background-color: #0055ff94;
+  color: #fff;
+  height: 1px;
+}
+
+th[scope="row"] {
+  background-color: #0055ff94;
+  color: #fff;
+}
+
+caption {
+  padding: 10px;
+  caption-side: bottom;
+}
+
+table {
+  border-collapse: collapse;
+  border: 2px solid rgb(200, 200, 200);
+  letter-spacing: 1px;
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  height: 18rem;
+}
+
+.menu {
+  margin-left: 0;
+}
+
+.toolbar_element_solo {
+  /* width: 100%; */
+  display: flex;
+  flex-direction: row;
+  /* margin-left: 12%; */
+  align-items: center;
+  border-radius: 4.35rem;
+  background-color: rgb(168 162 162 / 10%);
+}
+
+.information_value {
+  margin-left: 0.8rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+#mempoolusage {
+  height: 120px;
+}
+
+#transaction-psec {
+  font-size: 4rem;
+  color: #4f7bff;
+}
+
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#transaction-lost {
+  font-size: 4rem;
+  color: #4f7bff;
+}
+
+#transaction-retransmission {
+  font-size: 4rem;
+  color: #4f7bff;
+}

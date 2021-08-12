@@ -4,9 +4,9 @@ import os
 import os.path
 import sys
 
-input_file_path = './datas/graphjson.json'
+input_file_path = './datas/dataMempool.json'
 output_file_dir = './datas/tmp/'
-output_file_path = output_file_dir + 'graphjson.json'
+output_file_path = output_file_dir + 'Mempool'
 
 print("Starting...", flush=True)
 print("Press <ctrl+c> to quit ...", flush=True)
@@ -15,7 +15,7 @@ try:
     if not os.path.isdir(output_file_dir):
         os.mkdir(output_file_dir)
 except OSError:
-    print ("Creation of the directory %s failed" % path)
+    print ("Creation of the directory %s failed" )
     raise
 
 def line_generator(input_file_path, output_file_path):

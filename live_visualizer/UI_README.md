@@ -12,13 +12,13 @@ This documentation details UI features.
   - [Pan, zoom](#pan-zoom)
     - [Zoom-in, zoom-out](#zoom-in-zoom-out)
     - [Center and zoom](#center-and-zoom)
-    - [Center only (no zoom)](#center-only-no-zoom)
   - [Toolbar](#toolbar)
     - [Graph orientation](#graph-orientation)
-    - [View Mode](#change-view)
+    - [Change view](#change-view)
     - [Reset zoom *(auto-fit)*](#reset-zoom-auto-fit)
     - [Automate camera](#automate-camera)
   - [Information bar](#information-bar)
+  - [Dashboard](#dashboard)
   - [Optimizations](#optimizations)
   - [Security](#security)
 
@@ -89,7 +89,7 @@ The one by default is a view based on event and time, it is the common way of wa
 
 ![](./documentation/images/bgraph.PNG)
 
-the second view is a view of the blockgraph where the block are regrouped by cluster .
+the second view is a view of the blockgraph where the blocks are regrouped by cluster .
 
 ![](./documentation/images/cluster.PNG)
 
@@ -117,6 +117,24 @@ In the upper-right corner, some useful informations about the graph currently re
 
 - Nodes's count
 - Clusters's count
+
+## Dashboard
+You can click on the Dashboard button located on the top menu to access differents metrics.
+
+![](./documentation/images/Dashboard.PNG)
+
+![](./documentation/images/D1.PNG)
+
+On this page you can find the listed metrics:
+- Number of transactions in the blockgraph.
+- Number of transaction in the node generated.
+- Transaction per second.
+- Time between blocks.
+- Size of the blockgraph.
+- Mempool usage of the node.
+- Last 10 transactions commited in the blockgraph.
+
+All the metrics in the blockgraph are updated live as the blockgraph evolve.
 
 ## Optimizations
 

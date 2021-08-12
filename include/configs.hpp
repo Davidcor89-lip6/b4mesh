@@ -5,35 +5,34 @@
 #define DEFAULT_PORT 5000
 
 // Dbus
-#define POLLING_DBUS 5  //Seconds
+#define POLLING_DBUS 5
 
 // Merge
-#define MERGE_TIMING 5  //Seconds
+#define MERGE_TIMING 5
 
 // Payload size
-#define PAYLOAD_MIN 300     // Bytes
-#define PAYLOAD_MAX 600     // Bytes
-#define PAYLOAD_MEAN 450
+#define PAYLOAD_MIN 300
+#define PAYLOAD_MAX 600
 
 // Transaction generation
-#define WAIT_FOR_FIRST_TRANSACTION 10   //Seconds  
-#define LAMBDA_DIST 1    // = 1/mean
+#define WAIT_FOR_FIRST_TRANSACTION 10 // wait a bit that everyone is started
+#define LAMBDA_DIST 2 // = 1/mean
 
 // B4mesh recurrent task (Ask4missingblock)
-#define RECCURENT_TIMER 10      // Seconds
-#define RECURRENT_SIMPLING 5    // Seconds
+#define RECCURENT_TIMER 10
+#define RECURRENT_SIMPLING 5
 
 // Blockgraph
-#define MAX_SIZE_BLOCK 54       //Kilobytes  
-#define MIN_SIZE_BLOCK 36       //Kilobytes
+#define MAX_SIZE_BLOCK 54        // 120
+#define MIN_SIZE_BLOCK 36
 
-#define SIZE_MEMPOOL 500        //kilobytes
+#define SIZE_MEMPOOL 500 //  in kilobytes
 
 // Retransmit transaction timing
-#define T_RETRANS 60        // Seconds
+#define T_RETRANS 60
 
 // Limit in seconds for the block creation
-#define TIME_BTW_BLOCK 5       //Seconds
+#define TIME_BTW_BLOCK 5
 
 // Trace option
 #define LIVEBLOCK_FILE "/tmp/blockgraph"

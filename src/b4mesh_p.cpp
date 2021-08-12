@@ -16,7 +16,12 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   timer_recurrentTask(io_context,std::chrono::steady_clock::now()),
   timer_recurrentSampling(io_context, std::chrono::steady_clock::now()),
   timer_childless(io_context,std::chrono::steady_clock::now()),
-  timer_createBlock(io_context,std::chrono::steady_clock::now())
+  //-----------
+  
+  timer_createBlock(io_context,std::chrono::steady_clock::now()),
+  timer_recurrentTask1sec(io_context,std::chrono::steady_clock::now()),
+  timer_recurrentTask7sec(io_context,std::chrono::steady_clock::now()),
+  timer_recurrentTask30sec(io_context,std::chrono::steady_clock::now())
 {
   /* Group Management System Variables Init */
   groupId = string(32,0);
@@ -32,6 +37,13 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	lastBlock_creation_time = 0;
 
   /* Variables for the blockchain performances */
+  //this added
+  tempsec=0;
+  temp1sec=0;
+  temp7sec=0;
+  tempourcent=0;
+
+  //--------
   numTxsG = 0;  //Num of txs generated
 	numRTxsG = 0;
   lostTrans = 0;
@@ -45,19 +57,55 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
 	total_pendingTxTime = 0;
   count_pendingTx = 0;
   TxsLatency = std::multimap<std::string, std::pair<std::string, double>> ();
-  block_creation = std::vector<std::pair<std::pair<int, int>, std::pair<int, double>>> ();
   blockgraph_file = std::vector<std::pair<int, std::pair <int, int>>> ();
-  txTime_mempool =  std::vector<std::pair<std::pair<double, std::string>, std::pair<double, int>>> ();
-  blockTime_wl = std::vector<std::pair<std::pair<double, std::string>, std::pair<double, int>>> ();
+
+  // Emptying all file for live visualizer metrics
+  std::ofstream outfile;
+  outfile.open("./live_visualizer/tests/datas/tmp/transactions", std::ios_base::trunc);//overwrite the file first 
+  outfile << "";
+
+  std::ofstream retrans;
+  retrans.open("./live_visualizer/tests/datas/tmp/retransactions", std::ios_base::trunc);//overwrite the file first 
+  retrans << "";
+
+  std::ofstream losttr;
+  losttr.open("./live_visualizer/tests/datas/tmp/losttransactions", std::ios_base::trunc);//overwrite the file first 
+  losttr << "";
+
+  std::ofstream mempoolfile;
+  mempoolfile.open("./live_visualizer/tests/datas/tmp/Mempool", std::ios_base::trunc); //overwrite the file first 
+  mempoolfile << "";
+
+  std::ofstream pourcentmempoolfile;
+  pourcentmempoolfile.open("./live_visualizer/tests/datas/tmp/Pourcentmempool", std::ios_base::trunc); //overwrite the file first 
+  pourcentmempoolfile << "";
+
+  std::ofstream totaltrans;
+  totaltrans.open("./live_visualizer/tests/datas/tmp/totaltransa", std::ios_base::trunc);//overwrite the file first 
+  totaltrans << "";
+  std::ofstream listtrans;
+  listtrans.open("./live_visualizer/tests/datas/tmp/listtransa", std::ios_base::trunc);//overwrite the file first 
+  listtrans << "";
+
 
   //recurrent task
   timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
-  timer_recurrentSampling.expires_from_now(std::chrono::seconds(WAIT_FOR_FIRST_TRANSACTION));
+  timer_recurrentTask1sec.expires_from_now(std::chrono::seconds(3));
+	timer_recurrentTask1sec.async_wait(boost::bind(&B4Mesh::timer_recurrentTask1sec_fct, this, boost::asio::placeholders::error));
+
+  timer_recurrentTask7sec.expires_from_now(std::chrono::seconds(7));
+	timer_recurrentTask7sec.async_wait(boost::bind(&B4Mesh::timer_recurrentTask7sec_fct, this, boost::asio::placeholders::error));
+
+  timer_recurrentTask30sec.expires_from_now(std::chrono::seconds(10));
+	timer_recurrentTask30sec.async_wait(boost::bind(&B4Mesh::timer_recurrentTask30sec_fct, this, boost::asio::placeholders::error));
+
+
+  timer_recurrentSampling.expires_from_now(std::chrono::seconds(10));
   timer_recurrentSampling.async_wait(boost::bind(&B4Mesh::timer_recurrentSampling_fct, this, boost::asio::placeholders::error));
 
-  timer_createBlock.expires_from_now(std::chrono::seconds(WAIT_FOR_FIRST_TRANSACTION));
+  timer_createBlock.expires_from_now(std::chrono::seconds(1));
   timer_createBlock.async_wait(boost::bind(&B4Mesh::timer_checkCreateBlock_fct, this, boost::asio::placeholders::error));
 
   //lancement transaction
@@ -80,12 +128,137 @@ void B4Mesh::setCreateBlock (bool cb)
 void B4Mesh::timer_recurrentTask_fct (const boost::system::error_code& /*e*/) 
 {
 	Ask4MissingBlocks();
-  RetransmitTransactions();
+
+
 
   timer_recurrentTask.expires_from_now(std::chrono::seconds(RECCURENT_TIMER));
 	timer_recurrentTask.async_wait(boost::bind(&B4Mesh::timer_recurrentTask_fct, this, boost::asio::placeholders::error));
 
 }
+void B4Mesh::timer_recurrentTask1sec_fct (const boost::system::error_code& /*e*/) 
+{
+  WriteInfoFile2sec();
+  
+  timer_recurrentTask1sec.expires_from_now(std::chrono::seconds(3));
+	timer_recurrentTask1sec.async_wait(boost::bind(&B4Mesh::timer_recurrentTask1sec_fct, this, boost::asio::placeholders::error));
+}
+
+void B4Mesh::timer_recurrentTask7sec_fct (const boost::system::error_code& /*e*/) 
+{
+  WriteInfoFile7sec();
+  
+  timer_recurrentTask7sec.expires_from_now(std::chrono::seconds(7));
+	timer_recurrentTask7sec.async_wait(boost::bind(&B4Mesh::timer_recurrentTask7sec_fct, this, boost::asio::placeholders::error));
+}
+
+void B4Mesh::timer_recurrentTask30sec_fct (const boost::system::error_code& /*e*/) 
+{
+  
+  if( blockgraph.GetBlocksCount()>1){
+    WriteInfoFile30sec();
+ }
+  timer_recurrentTask30sec.expires_from_now(std::chrono::seconds(10));
+	timer_recurrentTask30sec.async_wait(boost::bind(&B4Mesh::timer_recurrentTask30sec_fct, this, boost::asio::placeholders::error));
+}
+
+void B4Mesh::WriteInfoFile30sec(){
+ 
+  //Write list of the last 10 transactions of the blockgraph
+  std::ofstream list;
+
+  list.open("./live_visualizer/tests/datas/tmp/listtransa", std::ios_base::app); // append instead of overwrite
+  std::stringstream li;
+
+ int a =(blockgraph.GetChildlessBlocks().size());
+
+ vector<Block> w=blockgraph.GetChildlessBlocks();
+ Block x= w[a-1];
+  vector<Transaction> transac = x.GetTransactions();
+  for(int i=11 ; i>1; i-- ){
+    Transaction z = transac[transac.size()-i];
+    
+    li << z.GetHash() << ":" << z.GetTimestamp() << "\n";
+  }
+  
+  std::string lis = li.str();
+  list << lis;
+}
+
+void B4Mesh::WriteInfoFile7sec(){
+  //Wrtie the number of total transaction inside the blockgraph
+  std::ofstream tot;
+
+
+  tot.open("./live_visualizer/tests/datas/tmp/totaltransa", std::ios_base::app); // append instead of overwrite
+  std::stringstream tt;
+  tt << temp7sec << ":" << blockgraph.GetTxsCount() << "\n";
+  std::string t = tt.str();
+
+  tot << t;
+  temp7sec+=7;
+
+}
+
+void B4Mesh::WriteInfoFile2sec(){
+
+  //Write number the number of transaction inside the current node
+    
+  std::ofstream trsct;
+
+  trsct.open("./live_visualizer/tests/datas/tmp/transactions", std::ios_base::app); // append instead of overwrite
+  std::stringstream trs;
+  trs << tempourcent << ":" << numTxsG << "\n";
+  std::string tr = trs.str();
+
+  trsct << tr;
+
+  //Write the number of transaction retransmission inside the current node
+    
+  std::ofstream outfile;
+
+  outfile.open("./live_visualizer/tests/datas/tmp/retransactions", std::ios_base::app); // append instead of overwrite
+  std::stringstream ss;
+  ss << tempourcent << ":" << total_process_block_t.count() / (blockgraph.GetBlocksCount()-1) << "\n";
+  std::string s = ss.str();
+
+  outfile << s;
+
+  //Write size of the blockgraph
+  std::ofstream lost;
+
+  lost.open("./live_visualizer/tests/datas/tmp/losttransactions", std::ios_base::app); // append instead of overwrite
+  std::stringstream ls;
+  ls << tempourcent << blockgraph.GetByteSize() / 1000 << "\n";
+  std::string l = ls.str();
+
+  lost << l;
+
+  //Write  current usage of the node's mempool 
+  std::ofstream mempoolfile;
+
+  mempoolfile.open("./live_visualizer/tests/datas/tmp/Mempool", std::ios_base::app); // append instead of overwrite
+  std::stringstream memss;
+  memss << tempourcent << ":" << SizeMempoolBytes()/1000 << "\n";
+  std::string mems = memss.str();
+
+  mempoolfile << mems;
+
+  //Write the % usage of the mempool of the current node
+  std::ofstream pourcentpoolfile;
+
+  pourcentpoolfile.open("./live_visualizer/tests/datas/tmp/Pourcentmempool", std::ios_base::app); // append instead of overwrite
+  std::stringstream pourcentmemss;
+  pourcentmemss << (float)((SizeMempoolBytes()/1000)*100)/(float)(SIZE_MEMPOOL) << "%" << "\n";
+  std::string pourcentmems = pourcentmemss.str();
+
+  pourcentpoolfile << pourcentmems;
+
+  
+
+
+  tempourcent+=3;
+}
+
 
 void B4Mesh::timer_recurrentSampling_fct (const boost::system::error_code& /*e*/){
 
@@ -99,9 +272,6 @@ void B4Mesh::timer_recurrentSampling_fct (const boost::system::error_code& /*e*/
 
 void B4Mesh::timer_checkCreateBlock_fct(const boost::system::error_code& /*e*/){
 
-  timer_createBlock.expires_from_now(std::chrono::milliseconds(1500));
-  timer_createBlock.async_wait(boost::bind(&B4Mesh::timer_checkCreateBlock_fct, this, boost::asio::placeholders::error));
-
    // If leader and enough transactions in mempool. Then create block.
   if(node_->consensus_.AmILeader() == false){
     return;
@@ -111,6 +281,8 @@ void B4Mesh::timer_checkCreateBlock_fct(const boost::system::error_code& /*e*/){
     GenerateBlocks();
   }
 
+  timer_createBlock.expires_from_now(std::chrono::seconds(1));
+  timer_createBlock.async_wait(boost::bind(&B4Mesh::timer_checkCreateBlock_fct, this, boost::asio::placeholders::error));
 }
 
 
@@ -237,7 +409,7 @@ void B4Mesh::SendTransaction(Transaction t){
 //  ******* TRANSACTION RELATED METHODS **************** */
 void B4Mesh::TransactionsTreatment(Transaction t)
 {
- // auto t1 = std::chrono::high_resolution_clock::now();
+  auto t1 = std::chrono::high_resolution_clock::now();
 
   if (!IsTxInMempool(t)){
   //    DEBUG << "Transaction not in mempool. " << std::endl;
@@ -262,31 +434,26 @@ void B4Mesh::TransactionsTreatment(Transaction t)
       numDumpingTxs++;
   }
 
-//  auto t2 = std::chrono::high_resolution_clock::now();
-//  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-//  tx_treatment_time.push_back(time_treatment.count());
-//  total_treatment_tx_t += time_treatment;
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  tx_treatment_time.push_back(time_treatment.count());
+  total_treatment_tx_t += time_treatment;
 
 }
 
 void B4Mesh::RetransmitTransactions(){
   // Retransmission of transactions to be sure that old transactions are register
-  int i = 0;
 	if (pending_transactions.size() > 0)
 	{
 		for(auto &mem_i: pending_transactions)
 		{
 		//	Transaction t = mem_i.second;
-			if ( mem_i.second.GetTimestamp() + T_RETRANS < getSeconds() && i <= 10 )
+			if ( mem_i.second.GetTimestamp() + T_RETRANS < getSeconds() )
 			{
 				DEBUG << YELLOW << "--> Retransmission transation" << RESET << std::endl;
 				numRTxsG ++;
 				SendTransaction(mem_i.second);
-        i++;
 			}
-      else {
-        break;
-      }
 		}
 	}
  
@@ -324,7 +491,7 @@ void B4Mesh::DumpMempool (void)
 // ****** BLOCK RELATED METHODS *********************
 void B4Mesh::BlockTreatment(Block b){
 
- //  auto t1 = std::chrono::high_resolution_clock::now();
+   auto t1 = std::chrono::high_resolution_clock::now();
          
  // DEBUG << " BlockTreatment: Block made by leader: " << b.GetLeader() << " with hash " << b.GetHash().data() << std::endl;
   // Checking if the block is already in the blockgraph
@@ -387,10 +554,10 @@ void B4Mesh::BlockTreatment(Block b){
     numDumpingBlock++;
   }
 
-//  auto t2 = std::chrono::high_resolution_clock::now();
-//  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-//  block_treatment_time.push_back(time_treatment.count());
-//  total_treatment_block_t += time_treatment;
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  block_treatment_time.push_back(time_treatment.count());
+  total_treatment_block_t += time_treatment;
 }
 
 void B4Mesh::StartSyncProcedure(std::vector<Transaction> transactions){
@@ -416,6 +583,63 @@ void B4Mesh::StartSyncProcedure(std::vector<Transaction> transactions){
   SendBranchRequest();
   
 }
+
+/*
+void B4Mesh::SyncNode(vector<Transaction> transactions){
+  std::string::size_type n;
+  std::vector<std::string> myChildless = blockgraph.GetChildlessBlockList();
+  std::vector<string>::iterator it;
+  std::vector<string>::iterator it2;
+
+  for (auto &tx : transactions){
+    string tmp = tx.GetPayload();
+    n = tmp.find(" ");
+    int idnode = stoi(tmp.substr(0, n));
+    std::string hash = tmp.substr(n+1);
+
+    it = find(myChildless.begin(), myChildless.end(), hash);
+    if (it == myChildless.end()){
+      if (recover_branch.count(idnode) > 0){
+        auto range = recover_branch.equal_range(idnode);
+        bool inMap = false;
+        for (auto i = range.first; i != range.second; ++i){
+          if (i->second == hash){
+            inMap = true;
+          }
+        }
+        if (inMap == true){
+          continue;
+        } else {
+          recover_branch.insert(pair<int, string> (idnode, hash));
+        }
+      } else {
+        recover_branch.insert(pair<int, string> (idnode, hash));
+      }
+      it2 = find(missing_childless.begin(), missing_childless.end(), hash);
+      if (it2 == missing_childless.end()){
+        missing_childless.push_back(hash);
+      }
+    }
+  }
+
+  for (auto &cb : missing_childless){
+    std::vector<string> missing_b = std::vector<string> ();
+    int idnode = -1;
+    for (auto it = recover_branch.begin(); it != recover_branch.end(); ++it){
+      if (it->second == cb){
+        missing_b.push_back(cb);
+        idnode = it->first;
+        goto cnt;
+      }
+    }
+    cnt:;
+    DEBUG << " SyncNode: Adding childless block: " << cb << " to list of missing blocks with node: " << idnode << std::endl;
+    UpdateMissingList(missing_b, node_->consensus_.GetIPFromId(idnode));
+  }
+
+  SendBranchRequest();
+}
+*/
 
 void B4Mesh::SendBranchRequest(){
 
@@ -564,7 +788,9 @@ void B4Mesh::UpdateWaitingList(){
 			}
 			if (it->second.GetParents().size() == i){ // if all parents are in blockgraph
 				//Trace purpose
-				WaitingListPerformance(it->first);
+				total_waitingBlockTime += getSeconds() - waiting_list_time[it->first];
+        count_waitingBlock ++;
+        waiting_list_time.erase(it->first);
 				DEBUG << "Update waiting list: All parents are present -> Adding block."<< std::endl;
 				AddBlockToBlockgraph(it->second);
 
@@ -629,8 +855,12 @@ void B4Mesh::UpdatingMempool (vector<Transaction> transactions, std::string b_ha
       DEBUG << " UpdatingMempool: Erasing transaction from Mempool... " << std::endl;
       // Traces
       TraceTxLatency(t, b_hash);
-      MempoolPerformance(t);
       pending_transactions.erase(t.GetHash());
+
+      //Trace purpose
+      total_pendingTxTime += getSeconds() - pending_transactions_time[t.GetHash()];
+      count_pendingTx ++;
+      pending_transactions_time.erase(t.GetHash());
     }
     else {
       DEBUG << " UpdatingMempool:  I don't know this transaction " << t.GetHash() << std::endl;
@@ -947,8 +1177,7 @@ vector<Transaction> B4Mesh::SelectTransactions(){
 
   vector<Transaction> transactions;
 
-  //while(SizeMempoolBytes()/1000 < MAX_SIZE_BLOCK){
-  while((transactions.size()*PAYLOAD_MEAN)/1000 < MAX_SIZE_BLOCK){
+  while(SizeMempoolBytes()/1000 < MAX_SIZE_BLOCK){
     pair<string, double> min_ts = make_pair("0", 9999999);
     for(auto &t : pending_transactions){
       if(find(transactions.begin(), transactions.end(), t.second) != transactions.end()){
@@ -990,7 +1219,7 @@ bool B4Mesh::IsMergeInProcess(){
 void B4Mesh::GenerateBlocks(){
   // Only executed by the leader
 
-  // auto t1 = std::chrono::high_resolution_clock::now();
+  auto t1 = std::chrono::high_resolution_clock::now();
 
   DEBUG << " GenerateBlock : Creating a block " << std::endl;
 
@@ -1030,13 +1259,11 @@ void B4Mesh::GenerateBlocks(){
 
   SendBlockToConsensus(block);
  
-//  auto t2 = std::chrono::high_resolution_clock::now();
-//  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
-//  block_creation_time.push_back(time_treatment.count());
-//  total_process_block_t += time_treatment;
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  block_creation_time.push_back(time_treatment.count());
+  total_treatment_block_t += time_treatment;
 
-
-  BlockCreationRate (block.GetHash(), block.GetGroupId(), block.GetTxsCount(), block.GetTimestamp());
   BlockTreatment(block);
 
 }
@@ -1119,6 +1346,100 @@ Block B4Mesh::GenerateRegularBlock(Block &block){
 
 }
 
+/*
+void B4Mesh::GenerateBlocks(){
+   auto t1 = std::chrono::high_resolution_clock::now();
+  // Only leader execute this function
+  
+  std::vector<string> myChildless = blockgraph.GetChildlessBlockList();
+  std::vector<std::string> p_block = vector <string> ();
+  
+	// Initialize the block
+	Block block;
+	block.SetLeader(node_->consensus_.GetId());
+	block.SetGroupId(node_->GetGroupId());
+ // DEBUG << " GenerateBlock: Block's groupId is: " << node_->GetGroupId() << std::endl;
+	// Getting Parents of the futur Block
+	for (auto& parent : myChildless){
+		p_block.push_back(parent);
+	}
+	// If the block to create is a merge block
+	if (mergeBlock || p_block.size() > 1 ){
+		std::vector<Transaction> transactions = std::vector<Transaction> ();
+   // DEBUG << " GenerateBlock: Creation of a merge block" << std::endl;
+	//	DEBUG << " GenerateBlock: Merge block transactions are: " << std::endl;
+		for (auto hash : p_block){
+      Transaction t;
+      string payload = to_string(node_->consensus_.GetId()) + " " + hash;
+   //   DEBUG << payload << endl;
+      t.SetPayload(payload);
+      t.SetTimestamp(getSeconds());
+      transactions.push_back(t);
+		}
+
+		for (auto &node : recover_branch){
+			Transaction t;
+			std::string payload = to_string(node.first) + " " + node.second;
+	//		DEBUG << payload << std::endl;
+			t.SetPayload(payload);
+			t.SetTimestamp(getSeconds());
+			transactions.push_back(t);
+		}
+
+		block.SetTransactions(transactions);
+
+    // Adding the new parents
+		if(missing_childless.size() > 0){
+			for (auto &pb : missing_childless){
+				if(find(p_block.begin(), p_block.end(), pb) == p_block.end()){
+					p_block.push_back(pb);
+				}
+			}
+		}
+		mergeBlock = false;
+	}
+	else {
+		std::vector<Transaction> transactions = SelectTransactions();
+		block.SetTransactions(transactions);
+		// Remove transactions from the list of pending transactions
+		// Transactions from the leader need to be removed Here
+			// and not at the block reception because the leader's Mempool size
+			// is the critirial to create blocks. If transactions are not removed
+			// blocks are going to be created with repeated txs
+		
+			//for (auto &t : transactions)
+			//  pending_transactions.erase(t.GetHash()); //Not in case of POC
+	}
+
+ // DEBUG << " GenerateBlock: Parents of new block are: " << std::endl;
+ // for (auto &p : p_block){
+  //  DEBUG << " GenerateBlock: Block: " << p << std::endl;
+//  }
+
+
+	block.SetParents(p_block);
+
+	int index = -1;
+	for (auto &p : p_block){
+		index = max(index, blockgraph.GetBlock(p).GetIndex());
+	}
+	block.SetIndex(index+1);
+	block.SetTimestamp(getSeconds());
+
+	lastBlock_creation_time = getSeconds();
+
+//	DEBUG << " Block size is:   " << block.GetSize() <<  std::endl;
+	SendBlockToConsensus(block);
+ 
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> time_treatment = t2 - t1;
+  block_creation_time.push_back(time_treatment.count());
+  total_treatment_block_t += time_treatment;
+
+  BlockTreatment(block);
+}
+*/
+
 void B4Mesh::SendBlockToConsensus(Block b)
 {
   // If a consensus protocol is used to replicate blocks in all nodes
@@ -1147,14 +1468,6 @@ void B4Mesh::TxsPerformances (){
 
 }
 
-void B4Mesh::BlockCreationRate (std::string b_hash, std::string b_group, int txCount, double b_time){
-  
-  auto block_info = std::pair<std::pair<int, int>, std::pair<int, double>> ();
-  block_info = make_pair(make_pair(stoi(b_hash.data()), stoi(b_group.data())), make_pair(txCount, b_time));
-  block_creation.push_back(block_info);
-
-}
-
 
 void B4Mesh::CreateGraph(Block &b){
   vector<string> parents_of_block = b.GetParents();
@@ -1174,35 +1487,8 @@ void B4Mesh::CreateGraph(Block &b){
 }
 
 void B4Mesh::TraceTxLatency(Transaction t, std::string b_hash){
-
   TxsLatency.insert(pair<std::string, std::pair<std::string, double>> (b_hash.data(), make_pair(t.GetHash().data(), getSeconds() - t.GetTimestamp())));
-
 }
-
-void B4Mesh::MempoolPerformance (Transaction t){
-
-  auto txInmempoolInfo = std::pair<std::pair<double, std::string>, std::pair<double, int>> ();
-  double timeInMempool = getSeconds() - pending_transactions_time[t.GetHash()];
-  total_pendingTxTime += timeInMempool;
-  count_pendingTx ++;
-  txInmempoolInfo = make_pair(make_pair(getSeconds(), t.GetHash().data()), make_pair(timeInMempool, total_pendingTxTime));
-  txTime_mempool.push_back(txInmempoolInfo);
-  pending_transactions_time.erase(t.GetHash());
-
-}
-
-void B4Mesh::WaitingListPerformance (std::string b_hash){
-
-  auto blockInWaitingListInfo = std::pair<std::pair<double, std::string>, std::pair<double, int>> ();
-  double timeInWL = getSeconds() - waiting_list_time[b_hash];
-  total_waitingBlockTime += timeInWL;
-  count_waitingBlock ++;
-  blockInWaitingListInfo = make_pair(make_pair(getSeconds(), b_hash), make_pair(timeInWL, total_waitingBlockTime));
-  blockTime_wl.push_back(blockInWaitingListInfo);
-  waiting_list_time.erase(b_hash);
-
-}
-
 
 int B4Mesh::SizeMempoolBytes(void){
 
@@ -1281,9 +1567,9 @@ void B4Mesh::GenerateResults()
   sprintf(filename, "performances-%d.txt", node_->consensus_.GetId());
   output_file.open(filename, ios::out);
   output_file << " Execution time : " << getSeconds() << "s" << std::endl;
- // output_file << " Mean block creation time : " << total_process_block_t.count() / (blockgraph.GetBlocksCount()-1) << "ms" << std::endl;
- // output_file << " Mean block treatment time : " << total_treatment_block_t.count() / (blockgraph.GetBlocksCount()-1) << "ms" << std::endl;
- // output_file << " Mean tx treatment time : " << total_treatment_tx_t.count() / blockgraph.GetTxsCount() << "ms" << std::endl;
+  output_file << " Mean block creation time : " << total_process_block_t.count() / (blockgraph.GetBlocksCount()-1) << "ms" << std::endl;
+  output_file << " Mean block treatment time : " << total_treatment_block_t.count() / (blockgraph.GetBlocksCount()-1) << "ms" << std::endl;
+  output_file << " Mean tx treatment time : " << total_treatment_tx_t.count() / blockgraph.GetTxsCount() << "ms" << std::endl;
   output_file << " Size of the blockgraph : " << blockgraph.GetByteSize() / 1000 << "Kb" << std::endl;
   output_file << " Packets lost due to messaging pb: " << lostPacket << std::endl;
   output_file << "************** BLOCK RELATED PERFORMANCES **************" << std::endl;
@@ -1306,7 +1592,7 @@ void B4Mesh::GenerateResults()
   output_file << "B4mesh: Number of committed transactions per seconds: " << (float)(blockgraph.GetTxsCount())/getSeconds() << std::endl;
   output_file << "B4Mesh: Size of all transactions in the blockgraph : " << blockgraph.GetTxsByteSize() / 1000 <<  "kB" << std::endl;
   output_file << "B4Mesh: Mean number of transactions per block: " << blockgraph.MeanTxPerBlock() << std::endl;
-  output_file << "B4Mesh: Mean time that a transaction spend in the mempool: " << total_pendingTxTime / count_pendingTx << "s" << std::endl;
+  output_file << "B4Mesh: Mean time that a transaction spendS in the mempool: " << total_pendingTxTime / count_pendingTx << "s" << std::endl;
   output_file << "B4Mesh: Number of remaining transactions in the mempool: " << pending_transactions.size() << std::endl;
   output_file << "B4Mesh: Number of re transaction: " << numRTxsG << std::endl;
   output_file << "B4Mesh: Transactions lost due to mempool space: " << lostTrans << std::endl;
@@ -1337,34 +1623,6 @@ void B4Mesh::GenerateResults()
     }
 	output_file2.close();
 
-  // ---Txs in mempool perfs. ----
-	ofstream output_file3;
-	char filename3[50];
-	sprintf(filename3, "time_mempool-%d.txt", node_->consensus_.GetId());
-	output_file3.open(filename3, ios::out);
-  output_file3 << "Time" << " " << "TxHash" << " " << "time_tx_mempool" << " " << "total_accum_time" << std::endl;
-	for(auto &it : txTime_mempool)
-    {
-      output_file3 << it.first.first << " " << it.first.second << " " << it.second.first << " " << it.second.second << std::endl; 
-    }
-	output_file3.close();
-
-    // ---Blocks in waiting list perfs. ----
-  if (blockTime_wl.size() > 0 ){
-    ofstream output_file4;
-    char filename4[50];
-    sprintf(filename4, "time_waitingList-%d.txt", node_->consensus_.GetId());
-    output_file4.open(filename4, ios::out);
-    output_file4 << "Time" << " " << "BlockHash" << " " << "time_block_wl" << " " << "total_accum_time" << std::endl;
-    for(auto &it : blockTime_wl)
-      {
-        output_file4 << it.first.first << " " << it.first.second << " " << it.second.first << " " << it.second.second << std::endl; 
-      }
-    output_file4.close();
-  }
-  
-
-/*
   // ---Block creation processing time. ----
 	ofstream output_file3;
 	char filename3[50];
@@ -1375,9 +1633,7 @@ void B4Mesh::GenerateResults()
       output_file3 << it << std::endl; 
     }
 	output_file3.close();
-  */
 
-/*
   // ---Block treatment processing time. ----
 	ofstream output_file4;
 	char filename4[50];
@@ -1388,9 +1644,7 @@ void B4Mesh::GenerateResults()
       output_file4 << it << std::endl; 
     }
 	output_file4.close();
-  */
 
-  /*
   // ---Transaction treatment processing time. ----
 	ofstream output_file5;
 	char filename5[50];
@@ -1401,7 +1655,6 @@ void B4Mesh::GenerateResults()
       output_file5 << it << std::endl; 
     }
 	output_file5.close();
-  */
 
   // Transaction latency file
   ofstream output_file6;
@@ -1412,19 +1665,6 @@ void B4Mesh::GenerateResults()
     output_file6 << it.first << " " << it.second.first << " " << it.second.second << std::endl;
   }
   output_file6.close();
-
-  // Block information 
-  if (block_creation.size() > 0){
-    ofstream output_file7;
-    char filename7[50];
-    sprintf(filename7, "BlockInfo-%d.txt", node_->consensus_.GetId());
-    output_file7.open(filename7, ios::out);
-    output_file7 << "BlockHash" << " " << "GroupId" << " " << "NumTxs" << " " << "CreationTime" << endl;
-    for (auto &it : block_creation){
-      output_file7 << it.first.first << " " << it.first.second << " " << it.second.first << " " << it.second.second << std::endl;
-    }
-    output_file7.close();
-  }
 
 	// close live file
   visuBlock.close();

@@ -4,9 +4,9 @@ import os
 import os.path
 import sys
 
-input_file_path = './datas/graphjson.json'
+input_file_path = './datas/listransa'
 output_file_dir = './datas/tmp/'
-output_file_path = output_file_dir + 'graphjson.json'
+output_file_path = output_file_dir + 'listtransa'
 
 print("Starting...", flush=True)
 print("Press <ctrl+c> to quit ...", flush=True)

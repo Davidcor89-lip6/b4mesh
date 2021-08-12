@@ -6,3 +6,22 @@ const configuration = {
     blockgraph_as_dot_API_accesspoint: "/blockgraph_live_visualizer/get_nodes",
     refresh_rate_ms: @live_visualizer_refresh_rate@                         // tests : 3000
 }
+
+const graph ={
+  graph_API_accesspoint:
+  "http://127.0.0.1:8000/tests/datas/tmp/graphjson.json",
+  refresh_rate_ms: 1500, // tests : 3000
+};
+
+
+const histo ={
+  graph_API_accesspoint:
+  "http://127.0.0.1:8000/tests/datas/tmp/histo.json",
+  refresh_rate_ms: 1500, // tests : 3000
+};
+
+const mempool ={
+  graph_API_accesspoint:
+  "http://127.0.0.1:8000/tests/datas/tmp/mempool.json",
+  refresh_rate_ms: 1500, // tests : 3000
+};

@@ -7,6 +7,8 @@
     <head>
         <link rel="icon" href="favicon.ico" />
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="dashboardstyle.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         <script src="//d3js.org/d3.v5.min.js"></script>
         <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
         <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
@@ -15,6 +17,7 @@
         <script src="scripts/string_hash.js"></script>
         <script src="scripts/view_operations.js"></script>
         <script src="configuration.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.js"></script>
         <link
           href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700&display=swap"
           rel="stylesheet"
@@ -96,286 +99,632 @@
               </li>
             </ul>
           </div>
+          
 
             
       <!-- Graph -->
-              
+      <div id="theGraphs">
+      <div id="graph-container">
+        <div class="toolbar-global">
+          <div class="h100">
 
-       
-        </main>
+            <div class="card_top">
+              Number of transactions in the blockgraph
+                <div class="toolbar_element_solo">
+                  <span class="information_value" id="transaction-global">0</span>
+                </div>
+            </div>
+            
+            
+          </div> 
+          <div class="chart-container">  
+            <canvas id="totransaction" height="80"></canvas>
+          </div>
+        </div>
+      </div>
+
       
-            
-        <script type="text/javascript">
-        
-            // [todo] Rendering stability
-            //  https://gist.github.com/magjac/28a70231e2c9dddb84b3b20f450a215f
-            //  - cache dot graph
-            //  - call renderDot(cache) instead of render()
-            //  - add events renderDot(cache).on("end", funct(){})
+            <div class="toolbar-global">
+              <div class="h100">
+                <div class="card_top">
+                  Number of transaction in the node generated
+                  <div class="toolbar_element_solo">
+                    <span class="information_value" id="transaction-local">0</span>
+                  </div>
+                </div>
+              </div> 
+              <div class="chart-container">  
+                <canvas id="canvas" height="80"></canvas>
+              </div>
+            </div>
 
-            // options management
 
-            
-
-        // Style Toolbar 
-            var options ="LR";
-
-            var deg=90;
-            var x, i, j, l, ll, selElmnt, a, b, c;
-            var auto_on=false
-            var viewbchain =true
-           function alternate(){
-                if(viewbchain){
-                viewbchain=false;
-                }else if(!viewbchain){
-                  viewbchain=true;
-                }
-                fetch(new Request(configuration.blockgraph_as_dot_API_accesspoint), {cache: "reload"}).then(function(reponse) {
-                    return reponse.text();
-                }).then(data => {    draw_fetched_datas(data)})            
-            }
-
-            const graphContainer = d3.select("#graph-container");
-            var rendering = graphContainer
-                .graphviz()
-                .transition(function () {
-                    return d3.transition("main")
-                        .ease(d3.easeLinear)
-                        .delay(40)
-                        .duration(750);
-                })
-                .width(graphContainer.node().clientWidth)
-                .height(graphContainer.node().clientHeight)
-                //.zoom(true)
-                .fit(true)
-                ;
-            console.log(rendering)
-            var update_views = function(){
-                document.getElementById("view_nodes_count").innerHTML = d3.select(".graph").selectAll(".node").nodes().length;
-                // probably temporary
-                if(view==1){
-                    document.getElementById("view_clusters_count").innerHTML = d3.select(".graph").selectAll(".cluster").nodes().length;
-                    //console.log(d3.select(".graph").selectAll(".cluster");
-                }           
-            };
-
-            let freshest_node_type = class {
-                hash = null;
-                get node() {
-                    var node_hash = this.hash;
-                    var value = d3.selectAll('.node').nodes().filter(
-                        function(d, i){
-                            return d3.select(d).select('title').node().textContent == node_hash;
-                        }
-                    );
-                    return value.length == 0 ? null : value[0];
-                }
-                center_node() {
-                    // no rendering here, only centering
-                    if (freshest_node.node == null)
-                        return;
-                    center_element(freshest_node.node);
-                    // rendering.render();
-                }
-            };
-            freshest_node = new freshest_node_type();
-
-            var render_graph = function(datas) {
-
-               // const is_camera_automated = document.getElementById('automate_camera').checked;
-
-                rendering
-                    .renderDot(datas)
-                    .on("end", function(){
-                        update_views();
-                        if (auto_on)
-                        {
-                            freshest_node.center_node();
-                            //rendering.render();
-                        }
-                    
-                        d3.selectAll(".node").on("click", function(){
-                            console.log('Focusing node : ' + d3.select(this).selectAll('title').text());
-                            center_element(this);
-                            rendering.render();
-                        });
-                        d3.selectAll(".node").on("dblclick", function(){
-                            console.log('Focusing node : ' + d3.select(this).selectAll('title').text());
-                            center_and_zoom_element(this);
-                            rendering.render();
-                        });
-                        // d3.selectAll('.cluster').on("mouseenter", function() {
-                        //     var this_polygon = d3.select(this).select('polygon').node();
-                        //     this_polygon.style.strokeWidth = 3;
-                        //     this_polygon.style.stroke = "darkslateblue";
-                        // });
-                        // d3.selectAll('.cluster').on("mouseleave", function() {
-                        //     var this_polygon = d3.select(this).select('polygon').node();
-                        //     this_polygon.style.strokeWidth = 1;
-                        //     this_polygon.style.stroke = "black";
-                        // });
-                    });
-            }
-            var view=0
-            var datas_as_dot = null;
-            var draw_fetched_datas = function(datas_as_json)
-            {
-                try
-                {  
-                   // console.log(graph_option_html_references.orientation_node[0].getAttribute("data-orientation"))
-                    // probably temporary
-                    if(viewbchain){
-                        datas_as_dot = json_to_dot_time(datas_as_json, options);
-                        document.getElementById("view_clusters_count").innerHTML = nb_cluster();
-                    }else if ( !viewbchain){
-                        datas_as_dot = json_to_dot_cluster(datas_as_json, options);
-                        
-
-                    }
-                    
-                    // console.log("json_to_dot : [\n" + datas_as_dot + "\n]")
-                }
-                catch (error) {
-                    console.error('[draw_fetched_datas] Error : graph rendering failed : ' + error)
-                    throw(error);
-                }
-
-                try {
-                    if (document.hidden)
-                    {   // Check if rendering is useless ...
-                        console.log('[draw_fetched_datas] Tab is not focused, canceling datas update ...')
-                        return; // do not update if the tab is inactive
-                    }
-                    render_graph(datas_as_dot);
-                }
-                catch (error) { console.error('[error](rendering) graph rendering failed : ' + error) }
-
-                try
-                {   // refresh `freshest_node` value
-                    var lines = datas_as_json.split('\n');
-                    const regex = /\"hash\"\:(\d+)\,/;
-                    if (lines.length == 0)
-                        return;
-                    var freshest_node_hash = null;
-                    if (lines[lines.length - 1].length == 0 && lines.length > 1)
-                        freshest_node_hash = lines[lines.length - 2].match(regex)[1];
-                    else freshest_node_hash = lines[lines.length - 1].match(regex)[1];
-
-                    freshest_node.hash = freshest_node_hash;
-                }
-                catch (error)
-                {
-                    console.log("Cannot update freshest_node_hash, datas seems to be invalid");
-                }
-            }
-
-            if (!window.Worker)
-                throw('[poll_worker] Error : Browser does not support workers');
-
-            var worker = function(){
-                // fix Chrome security error (Firefox allow local files, not Chrome)
-                const poll_worker_task_URL = function() {
-                    var url = new URL(window.location.href);
-                    url.search = "";
-                    url.pathname = "scripts/poll_worker_task.js";
-                    return url;
-                }();
-                return new Worker(poll_worker_task_URL.toString());
-            }();
-
-            // events
-            worker.onmessage = function(event) {
-                //console.log("worker.onmessage ... [\n" + event.data + "\n]")
-                draw_fetched_datas(event.data);
-                // todo : auto-focus on last element
-            };
-
-            
-
-           worker.onerror = function(event){
-                console.log("[error](polling) worker error : " + event.message);
-            };
-            document.onvisibilitychange = function() {
-                if (document.hidden || datas_as_dot == null)
-                    return;
-                render_graph(datas_as_dot); // force rendering on tab selection
-            };
-            window.onerror = function myErrorHandler(msg, url, lineNumber) {
-                //alert("Error : " + msg);
-                return false;
-            }   
-            
-            window.onresize = function() {
-                console.log('window resized to [' + window.innerWidth + 'x' + window.innerHeight + ']');
-                if (rendering.data() === null)
-                    return; // not initialized yet
-                rendering
-                    .width(graphContainer.node().clientWidth)
-                    .height(graphContainer.node().clientHeight)
-                    .fit(true)
-                    .render();
-            };
-           
-            document.getElementById('reset_zoom_button').onclick  = function(event){
-                if (d3 === null || rendering === null)
-                    return;
-                rendering.resetZoom(d3.transition().duration(1000));
-            };
-
-            var vision = document.getElementsByClassName('mode');
-            var lvision = vision.length;
-
-           /*Movement arrow on and click and orientation change*/ 
-          
-          function  orientation_change(){
-            
-            if (options=="LR"){
+        </div>
+        <div id="theGraphs">
+           <div id="graph-container">
+          <div class="toolbar">
+            <div class="h100">
+  
+              <div class="card_top">
+                Transaction per second
+               
+              </div>
               
-              document.getElementById("arr").style.transform = "rotate("+deg+"deg)"
-              options="TD";
-              deg+=90
-            }
-            else if(options=="TD"){
-              document.getElementById("arr").style.transform = "rotate("+deg+"deg)"
-              options="RL";
-              deg+=90
-            }
-            else if(options=="RL"){
-              document.getElementById("arr").style.transform = "rotate("+deg+"deg)"
-              options="BT";
-              deg+=90
-            }
-            else if(options=="BT"){
-              document.getElementById("arr").style.transform = "rotate("+deg+"deg)"
-              options="LR";
-              deg+=90              
-            }
+            </div> 
+            <div class="chart-container">  
+              <span class="information_value" id="transaction-psec">0</span>
+            </div>
+          </div>
+           </div>
 
-                // temporary worker.onmessage event disable
-                worker._onmessage = worker.onmessage;
-                worker.onmessage = function(event){};
 
-                const regex = /rankdir=\w\w\;/g;
 
-                datas_as_dot = datas_as_dot.replaceAll(regex, 'rankdir='+options+';');
-                rendering.resetZoom(d3.transition().duration(1000));
-                render_graph(datas_as_dot);
+        <div id="graph-container">
+          <div class="toolbar">
+            <div class="h100">
+  
+              <div class="card_top">
+                Time between blocks (s)
+                
+              </div>
+              
+            </div> 
+            <div class="chart-container">  
+              <span class="information_value" id="transaction-retransmission">0</span>
+            </div>
+          </div>
+        </div>
+  
+  
+        <div id="graph-container">
+          <div class="toolbar">
+            <div class="h100">
+  
+              <div class="card_top">
+                Size of blockgraph (Kb)
+               
+              </div>
+              
+            </div> 
+            <div class="chart-container">  
+              <span class="information_value" id="transaction-lost">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+        
 
-                worker.onmessage = worker._onmessage;
-                worker._onmessage = null;
+      
+    </div>  
+
+
+      <div id="graph-container">
+        <div class="memtoolbar">
+          <div class="h100">
+
+            <div class="card_top">
+              Mempool usage of the node
+              <div class="w3-light-grey w3-round-xlarge">
+                <div class="w3-container w3-blue w3-round-xlarge" id=mempoolpourcent style="width:0%"><p id="pour"></p></div>
+              </div>
+            </div>
+            
+          </div> 
+          <div class="chart-container">  
+            <canvas id="mempoolusage" height="80"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="graph-container">
+        <div class="memtoolbar">
+          <div class="h100">
+            <div class="card_top">
+               Last transactions commited in the blockgraph
+            </div>
+          </div> 
+
+          <table>
+            
+            <tr>
+                <th scope="col">Transaction Position</th>
+                <th scope="col">1</th>
+                <th scope="col">2</th>
+                <th scope="col">3</th>
+                <th scope="col">4</th>
+                <th scope="col">5</th>
+                <th scope="col">6</th>
+                <th scope="col">7</th>
+                <th scope="col">8</th>
+                <th scope="col">9</th>
+                <th scope="col">10</th>
+            
+            </tr>
+            <tr>
+                <th scope="row">Hash</th>
+                <td ><div id="h1"></div></td>
+                <td ><div id="h2"></div></td>
+                <td ><div id="h3"></div></td>
+                <td ><div id="h4"></div></td>
+                <td ><div id="h5"></div></td>
+                <td ><div id="h6"></div></td>
+                <td ><div id="h7"></div></td>
+                <td ><div id="h8"></div></td>
+                <td ><div id="h9"></div></td>
+                <td ><div id="h10"></div></td>
+            </tr>
+            <tr>
+                <th scope="row">Timestamp</th>
+                <td ><div id="t1"></div></td>
+                <td ><div id="t2"></div></td>
+                <td ><div id="t3"></div></td>
+                <td ><div id="t4"></div></td>
+                <td ><div id="t5"></div></td>
+                <td ><div id="t6"></div></td>
+                <td ><div id="t7"></div></td>
+                <td ><div id="t8"></div></td>
+                <td ><div id="t9"></div></td>
+                <td ><div id="t10"></div></td>
+            </tr>
+        </table>
+        </div>
+      </div>
+
+
+
+    </div>
+
+
+        </main>
+        
+        <script type="text/javascript">
+        var chart;
+        var hist;
+        var mem;
+        var retrans;
+        var lotrans;
+        var totrans
+
+
+
+        function xhrSuccess() {
+    this.callback.apply(this, this.arguments);
+}
+
+function xhrError() {
+    console.error(this.statusText);
+}
+
+        function loadFile(url, callback /*, opt_arg1, opt_arg2, ... */) {
+            var xhr = new XMLHttpRequest();
+            xhr.callback = callback;
+            xhr.arguments = Array.prototype.slice.call(arguments, 2);
+            xhr.onload = xhrSuccess;
+            xhr.onerror = xhrError;
+            xhr.open("GET", url, true);
+            xhr.send(null);
+        }
+
+        function creategraphTransaction(message) {
+            creategraph(this.responseText);
+        }
+
+        function updateTransaction(message) {
+            updateNumberofTransaction(this.responseText);
+        }
+        
+
+        
+        function creategraphMempool(message) {
+            createMemPoolUsageGraph(this.responseText);
+        }
+
+        function updateMempool(message) {
+            updateMempoolUsage(this.responseText);
+        }
+        function startcreatemempoolpourcent(data){
+         createmempoolpourcent(this.responseText)
+          
+        }
+        function updatepourcentMempool(message) {
+            pourcentMempool(this.responseText);
+        }
+
+        function createReTransactiongraph(message) {
+            createReTransaction(this.responseText);
+        }
+
+        function updatereTransactiongraph(message) {
+            updateReTransaction(this.responseText);
+        }
+
+
+        function createLostTransactiongraph(message) {
+            createLostTransaction(this.responseText);
+        }
+
+        function updateLostTransactiongraph(message) {
+            updateLostTransaction(this.responseText);
+        }
+
+        function createTotTransactiongraph(message) {
+            createTotTransaction(this.responseText);
+        }
+
+        function updateTotTransactiongraph(message) {
+            updateTotTransaction(this.responseText);
+        }
+
+        function updateListTransactiongraph(message) {
+         
+            updateListTransaction(this.responseText);
+        }
+
+
+
+
+        // initialize number of transaction in the blockgraph
+        function creategraph(data){
+          var label=[];
+          var values=[];
+          var labelps=[];
+          var valuesps=[];
+
+
+          data=data.split("\n");
+          data.pop()
+          for( x=0; x<data.length;x++){
+            data[x]=data[x].split(":");
+            label.push(data[x][0]);
+            values.push(data[x][1]);
+            //graph per sec
+            if(data[x][0]==0){
+              labelps.push(data[x][0]);
+              valuesps.push(data[x][1]);
+              document.getElementById("transaction-psec").innerHTML=data[data.length-1][1];
+            }else{
+              labelps.push(data[x][0]);
+              valuesps.push(data[x][1]/data[x][0]);
+              document.getElementById("transaction-psec").innerHTML=(data[data.length-1][1]/data[x][0]).toFixed(2);
+            }
+            
           }
 
-          document.getElementById("auto").addEventListener('click', function(){
-            if(auto_on){
-              document.getElementById("camera").style.color="";
-              auto_on=false;
+
+          var ctx = document.getElementById('canvas').getContext('2d');
+          chart = new Chart(ctx, {
+              type: 'line',
+             
+              data: {
+                labels: label,
+                datasets: [{
+                    backgroundColor: 'rgb(129, 198, 2228)',
+                    borderColor: 'rgb(0, 150, 215)',
+                    data: values
+                }]
+              },
+              options: {
+                responsive: 'true',
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'seconds'
+                  }
+                }]
+              }
             }
-            else{
-              document.getElementById("camera").style.color="red";
-              auto_on=true;
+          });
+
+
+
+          
+        }
+        // initialize mempool usage graph
+        function createMemPoolUsageGraph(data){
+          var label=[];
+          var values=[];
+          
+          data=data.split("\n");
+          data.pop()
+          for( x=0; x<data.length;x++){
+            data[x]=data[x].split(":");
+            label.push(data[x][0]);
+            values.push(data[x][1]);
+          }
+
+
+          var ctx = document.getElementById('mempoolusage').getContext('2d');
+          mem = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: label,
+                datasets: [{
+                    backgroundColor: 'rgb(129, 198, 2228)',
+                    borderColor: 'rgb(0, 150, 215)',
+                    data: values
+                }]
+              },
+              options: {
+                responsive: 'true',
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'seconds'
+                  }
+                }],
+                yAxes:[{
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Kb'
+                  }
+                }]
+              }
             }
-            ;
-          })
+          });
+        }
+
+        // inisialize number of transaction in the node and commited per seconds
+        function createReTransaction(data){
+          var label=[];
+          var values=[];
+          
+          data=data.split("\n");
+          data.pop()
+          for( x=0; x<data.length;x++){
+            data[x]=data[x].split(":");
+            label.push(data[x][0]);
+            values.push(data[x][1]);
+          }
+          document.getElementById("transaction-retransmission").innerHTML=data[data.length-1][1];
+
+        }
+
+         // inisialize size of the blockgraph
+        function createLostTransaction(data){
+          var label=[];
+          var values=[];
+          
+          data=data.split("\n");
+          data.pop()
+          for( x=0; x<data.length;x++){
+            data[x]=data[x].split(":");
+            label.push(data[x][0]);
+            values.push(data[x][1]);
+          }
+
+          document.getElementById("transaction-lost").innerHTML=data[data.length-1][1];
+        }
+
+        // inisialize number of transaction in the blockgraph
+        function createTotTransaction(data){
+          var label=[];
+          var values=[];
+          
+          data=data.split("\n");
+          data.pop()
+          for( x=0; x<data.length;x++){
+            data[x]=data[x].split(":");
+            label.push(data[x][0]);
+            values.push(data[x][1]);
+          }
+
+
+          var ctx = document.getElementById('totransaction').getContext('2d');
+          totrans = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: label,
+                datasets: [{
+                    backgroundColor: 'rgb(129, 198, 2228)',
+                    borderColor: 'rgb(0, 150, 215)',
+                    data: values
+                }]
+              },
+              options: {
+                responsive: 'true',
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'seconds'
+                  }
+                }]
+              }
+            }
+          });
+        }
+        
+        
+
+        
+        function resetCanvas(){
+          $('#canvas').remove();
+          $('#graph-container').append('<canvas id="canvas"><canvas>');
+        }
+        
+        // initialize every metrics of the dashboard
+        loadFile("tests/datas/tmp/transactions", creategraphTransaction);
+        loadFile("tests/datas/tmp/Mempool", creategraphMempool);
+        loadFile("tests/datas/tmp/Pourcentmempool", startcreatemempoolpourcent)
+        
+
+        loadFile("tests/datas/tmp/retransactions", createReTransactiongraph);
+        loadFile("tests/datas/tmp/losttransactions", createLostTransactiongraph);
+        loadFile("tests/datas/tmp/totaltransa", createTotTransactiongraph);
+
+     
+        // update every metrics of the dashboard
+        var intervalId = window.setInterval(function(){
+            loadFile("tests/datas/tmp/Mempool", updateMempool);
+            loadFile("tests/datas/tmp/transactions", updateTransaction);
+    
+            loadFile("tests/datas/tmp/Pourcentmempool", updatepourcentMempool)
+            loadFile("tests/datas/tmp/retransactions", updatereTransactiongraph);
+            loadFile("tests/datas/tmp/losttransactions", updateLostTransactiongraph);
+            loadFile("tests/datas/tmp/totaltransa", updateTotTransactiongraph);
+            loadFile("tests/datas/tmp/listtransa", updateListTransactiongraph);
+            
+        }, 2000);
+
+        //Functions for updating differents metrics evry x seconds
+
+
+        // update node transaction commited and transaction commited per second
+        function updateNumberofTransaction(data){
+         
+          data=data.split("\n");
+          
+          data.pop()
+          linemissing=data.length-chart.data.labels.length;
+          if (linemissing==0){
+            
+          }
+          else if(linemissing>0){
+            
+            for (index=0; index < linemissing; index++) {
+              console.log(chart.data.labels.length)
+              x=data[chart.data.labels.length+index].split(":");
+              chart.data.labels.push(x[0]);
+              chart.data.datasets[0].data.push(x[1]);
+              chart.update();
+              //graph per sec
+              
+            }
+            
+            hist.update();
+          }
+         
+          x=data[data.length-1].split(":")
+          document.getElementById("transaction-local").innerHTML=x[1];
+          if(data[0]==0){
+               
+               document.getElementById("transaction-psec").innerHTML=x[1];
+             }else{
+              
+               document.getElementById("transaction-psec").innerHTML=(x[1]/x[0]).toFixed(2);
+             }
+             console.log(data.length-1)
+        }
+
+
+        // updtate mempool usage graph
+        function updateMempoolUsage(data){
+
+          data=data.split("\n");
+          
+          data.pop()
+          linemissing=data.length-mem.data.labels.length;
+          if (linemissing==0){
+            
+          }
+          else if(linemissing>0){
+            
+            for (index=0; index < linemissing; index++) {
+              x=data[mem.data.labels.length+index].split(":");
+              mem.data.labels.push(x[0]);
+              mem.data.datasets[0].data.push(x[1]);
+              mem.update();
+            }
+          }
+          
+        }
+
+        //create pourcentage bar value
+        function createmempoolpourcent(data){
+          data=data.split("\n");
+          pourcent=data[data.length - 2];
+          document.getElementById("pour").innerHTML = pourcent;
+          document.getElementById("mempoolpourcent").style.width = pourcent;
+        }
+
+        // update pourcentage bar value
+        function pourcentMempool(data){
+
+          data=data.split("\n");
+          pourcent=data[data.length - 2];
+          document.getElementById("pour").innerHTML = pourcent;
+          document.getElementById("mempoolpourcent").style.width = pourcent;
+        }
+
+
+        //update mean block time creation value
+        function updateReTransaction(data){
+
+          data=data.split("\n");
+
+          data.pop()
+        
+          x=data[data.length-1].split(":")
+          document.getElementById("transaction-retransmission").innerHTML=x[1];
+
+        }
+
+
+        // update blockgraph size value
+        function updateLostTransaction(data){
+
+         
+          data=data.split("\n");
+          
+          data.pop()
+          x=data[data.length-1].split(":")
+          document.getElementById("transaction-lost").innerHTML=x[1];
+
+        }
+
+
+        // update number of transaction in the blockgraph
+        function updateTotTransaction(data){
+
+          data=data.split("\n");
+          data.pop()
+          linemissing=data.length-totrans.data.labels.length;
+          if (linemissing==0){
+            
+          }
+          else if(linemissing>0){
+            
+            for (index=0; index < linemissing; index++) {
+              x=data[totrans.data.labels.length+index].split(":");
+              totrans.data.labels.push(x[0]);
+              totrans.data.datasets[0].data.push(x[1]);
+              totrans.update();
+            }
+          }
+          x=data[data.length-1].split(":")
+          document.getElementById("transaction-global").innerHTML=x[1];
+
+        }
+
+        // update table of the last  10 transaction in the blockgraph
+        function updateListTransaction(data){
+          data=data.split("\n");
+          data.pop();
+            
+            for (index=0; index < 10; index++) {
+            
+              x=data[(data.length) -index -1].split(":");
+              var h= "h"+(index+1);
+              var t= "t"+(index+1);
+              document.getElementById(h).innerHTML=x[0];
+              document.getElementById(t).innerHTML=x[1];
+            }
+          }
+        
+
+        
+
         </script>
     </body>
 </html>
