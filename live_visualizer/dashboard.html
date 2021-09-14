@@ -164,8 +164,7 @@
             <div class="h100">
   
               <div class="card_top">
-                Time between blocks (s)
-                
+                Block treatment time (ms)
               </div>
               
             </div> 
@@ -356,7 +355,7 @@ function xhrError() {
         }
 
         function updateListTransactiongraph(message) {
-         
+            console.log('m',this.responseText)
             updateListTransaction(this.responseText);
         }
 
@@ -494,13 +493,7 @@ function xhrError() {
           
           data=data.split("\n");
           data.pop()
-          for( x=0; x<data.length;x++){
-            data[x]=data[x].split(":");
-            label.push(data[x][0]);
-            values.push(data[x][1]);
-          }
-
-          document.getElementById("transaction-lost").innerHTML=data[data.length-1][1];
+          document.getElementById("transaction-lost").innerHTML=data[data.length-1];
         }
 
         // inisialize number of transaction in the blockgraph
@@ -573,9 +566,9 @@ function xhrError() {
             loadFile("tests/datas/tmp/retransactions", updatereTransactiongraph);
             loadFile("tests/datas/tmp/losttransactions", updateLostTransactiongraph);
             loadFile("tests/datas/tmp/totaltransa", updateTotTransactiongraph);
-            loadFile("tests/datas/tmp/listtransa", updateListTransactiongraph);
+            loadFile("tests/datas/tmp/listransa", updateListTransactiongraph);
             
-        }, 2000);
+        }, 5000);
 
         //Functions for updating differents metrics evry x seconds
 
@@ -593,7 +586,7 @@ function xhrError() {
           else if(linemissing>0){
             
             for (index=0; index < linemissing; index++) {
-              console.log(chart.data.labels.length)
+           //   console.log(chart.data.labels.length)
               x=data[chart.data.labels.length+index].split(":");
               chart.data.labels.push(x[0]);
               chart.data.datasets[0].data.push(x[1]);
@@ -678,8 +671,7 @@ function xhrError() {
           data=data.split("\n");
           
           data.pop()
-          x=data[data.length-1].split(":")
-          document.getElementById("transaction-lost").innerHTML=x[1];
+          document.getElementById("transaction-lost").innerHTML=data[data.length-1];
 
         }
 
@@ -709,15 +701,18 @@ function xhrError() {
 
         // update table of the last  10 transaction in the blockgraph
         function updateListTransaction(data){
+          console.log(data)
           data=data.split("\n");
           data.pop();
             
             for (index=0; index < 10; index++) {
-            
+              
               x=data[(data.length) -index -1].split(":");
               var h= "h"+(index+1);
               var t= "t"+(index+1);
-              document.getElementById(h).innerHTML=x[0];
+              x[0]=x[0].split('^')
+              console.log('h',innerHTML=x[0][0])
+              document.getElementById(h).innerHTML=x[0][0];
               document.getElementById(t).innerHTML=x[1];
             }
           }

@@ -84,7 +84,7 @@ B4Mesh::B4Mesh(node* node, boost::asio::io_context& io_context, short port, std:
   totaltrans.open("./live_visualizer/tests/datas/tmp/totaltransa", std::ios_base::trunc);//overwrite the file first 
   totaltrans << "";
   std::ofstream listtrans;
-  listtrans.open("./live_visualizer/tests/datas/tmp/listtransa", std::ios_base::trunc);//overwrite the file first 
+  listtrans.open("./live_visualizer/tests/datas/tmp/listransa", std::ios_base::trunc);//overwrite the file first 
   listtrans << "";
 
 
@@ -166,11 +166,11 @@ void B4Mesh::WriteInfoFile30sec(){
   //Write list of the last 10 transactions of the blockgraph
   std::ofstream list;
 
-  list.open("./live_visualizer/tests/datas/tmp/listtransa", std::ios_base::app); // append instead of overwrite
+  list.open("./live_visualizer/tests/datas/tmp/listransa", std::ios_base::app); // append instead of overwrite
   std::stringstream li;
 
  int a =(blockgraph.GetChildlessBlocks().size());
-
+ 
  vector<Block> w=blockgraph.GetChildlessBlocks();
  Block x= w[a-1];
   vector<Transaction> transac = x.GetTransactions();
@@ -204,7 +204,7 @@ void B4Mesh::WriteInfoFile2sec(){
   //Write number the number of transaction inside the current node
     
   std::ofstream trsct;
-
+  double x;
   trsct.open("./live_visualizer/tests/datas/tmp/transactions", std::ios_base::app); // append instead of overwrite
   std::stringstream trs;
   trs << tempourcent << ":" << numTxsG << "\n";
@@ -218,7 +218,9 @@ void B4Mesh::WriteInfoFile2sec(){
 
   outfile.open("./live_visualizer/tests/datas/tmp/retransactions", std::ios_base::app); // append instead of overwrite
   std::stringstream ss;
-  ss << tempourcent << ":" << total_process_block_t.count() / (blockgraph.GetBlocksCount()-1) << "\n";
+  x=total_treatment_block_t.count() / (blockgraph.GetBlocksCount()-1);
+  x = std::ceil(x * 100.0) / 100.0;
+  ss << tempourcent << ":" << x  << "\n";
   std::string s = ss.str();
 
   outfile << s;
@@ -228,7 +230,7 @@ void B4Mesh::WriteInfoFile2sec(){
 
   lost.open("./live_visualizer/tests/datas/tmp/losttransactions", std::ios_base::app); // append instead of overwrite
   std::stringstream ls;
-  ls << tempourcent << blockgraph.GetByteSize() / 1000 << "\n";
+  ls << blockgraph.GetByteSize() / 1000 << "\n";
   std::string l = ls.str();
 
   lost << l;
